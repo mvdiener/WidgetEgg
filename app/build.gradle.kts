@@ -1,16 +1,19 @@
+import com.google.protobuf.gradle.id
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.protobuf")
 }
 
 android {
     namespace = "com.example.widgetegg"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.widgetegg"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -66,4 +69,25 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(libs.protobuf.java.util)
+    implementation(libs.protobuf.kotlin)
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.27.0"
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                id("kotlin") {
+                    option("lite")
+                }
+                id("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
 }
