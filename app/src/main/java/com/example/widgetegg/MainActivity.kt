@@ -8,14 +8,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.widgetegg.ui.theme.WidgetEggTheme
 
 class MainActivity : ComponentActivity() {
@@ -24,17 +28,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WidgetEggTheme {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Greeting(name = "Derp")
-                    Row(horizontalArrangement = Arrangement.Center) {
-                        SignInButton()
-                        SignOutButton()
-                    }
-                }
+                SignInContent()
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -48,15 +42,50 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
+fun SignInContent() {
+    val signInViewModel = viewModel<SignInViewModel>()
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Greeting(signInViewModel.eidName)
+        EidInput(signInViewModel.eid, signInViewModel)
+        Row(horizontalArrangement = Arrangement.Center) {
+            SignInButton(signInViewModel::updateEidName)
+            SignOutButton()
+        }
+    }
+}
+
+@Composable
 fun Greeting(name: String) {
     Text(
-        text = "Hello $name!",
+        text = if (name.isBlank()) "Enter your EID:" else "Welcome, $name!",
     )
 }
 
 @Composable
-fun SignInButton() {
-    Button(onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(Color.Blue)) {
+fun EidInput(eid: String, signInViewModel: SignInViewModel) {
+    OutlinedTextField(
+        value = eid,
+        onValueChange = { signInViewModel.updateEid(it) },
+        shape = CircleShape,
+        textStyle = TextStyle(color = Color.Black),
+        placeholder = {
+            Text(
+                "EI0000000000000000"
+            )
+        },
+    )
+}
+
+@Composable
+fun SignInButton(updateEidName: () -> Unit) {
+    Button(
+        onClick = { updateEidName() },
+        colors = ButtonDefaults.buttonColors(Color.Blue)
+    ) {
         Text("Submit EID")
     }
 }

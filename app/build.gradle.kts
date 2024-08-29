@@ -72,6 +72,10 @@ dependencies {
 
     implementation(libs.protobuf.java.util)
     implementation(libs.protobuf.kotlin)
+
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
 }
 
 protobuf {
