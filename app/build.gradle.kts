@@ -70,7 +70,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.protobuf.java.util)
+    implementation(libs.protobuf.java)
     implementation(libs.protobuf.kotlin)
 
     implementation(libs.kotlinx.coroutines.android)
