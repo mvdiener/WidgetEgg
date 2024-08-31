@@ -73,7 +73,10 @@ dependencies {
     implementation(libs.protobuf.java)
     implementation(libs.protobuf.kotlin)
 
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
     implementation(libs.kotlinx.coroutines.android)
+
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
 }
