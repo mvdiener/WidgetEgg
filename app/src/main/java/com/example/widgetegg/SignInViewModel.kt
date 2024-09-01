@@ -1,14 +1,24 @@
 package com.example.widgetegg
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import user.preferences.PreferencesDatastore
 
-class SignInViewModel : ViewModel() {
+
+class SignInViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val preferences: PreferencesDatastore
+
+    init {
+        val context = getApplication<Application>().applicationContext
+        preferences = PreferencesDatastore(context)
+    }
 
     var eid by mutableStateOf("")
         private set
@@ -20,7 +30,7 @@ class SignInViewModel : ViewModel() {
     var eiUserName by mutableStateOf("")
         private set
 
-    private fun updateEiUserName(input: String) {
+    fun updateEiUserName(input: String) {
         eiUserName = input
     }
 
@@ -53,6 +63,8 @@ class SignInViewModel : ViewModel() {
             try {
                 val result = api.fetchBackup(basicRequestInfo)
                 updateEiUserName(result.userName)
+                preferences.saveEiUserName(result.userName)
+                preferences.saveEid(eid)
                 updateHasSubmitted(false)
             } catch (e: Exception) {
                 updateErrorMessage("Please enter a valid EID!")
