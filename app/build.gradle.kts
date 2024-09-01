@@ -1,4 +1,5 @@
 import com.google.protobuf.gradle.id
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -24,12 +25,21 @@ android {
     }
 
     buildTypes {
+        val secretsFile = project.rootProject.file("secrets.properties")
+        val properties = Properties()
+        properties.load(secretsFile.inputStream())
+
+        val secretKey = properties.getProperty("SECRET_KEY") ?: ""
+        debug {
+            buildConfigField("String", "SECRET_KEY", secretKey)
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "SECRET_KEY", secretKey)
         }
     }
     compileOptions {
@@ -41,6 +51,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -70,14 +81,17 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    // Protobuf
     implementation(libs.protobuf.java)
     implementation(libs.protobuf.kotlin)
 
+    // Ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.datastore.preferences)
 
 }
 

@@ -17,11 +17,11 @@ class SignInViewModel : ViewModel() {
         eid = input
     }
 
-    var eidName by mutableStateOf("")
+    var eiUserName by mutableStateOf("")
         private set
 
-    private fun updateEidName(input: String) {
-        eidName = input
+    private fun updateEiUserName(input: String) {
+        eiUserName = input
     }
 
     var errorMessage by mutableStateOf("")
@@ -47,11 +47,12 @@ class SignInViewModel : ViewModel() {
 
     fun getBackupData() {
         viewModelScope.launch(Dispatchers.IO) {
+            val basicRequestInfo = api.getBasicRequestInfo(eid)
             updateHasSubmitted(true)
             updateHasError(false)
             try {
-                val result = api.fetchData(eid)
-                updateEidName(result.userName)
+                val result = api.fetchBackup(basicRequestInfo)
+                updateEiUserName(result.userName)
                 updateHasSubmitted(false)
             } catch (e: Exception) {
                 updateErrorMessage("Please enter a valid EID!")

@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.widgetegg.ui.theme.WidgetEggTheme
@@ -60,7 +59,7 @@ fun SignInContent() {
         } else if (signInViewModel.hasError) {
             Error(signInViewModel.errorMessage)
         } else {
-            Greeting(signInViewModel.eidName)
+            Greeting(signInViewModel.eiUserName)
         }
         EidInput(signInViewModel.eid, signInViewModel)
         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -156,13 +155,5 @@ fun HelpButton() {
         modifier = Modifier.padding(bottom = 50.dp)
     ) {
         Text("Where do I find my EID?")
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WidgetEggTheme {
-        Greeting("Android")
     }
 }
