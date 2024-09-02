@@ -18,14 +18,18 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.widgetegg.ui.theme.WidgetEggTheme
+import kotlinx.coroutines.runBlocking
+import user.preferences.PreferencesDatastore
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +53,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SignInContent() {
     val signInViewModel = viewModel<SignInViewModel>()
+    val context = LocalContext.current
+    runBlocking {
+        val preferences = PreferencesDatastore(context)
+
+        val prefEiUsername = preferences.getEiUserName()
+        if (prefEiUsername.isNotBlank()) signInViewModel.updateEiUserName(prefEiUsername)
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
