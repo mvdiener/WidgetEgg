@@ -90,7 +90,7 @@ suspend fun fetchData(eid: String): MissionData {
     val activeMissions = fetchActiveMissions(basicRequestInfo)
     val backup = fetchBackup(basicRequestInfo)
 
-    var fuelingMissions: List<MissionInfo> = listOf()
+    var fuelingMissions: List<MissionInfo> = emptyList()
     val fuelingMission = backup.artifactsDb.fuelingMission
     var newFuelingMission: MissionInfo
 
