@@ -66,11 +66,22 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 preferences.saveEiUserName(result.userName)
                 preferences.saveEid(eid)
                 updateHasSubmitted(false)
+                updateEid("")
             } catch (e: Exception) {
                 updateErrorMessage("Please enter a valid EID!")
                 updateHasError(true)
                 updateHasSubmitted(false)
             }
+        }
+    }
+
+    fun signOut() {
+        viewModelScope.launch(Dispatchers.IO) {
+            preferences.clearPreferences()
+            updateHasSubmitted(false)
+            updateHasError(false)
+            updateEid("")
+            updateEiUserName("")
         }
     }
 }

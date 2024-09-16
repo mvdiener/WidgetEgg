@@ -26,6 +26,15 @@ class PreferencesDatastore(context: Context) {
         private val TARGET_ICON_SMALL = booleanPreferencesKey("targetIconSmall")
         private val TARGET_ICON_MEDIUM = booleanPreferencesKey("targetIconMedium")
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
+        private val ALL_KEYS = listOf(
+            EID,
+            EI_USER_NAME,
+            MISSION_INFO,
+            USE_ABSOLUTE_TIME,
+            TARGET_ICON_SMALL,
+            TARGET_ICON_MEDIUM,
+            SHOW_TANK_LEVELS
+        )
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -103,6 +112,14 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveShowTankLevels(showTankLevels: Boolean) {
         dataStore.edit {
             it[SHOW_TANK_LEVELS] = showTankLevels
+        }
+    }
+
+    suspend fun clearPreferences() {
+        dataStore.edit { preferences ->
+            ALL_KEYS.forEach { key ->
+                preferences.remove(key)
+            }
         }
     }
 }

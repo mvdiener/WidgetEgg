@@ -81,6 +81,7 @@ fun SignInContent() {
                     .padding(start = 16.dp)
             )
             SignOutButton(
+                signInViewModel::signOut,
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 16.dp)
@@ -145,9 +146,9 @@ fun SignInButton(getBackupData: () -> Unit, modifier: Modifier) {
 }
 
 @Composable
-fun SignOutButton(modifier: Modifier) {
+fun SignOutButton(signOut: () -> Unit, modifier: Modifier) {
     Button(
-        onClick = { /*TODO*/ },
+        onClick = { signOut() },
         colors = ButtonDefaults.buttonColors(Color.Red),
         modifier = modifier
     ) {

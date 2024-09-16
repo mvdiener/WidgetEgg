@@ -30,6 +30,7 @@ class MissionWidget : GlanceAppWidget() {
         provideContent {
             var missionRemainingTimes: List<Double> = emptyList()
             var preferencesMissionData: List<MissionInfoEntry>
+            var prefEid = ""
             Column(
                 modifier = GlanceModifier
                     .fillMaxSize()
@@ -38,9 +39,9 @@ class MissionWidget : GlanceAppWidget() {
                 runBlocking {
                     val preferences = PreferencesDatastore(context)
                     preferencesMissionData = preferences.getMissionInfo()
+                    prefEid = preferences.getEid()
 
-                    if (preferencesMissionData.isEmpty()) {
-                        val prefEid = preferences.getEid()
+                    if (preferencesMissionData.isEmpty() && prefEid.isNotBlank()) {
                         val missionInfo = fetchData(prefEid)
                         missionInfo.missions.forEach { mission ->
                             if (mission.identifier.isNotBlank()) {
@@ -58,30 +59,39 @@ class MissionWidget : GlanceAppWidget() {
                     }
                 }
 
-                preferencesMissionData.forEach { mission ->
-                    val percentRemaining = getMissionPercentComplete(
-                        mission.missionDuration,
-                        mission.secondsRemaining,
-                        mission.date
-                    )
+                if (prefEid.isBlank()) {
                     Text(
-                        text = "Mission is $percentRemaining% complete",
+                        text = "Please log in first",
                         style = TextStyle(
                             color = ColorProvider(Color.White)
                         )
                     )
-                    mission.date = Instant.now().epochSecond
-                }
+                } else {
+                    preferencesMissionData.forEach { mission ->
+                        val percentRemaining = getMissionPercentComplete(
+                            mission.missionDuration,
+                            mission.secondsRemaining,
+                            mission.date
+                        )
+                        Text(
+                            text = "Mission is $percentRemaining% complete",
+                            style = TextStyle(
+                                color = ColorProvider(Color.White)
+                            )
+                        )
+                        mission.date = Instant.now().epochSecond
+                    }
 
-                runBlocking {
-                    val preferences = PreferencesDatastore(context)
-                    preferences.saveMissionInfo(preferencesMissionData)
-                }
+                    runBlocking {
+                        val preferences = PreferencesDatastore(context)
+                        preferences.saveMissionInfo(preferencesMissionData)
+                    }
 
-                Button(
-                    text = "Refresh mission times",
-                    onClick = actionRunCallback(ReloadWidgetCallback::class.java)
-                )
+                    Button(
+                        text = "Refresh mission times",
+                        onClick = actionRunCallback(ReloadWidgetCallback::class.java)
+                    )
+                }
             }
         }
     }

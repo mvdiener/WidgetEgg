@@ -26,6 +26,6 @@ fun getMissionPercentComplete(
 ): String {
     var newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
     if (newTimeRemaining < 0) newTimeRemaining = 0.0
-    val percentComplete = (missionDuration - newTimeRemaining) / missionDuration
+    val percentComplete = ((missionDuration - newTimeRemaining) / missionDuration) * 100
     return "%.2f".format(percentComplete)
 }
