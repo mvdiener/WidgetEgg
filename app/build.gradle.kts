@@ -101,6 +101,9 @@ dependencies {
     // JSON serialization
     implementation(libs.kotlinx.serialization.json)
 
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+
 }
 
 protobuf {

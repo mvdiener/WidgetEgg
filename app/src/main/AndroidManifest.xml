@@ -25,8 +25,9 @@
             </intent-filter>
         </activity>
         <receiver
-            android:name=".MissionWidgetReceiver"
-            android:exported="true">
+            android:name="widget.MissionWidgetReceiver"
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
