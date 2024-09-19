@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,9 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.widgetegg.ui.theme.WidgetEggTheme
 import kotlinx.coroutines.runBlocking
@@ -49,6 +55,9 @@ class MainActivity : ComponentActivity() {
                     ) {
                         HelpButton(signInViewModel)
                     }
+                    SignOutDialog(signInViewModel)
+                    FindMyEidDialog(signInViewModel)
+                    WhatNextDialog(signInViewModel)
                 }
 
             }
@@ -78,16 +87,16 @@ fun SignInContent(signInViewModel: SignInViewModel) {
         } else {
             Greeting(signInViewModel.eiUserName)
         }
-        EidInput(signInViewModel.eid, signInViewModel)
+        EidInput(signInViewModel)
         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             SignInButton(
-                signInViewModel::getBackupData,
+                signInViewModel,
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 16.dp)
             )
             SignOutButton(
-                signInViewModel::signOut,
+                signInViewModel,
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 16.dp)
@@ -112,9 +121,9 @@ fun Error(message: String) {
 }
 
 @Composable
-fun EidInput(eid: String, signInViewModel: SignInViewModel) {
+fun EidInput(signInViewModel: SignInViewModel) {
     OutlinedTextField(
-        value = eid,
+        value = signInViewModel.eid,
         onValueChange = { signInViewModel.updateEid(it) },
         shape = CircleShape,
         textStyle = LocalTextStyle.current.copy(
@@ -127,6 +136,7 @@ fun EidInput(eid: String, signInViewModel: SignInViewModel) {
             ) {
                 Text(
                     text = "EI0000000000000000",
+                    color = Color.LightGray
                 )
             }
         },
@@ -137,9 +147,13 @@ fun EidInput(eid: String, signInViewModel: SignInViewModel) {
 }
 
 @Composable
-fun SignInButton(getBackupData: () -> Unit, modifier: Modifier) {
+fun SignInButton(signInViewModel: SignInViewModel, modifier: Modifier) {
     Button(
-        onClick = { getBackupData() },
+        onClick = {
+            if (signInViewModel.eiUserName.isBlank()) {
+                signInViewModel.getBackupData()
+            }
+        },
         colors = ButtonDefaults.buttonColors(Color.Blue),
         modifier = modifier
     ) {
@@ -151,9 +165,13 @@ fun SignInButton(getBackupData: () -> Unit, modifier: Modifier) {
 }
 
 @Composable
-fun SignOutButton(signOut: () -> Unit, modifier: Modifier) {
+fun SignOutButton(signInViewModel: SignInViewModel, modifier: Modifier) {
     Button(
-        onClick = { signOut() },
+        onClick = {
+            if (signInViewModel.eiUserName.isNotBlank()) {
+                signInViewModel.updateShowSignoutConfirmDialog(true)
+            }
+        },
         colors = ButtonDefaults.buttonColors(Color.Red),
         modifier = modifier
     ) {
@@ -168,20 +186,126 @@ fun SignOutButton(signOut: () -> Unit, modifier: Modifier) {
 fun HelpButton(signInViewModel: SignInViewModel) {
     if (signInViewModel.eiUserName.isBlank()) {
         Button(
-            onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(Color.LightGray),
+            onClick = { signInViewModel.updateShowFindMyEidDialog(true) },
             modifier = Modifier.padding(bottom = 50.dp)
         ) {
             Text("Where do I find my EID?")
         }
     } else {
         Button(
-            onClick = { /*TODO*/ },
-            colors = ButtonDefaults.buttonColors(Color.LightGray),
+            onClick = { signInViewModel.updateShowWhatNextDialog(true) },
             modifier = Modifier.padding(bottom = 50.dp)
         ) {
             Text("What next?")
         }
     }
+}
 
+@Composable
+fun SignOutDialog(signInViewModel: SignInViewModel) {
+    if (signInViewModel.showSignoutConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                signInViewModel.updateShowSignoutConfirmDialog(false)
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) { Text(text = "Are you sure?") }
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            signInViewModel.updateShowSignoutConfirmDialog(false)
+                            signInViewModel.signOut()
+                        }
+                    ) {
+                        Text(
+                            text = "Confirm"
+                        )
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun FindMyEidDialog(signInViewModel: SignInViewModel) {
+    if (signInViewModel.showFindMyEidDialog) {
+        Dialog(
+            onDismissRequest = {
+                signInViewModel.updateShowFindMyEidDialog(false)
+            }
+        ) {
+            val instructions = listOf(
+                "1. Open Egg, Inc.",
+                "2. Open the Settings menu by pressing the nine dots at the bottom.",
+                "3. Open the Help menu by pressing the question mark icon.",
+                """4. Select "Data Loss Issue".""",
+                "5. Copy your EID (EI...) from the subject line.",
+                "6. Open WidgetEgg.",
+                """7. Paste your EID into the text box and press "Submit EID"."""
+            )
+            val length = instructions.size
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                instructions.forEachIndexed { index, item ->
+                    Text(
+                        text = item,
+                        modifier = Modifier.padding(0.dp, 10.dp)
+                    )
+                    if (index != length - 1) HorizontalDivider()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WhatNextDialog(signInViewModel: SignInViewModel) {
+    if (signInViewModel.showWhatNextDialog) {
+        Dialog(
+            onDismissRequest = {
+                signInViewModel.updateShowWhatNextDialog(false)
+            }
+        ) {
+            val instructions = listOf(
+                "1. Long press on your home screen to begin editing.",
+                """2. Select the "Widgets" option.""",
+                """3. Search for "WidgetEgg", select a widget and press the "Add" button.""",
+                "4. It may take up to 30 minutes for your data to appear in the widget."
+            )
+            val length = instructions.size
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                instructions.forEachIndexed { index, item ->
+                    Text(
+                        text = item,
+                        modifier = Modifier.padding(0.dp, 10.dp)
+                    )
+                    if (index != length - 1) HorizontalDivider()
+                }
+            }
+        }
+    }
 }

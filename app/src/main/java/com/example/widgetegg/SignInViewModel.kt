@@ -55,6 +55,27 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         hasSubmitted = input
     }
 
+    var showSignoutConfirmDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowSignoutConfirmDialog(input: Boolean) {
+        showSignoutConfirmDialog = input
+    }
+
+    var showFindMyEidDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowFindMyEidDialog(input: Boolean) {
+        showFindMyEidDialog = input
+    }
+
+    var showWhatNextDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowWhatNextDialog(input: Boolean) {
+        showWhatNextDialog = input
+    }
+
     fun getBackupData() {
         viewModelScope.launch(Dispatchers.IO) {
             val basicRequestInfo = api.getBasicRequestInfo(eid)
