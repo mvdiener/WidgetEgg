@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,22 +37,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WidgetEggTheme {
-                SignInContent()
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    HelpButton()
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    val signInViewModel = viewModel<SignInViewModel>()
+                    SignInContent(signInViewModel)
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        HelpButton(signInViewModel)
+                    }
                 }
+
             }
         }
     }
 }
 
 @Composable
-fun SignInContent() {
-    val signInViewModel = viewModel<SignInViewModel>()
+fun SignInContent(signInViewModel: SignInViewModel) {
     val context = LocalContext.current
     runBlocking {
         val preferences = PreferencesDatastore(context)
@@ -112,8 +118,7 @@ fun EidInput(eid: String, signInViewModel: SignInViewModel) {
         onValueChange = { signInViewModel.updateEid(it) },
         shape = CircleShape,
         textStyle = LocalTextStyle.current.copy(
-            textAlign = TextAlign.Center,
-            color = Color.Black
+            textAlign = TextAlign.Center
         ),
         placeholder = {
             Box(
@@ -160,12 +165,23 @@ fun SignOutButton(signOut: () -> Unit, modifier: Modifier) {
 }
 
 @Composable
-fun HelpButton() {
-    Button(
-        onClick = { /*TODO*/ },
-        colors = ButtonDefaults.buttonColors(Color.LightGray),
-        modifier = Modifier.padding(bottom = 50.dp)
-    ) {
-        Text("Where do I find my EID?")
+fun HelpButton(signInViewModel: SignInViewModel) {
+    if (signInViewModel.eiUserName.isBlank()) {
+        Button(
+            onClick = { /*TODO*/ },
+            colors = ButtonDefaults.buttonColors(Color.LightGray),
+            modifier = Modifier.padding(bottom = 50.dp)
+        ) {
+            Text("Where do I find my EID?")
+        }
+    } else {
+        Button(
+            onClick = { /*TODO*/ },
+            colors = ButtonDefaults.buttonColors(Color.LightGray),
+            modifier = Modifier.padding(bottom = 50.dp)
+        ) {
+            Text("What next?")
+        }
     }
+
 }
