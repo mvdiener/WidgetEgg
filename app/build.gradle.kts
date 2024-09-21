@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     // Glance
+    implementation(libs.androidx.glance)
     implementation(libs.androidx.glance.appwidget)
 
     // Datastore

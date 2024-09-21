@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
 
                         Image(
                             bitmap = bitmapImage,
-                            contentDescription = null,
+                            contentDescription = "App Logo",
                             modifier = Modifier
                                 .size(150.dp)
                                 .padding(bottom = 30.dp)
@@ -216,14 +216,18 @@ fun HelpButton(signInViewModel: SignInViewModel) {
     if (signInViewModel.eiUserName.isBlank()) {
         Button(
             onClick = { signInViewModel.updateShowFindMyEidDialog(true) },
-            modifier = Modifier.padding(bottom = 50.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, bottom = 50.dp, end = 16.dp)
         ) {
             Text("Where do I find my EID?")
         }
     } else {
         Button(
             onClick = { signInViewModel.updateShowWhatNextDialog(true) },
-            modifier = Modifier.padding(bottom = 50.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, bottom = 50.dp, end = 16.dp)
         ) {
             Text("What next?")
         }

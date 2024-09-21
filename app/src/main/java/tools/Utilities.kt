@@ -1,6 +1,10 @@
 package tools
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import api.MissionData
+import data.ALL_SHIPS
 import data.MissionInfoEntry
 import data.SHIP_TIMES
 import ei.Ei.Backup
@@ -40,11 +44,46 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
                 MissionInfoEntry(
                     secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
                     missionDuration = mission.durationSeconds,
-                    date = Instant.now().epochSecond
+                    date = Instant.now().epochSecond,
+                    shipId = mission.ship.number
                 )
             )
         }
     }
 
     return formattedMissions
+}
+
+fun createCircularProgressBarBitmap(progress: Float, size: Int): Bitmap {
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val paint = Paint().apply {
+        isAntiAlias = true
+        strokeWidth = 8f
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+    }
+
+    paint.color = android.graphics.Color.parseColor("#464646")
+    val radius = size / 2f - paint.strokeWidth / 2
+    canvas.drawCircle(size / 2f, size / 2f, radius, paint)
+
+    paint.color = android.graphics.Color.YELLOW
+    val sweepAngle = 360 * progress
+    canvas.drawArc(
+        paint.strokeWidth / 2,
+        paint.strokeWidth / 2,
+        size - paint.strokeWidth / 2,
+        size - paint.strokeWidth / 2,
+        90f,
+        sweepAngle,
+        false,
+        paint
+    )
+
+    return bitmap
+}
+
+fun getShipName(shipId: Int): String {
+    return ALL_SHIPS[shipId]
 }

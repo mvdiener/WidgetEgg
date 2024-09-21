@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class MissionInfoEntry(
     var secondsRemaining: Double,
     var missionDuration: Double,
-    var date: Long
+    var date: Long,
+    var shipId: Int,
 )
