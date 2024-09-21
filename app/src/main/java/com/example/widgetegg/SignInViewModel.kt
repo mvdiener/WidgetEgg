@@ -6,10 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import api.fetchData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.formatMissionData
 import user.preferences.PreferencesDatastore
-
 
 class SignInViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -55,22 +56,65 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         hasSubmitted = input
     }
 
+    var showSignoutConfirmDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowSignoutConfirmDialog(input: Boolean) {
+        showSignoutConfirmDialog = input
+    }
+
+    var showFindMyEidDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowFindMyEidDialog(input: Boolean) {
+        showFindMyEidDialog = input
+    }
+
+    var showWhatNextDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowWhatNextDialog(input: Boolean) {
+        showWhatNextDialog = input
+    }
+
     fun getBackupData() {
         viewModelScope.launch(Dispatchers.IO) {
             val basicRequestInfo = api.getBasicRequestInfo(eid)
             updateHasSubmitted(true)
             updateHasError(false)
             try {
-                val result = api.fetchBackup(basicRequestInfo)
-                updateEiUserName(result.userName)
-                preferences.saveEiUserName(result.userName)
+                val backupResult = api.fetchBackup(basicRequestInfo)
+                updateEiUserName(backupResult.userName)
+                preferences.saveEiUserName(backupResult.userName)
                 preferences.saveEid(eid)
                 updateHasSubmitted(false)
+                updateEid("")
             } catch (e: Exception) {
                 updateErrorMessage("Please enter a valid EID!")
                 updateHasError(true)
                 updateHasSubmitted(false)
             }
+
+            try {
+                //Attempt to get mission data ahead of time for any widgets
+                val prefEid = preferences.getEid()
+                if (prefEid.isNotBlank()) {
+                    val missionResult = fetchData(prefEid)
+                    val preferencesMissionData = formatMissionData(missionResult)
+                    preferences.saveMissionInfo(preferencesMissionData)
+                }
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    fun signOut() {
+        viewModelScope.launch(Dispatchers.IO) {
+            preferences.clearPreferences()
+            updateHasSubmitted(false)
+            updateHasError(false)
+            updateEid("")
+            updateEiUserName("")
         }
     }
 }

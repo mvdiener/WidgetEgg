@@ -11,7 +11,7 @@ import ei.Ei.GetActiveMissionsResponse
 import ei.Ei.MissionInfo
 import ei.copy
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
@@ -35,7 +35,6 @@ suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<Missio
     val encodedRequest = authMessage.toByteArray().encodeBase64()
     val client = createHttpClient()
     val response = makeRequest(client, url, encodedRequest)
-    client.close()
 
     when (response.status.value) {
         in 200..299 -> {
@@ -67,7 +66,6 @@ suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
     val encodedRequest = firstContactRequest.toByteArray().encodeBase64()
     val client = createHttpClient()
     val response = makeRequest(client, url, encodedRequest)
-    client.close()
 
     when (response.status.value) {
         in 200..299 -> {
@@ -90,7 +88,7 @@ suspend fun fetchData(eid: String): MissionData {
     val activeMissions = fetchActiveMissions(basicRequestInfo)
     val backup = fetchBackup(basicRequestInfo)
 
-    var fuelingMissions: List<MissionInfo> = listOf()
+    var fuelingMissions: List<MissionInfo> = emptyList()
     val fuelingMission = backup.artifactsDb.fuelingMission
     var newFuelingMission: MissionInfo
 
@@ -113,7 +111,7 @@ fun getBasicRequestInfo(eid: String): BasicRequestInfo {
 }
 
 private fun createHttpClient(): HttpClient {
-    return HttpClient(CIO)
+    return HttpClient(OkHttp)
 }
 
 private suspend fun makeRequest(
@@ -128,5 +126,7 @@ private suspend fun makeRequest(
         }
     } catch (e: Exception) {
         throw e
+    } finally {
+        client.close()
     }
 }

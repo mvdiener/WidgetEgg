@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.protobuf")
+    kotlin("plugin.serialization") version "2.0.20"
 }
 
 android {
@@ -80,18 +81,29 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // Protobuf
     implementation(libs.protobuf.java)
     implementation(libs.protobuf.kotlin)
 
-    // Ktor
+    // Network
     implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.okhttp)
     implementation(libs.kotlinx.coroutines.android)
 
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // Glance
+    implementation(libs.androidx.glance)
+    implementation(libs.androidx.glance.appwidget)
+
+    // Datastore
     implementation(libs.androidx.datastore.preferences)
+
+    // JSON serialization
+    implementation(libs.kotlinx.serialization.json)
+
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
 
 }
 

@@ -7,8 +7,11 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import data.MissionInfoEntry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "eiUserPrefs")
 
@@ -18,10 +21,20 @@ class PreferencesDatastore(context: Context) {
     private companion object {
         private val EID = stringPreferencesKey("eid")
         private val EI_USER_NAME = stringPreferencesKey("eiUserName")
+        private val MISSION_INFO = stringPreferencesKey("missionInfo")
         private val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
         private val TARGET_ICON_SMALL = booleanPreferencesKey("targetIconSmall")
         private val TARGET_ICON_MEDIUM = booleanPreferencesKey("targetIconMedium")
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
+        private val ALL_KEYS = listOf(
+            EID,
+            EI_USER_NAME,
+            MISSION_INFO,
+            USE_ABSOLUTE_TIME,
+            TARGET_ICON_SMALL,
+            TARGET_ICON_MEDIUM,
+            SHOW_TANK_LEVELS
+        )
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -31,6 +44,18 @@ class PreferencesDatastore(context: Context) {
     suspend fun getEiUserName() = dataStore.data.map {
         it[EI_USER_NAME] ?: ""
     }.first()
+
+    suspend fun getMissionInfo(): List<MissionInfoEntry> {
+        return dataStore.data.map {
+            it[MISSION_INFO]?.let { missionJson ->
+                try {
+                    Json.decodeFromString<List<MissionInfoEntry>>(missionJson)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList()
+        }.first()
+    }
 
     suspend fun getUseAbsoluteTime() = dataStore.data.map {
         it[USE_ABSOLUTE_TIME] ?: false
@@ -60,6 +85,12 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
+    suspend fun saveMissionInfo(missionInfo: List<MissionInfoEntry>) {
+        dataStore.edit {
+            it[MISSION_INFO] = Json.encodeToString(missionInfo)
+        }
+    }
+
     suspend fun saveUseAbsoluteTime(useAbsoluteTime: Boolean) {
         dataStore.edit {
             it[USE_ABSOLUTE_TIME] = useAbsoluteTime
@@ -81,6 +112,14 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveShowTankLevels(showTankLevels: Boolean) {
         dataStore.edit {
             it[SHOW_TANK_LEVELS] = showTankLevels
+        }
+    }
+
+    suspend fun clearPreferences() {
+        dataStore.edit { preferences ->
+            ALL_KEYS.forEach { key ->
+                preferences.remove(key)
+            }
         }
     }
 }

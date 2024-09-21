@@ -1,12 +1,14 @@
 [versions]
 agp = "8.6.0"
 datastorePreferences = "1.1.1"
+glanceAppwidget = "1.1.0"
 kotlin = "1.9.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 kotlinxCoroutinesAndroid = "1.7.1"
+kotlinxSerializationJson = "1.6.3"
 ktor = "2.3.12"
 lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.8.0"
@@ -14,11 +16,15 @@ composeBom = "2024.04.01"
 lifecycleViewmodelCompose = "2.8.4"
 protobufGradlePlugin = "0.9.4"
 protobuf = "4.27.0"
+workRuntimeKtx = "2.9.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-glance = { module = "androidx.glance:glance", version.ref = "glanceAppwidget" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceAppwidget" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -33,7 +39,8 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
-ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 protobuf-gradle-plugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version.ref = "protobufGradlePlugin" }
 protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
