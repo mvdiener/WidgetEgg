@@ -1,5 +1,7 @@
 package tools
 
+import api.MissionData
+import data.MissionInfoEntry
 import data.SHIP_TIMES
 import ei.Ei.Backup
 import ei.Ei.MissionInfo
@@ -23,9 +25,26 @@ fun getMissionPercentComplete(
     missionDuration: Double,
     timeRemaining: Double,
     savedTime: Long
-): String {
+): Float {
     var newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
     if (newTimeRemaining < 0) newTimeRemaining = 0.0
-    val percentComplete = ((missionDuration - newTimeRemaining) / missionDuration) * 100
-    return "%.2f".format(percentComplete)
+    return ((missionDuration - newTimeRemaining) / missionDuration).toFloat()
+}
+
+fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
+    var formattedMissions: List<MissionInfoEntry> = emptyList()
+
+    missionInfo.missions.forEach { mission ->
+        if (mission.identifier.isNotBlank()) {
+            formattedMissions = formattedMissions.plus(
+                MissionInfoEntry(
+                    secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
+                    missionDuration = mission.durationSeconds,
+                    date = Instant.now().epochSecond
+                )
+            )
+        }
+    }
+
+    return formattedMissions
 }

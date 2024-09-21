@@ -87,9 +87,9 @@ dependencies {
     implementation(libs.protobuf.java)
     implementation(libs.protobuf.kotlin)
 
-    // Ktor
+    // Network
     implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.okhttp)
     implementation(libs.kotlinx.coroutines.android)
 
     // Glance

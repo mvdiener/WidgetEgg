@@ -1,10 +1,13 @@
 package com.example.widgetegg
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -27,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -45,7 +50,32 @@ class MainActivity : ComponentActivity() {
             WidgetEggTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     val signInViewModel = viewModel<SignInViewModel>()
-                    SignInContent(signInViewModel)
+                    val logoString = if (isSystemInDarkTheme()) {
+                        "logo-dark-mode"
+                    } else {
+                        "logo-light-mode"
+                    }
+
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        val assetManager = LocalContext.current.assets
+                        val bitmapImage =
+                            BitmapFactory.decodeStream(assetManager.open("icons/${logoString}.png"))
+                                .asImageBitmap()
+
+                        Image(
+                            bitmap = bitmapImage,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(150.dp)
+                                .padding(bottom = 30.dp)
+                        )
+                        SignInContent(signInViewModel)
+                    }
+
                     Column(
                         modifier = Modifier
                             .padding(innerPadding)
@@ -76,9 +106,8 @@ fun SignInContent(signInViewModel: SignInViewModel) {
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
     ) {
         if (signInViewModel.hasSubmitted) {
             LoadingMessage()
