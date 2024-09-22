@@ -3,7 +3,7 @@ package tools
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import api.MissionData
+import data.MissionData
 import data.ALL_SHIPS
 import data.MissionInfoEntry
 import data.SHIP_TIMES
@@ -31,8 +31,19 @@ fun getMissionPercentComplete(
     savedTime: Long
 ): Float {
     var newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
-    if (newTimeRemaining < 0) newTimeRemaining = 0.0
+    if (newTimeRemaining <= 0) newTimeRemaining = 0.0
     return ((missionDuration - newTimeRemaining) / missionDuration).toFloat()
+}
+
+fun getMissionDurationRemaining(timeRemaining: Double, savedTime: Long): String {
+    val newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
+    if (newTimeRemaining <= 0) {
+        return "Finished!"
+    } else {
+        val hours = newTimeRemaining / 3600
+        val minutes = (newTimeRemaining % 3600) / 60
+        return "${hours.toInt()}hr ${minutes.toInt()}min"
+    }
 }
 
 fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
@@ -45,7 +56,11 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
                     secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
                     missionDuration = mission.durationSeconds,
                     date = Instant.now().epochSecond,
-                    shipId = mission.ship.number
+                    shipId = mission.ship.number,
+                    capacity = mission.capacity,
+                    shipLevel = mission.level,
+                    targetArtifact = mission.targetArtifact.number,
+                    durationType = mission.durationType.number
                 )
             )
         }
@@ -54,7 +69,7 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
     return formattedMissions
 }
 
-fun createCircularProgressBarBitmap(progress: Float, size: Int): Bitmap {
+fun createCircularProgressBarBitmap(progress: Float, durationType: Int, size: Int): Bitmap {
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     val paint = Paint().apply {
@@ -68,7 +83,7 @@ fun createCircularProgressBarBitmap(progress: Float, size: Int): Bitmap {
     val radius = size / 2f - paint.strokeWidth / 2
     canvas.drawCircle(size / 2f, size / 2f, radius, paint)
 
-    paint.color = android.graphics.Color.YELLOW
+    paint.color = getMissionColor(durationType)
     val sweepAngle = 360 * progress
     canvas.drawArc(
         paint.strokeWidth / 2,
@@ -86,4 +101,17 @@ fun createCircularProgressBarBitmap(progress: Float, size: Int): Bitmap {
 
 fun getShipName(shipId: Int): String {
     return ALL_SHIPS[shipId]
+}
+
+fun getMissionColor(durationType: Int): Int {
+    return when (durationType) {
+        //short
+        0 -> android.graphics.Color.BLUE
+        //standard
+        1 -> android.graphics.Color.rgb(160, 32, 240) //purple
+        //extended
+        2 -> android.graphics.Color.rgb(255, 165, 0) //orange
+        //tutorial
+        else -> android.graphics.Color.WHITE
+    }
 }
