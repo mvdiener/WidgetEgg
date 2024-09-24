@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         val assetManager = LocalContext.current.assets
                         val bitmapImage =
-                            BitmapFactory.decodeStream(assetManager.open("icons/${logoString}.png"))
+                            BitmapFactory.decodeStream(assetManager.open("icons/$logoString.png"))
                                 .asImageBitmap()
 
                         Image(

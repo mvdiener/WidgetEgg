@@ -90,7 +90,7 @@ class MissionWidget : GlanceAppWidget() {
 
                                     val shipName = getShipName(mission.shipId)
                                     val shipBitmap =
-                                        BitmapFactory.decodeStream(assetManager.open("ships/${shipName}.png"))
+                                        BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
                                     Image(
                                         provider = ImageProvider(shipBitmap),
                                         contentDescription = "Ship Icon",
