@@ -30,9 +30,9 @@ class MissionWidgetWorker(
             try {
                 if (prefEid.isNotBlank()) {
                     // Only make an api call if:
-                    // preferencesMissionData is empty, meaning data has not been saved before OR
+                    // preferencesMissionData is has less than 3 active missions, meaning all active missions haven't been saved OR
                     // preferencesMissionData has complete missions, meaning we need to fetch new active missions
-                    if (preferencesMissionData.isEmpty() || anyMissionsComplete(
+                    if (preferencesMissionData.size < 3 || anyMissionsComplete(
                             preferencesMissionData
                         )
                     ) {
@@ -40,13 +40,13 @@ class MissionWidgetWorker(
                         preferencesMissionData = formatMissionData(missionInfo)
                     }
                     preferences.saveMissionInfo(preferencesMissionData)
+                    MissionWidgetDataStore().setMissionInfo(context, preferencesMissionData)
                 }
             } catch (e: Exception) {
                 result = Result.retry()
             }
         }
 
-        MissionWidget().updateAll(context)
         return result
     }
 

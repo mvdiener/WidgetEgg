@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.formatMissionData
 import user.preferences.PreferencesDatastore
+import widget.MissionWidgetDataStore
 
 class SignInViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -79,6 +80,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
     fun getBackupData() {
         viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
             val basicRequestInfo = api.getBasicRequestInfo(eid)
             updateHasSubmitted(true)
             updateHasError(false)
@@ -87,6 +89,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 updateEiUserName(backupResult.userName)
                 preferences.saveEiUserName(backupResult.userName)
                 preferences.saveEid(eid)
+                MissionWidgetDataStore().setEid(context, eid)
                 updateHasSubmitted(false)
                 updateEid("")
             } catch (e: Exception) {
@@ -100,8 +103,9 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 val prefEid = preferences.getEid()
                 if (prefEid.isNotBlank()) {
                     val missionResult = fetchData(prefEid)
-                    val preferencesMissionData = formatMissionData(missionResult)
-                    preferences.saveMissionInfo(preferencesMissionData)
+                    val formattedMissionData = formatMissionData(missionResult)
+                    preferences.saveMissionInfo(formattedMissionData)
+                    MissionWidgetDataStore().setMissionInfo(context, formattedMissionData)
                 }
             } catch (_: Exception) {
             }
@@ -110,6 +114,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
 
     fun signOut() {
         viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().clearAllData(context)
             preferences.clearPreferences()
             updateHasSubmitted(false)
             updateHasError(false)
