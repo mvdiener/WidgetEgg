@@ -11,6 +11,7 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -35,17 +36,10 @@ import tools.getShipName
 class MissionWidget : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
-    override fun onCompositionError(
-        context: Context,
-        glanceId: GlanceId,
-        appWidgetId: Int,
-        throwable: Throwable
-    ) {
-        super.onCompositionError(context, glanceId, appWidgetId, throwable)
-        val thing = "test"
-    }
-
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        // Call the updater on load to save existing data into widget state
+        // This is a hacky way to do this, but it works... for now
+        MissionWidgetUpdater().updateMissions(context)
         provideContent {
             val state = currentState<Preferences>()
             val prefEid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
@@ -59,6 +53,9 @@ class MissionWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .fillMaxSize()
                     .background(Color(0xff181818))
+                    .clickable {
+                        MissionWidgetUpdater().updateMissions(context)
+                    }
             ) {
                 val assetManager = context.assets
                 if (prefEid.isBlank()) {

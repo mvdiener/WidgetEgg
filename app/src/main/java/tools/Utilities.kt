@@ -40,9 +40,16 @@ fun getMissionDurationRemaining(timeRemaining: Double, savedTime: Long): String 
     if (newTimeRemaining <= 0) {
         return "Finished!"
     } else {
+        val days = newTimeRemaining / 86400
+        val hoursMinusDays = (newTimeRemaining % 86400) / 3600
         val hours = newTimeRemaining / 3600
         val minutes = (newTimeRemaining % 3600) / 60
-        return "${hours.toInt()}hr ${minutes.toInt()}min"
+
+        return if (days > 1) {
+            "${days.toInt()}d ${hoursMinusDays.toInt()}hr"
+        } else {
+            "${hours.toInt()}hr ${minutes.toInt()}min"
+        }
     }
 }
 
