@@ -35,12 +35,13 @@ android {
             buildConfigField("String", "SECRET_KEY", secretKey)
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
             buildConfigField("String", "SECRET_KEY", secretKey)
+            isDebuggable = false
         }
     }
     compileOptions {

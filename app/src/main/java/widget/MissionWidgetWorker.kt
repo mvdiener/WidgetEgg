@@ -22,37 +22,12 @@ class MissionWidgetWorker(
             return Result.success()
         }
 
-        runBlocking {
-            val preferences = PreferencesDatastore(context)
-            var preferencesMissionData = preferences.getMissionInfo()
-            val prefEid = preferences.getEid()
-
-            try {
-                if (prefEid.isNotBlank()) {
-                    // Only make an api call if:
-                    // preferencesMissionData is empty, meaning data has not been saved before OR
-                    // preferencesMissionData has complete missions, meaning we need to fetch new active missions
-                    if (preferencesMissionData.isEmpty() || anyMissionsComplete(
-                            preferencesMissionData
-                        )
-                    ) {
-                        val missionInfo = fetchData(prefEid)
-                        preferencesMissionData = formatMissionData(missionInfo)
-                    }
-                    preferences.saveMissionInfo(preferencesMissionData)
-                }
-            } catch (e: Exception) {
-                result = Result.retry()
-            }
+        try {
+            MissionWidgetUpdater().updateMissions(context)
+        } catch (e: Exception) {
+            result = Result.retry()
         }
 
-        MissionWidget().updateAll(context)
         return result
-    }
-
-    private fun anyMissionsComplete(missions: List<MissionInfoEntry>): Boolean {
-        return missions.any { mission ->
-            mission.secondsRemaining - (Instant.now().epochSecond - mission.date) <= 0
-        }
     }
 }
