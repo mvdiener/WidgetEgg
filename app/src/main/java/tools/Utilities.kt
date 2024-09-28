@@ -10,6 +10,8 @@ import data.SHIP_TIMES
 import ei.Ei.Backup
 import ei.Ei.MissionInfo
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 fun getMissionDuration(mission: MissionInfo, epicResearch: List<Backup.ResearchItem>): Double {
     val ftlLevel = epicResearch.find { x -> x.id == "afx_mission_time" }?.level
@@ -35,20 +37,34 @@ fun getMissionPercentComplete(
     return ((missionDuration - newTimeRemaining) / missionDuration).toFloat()
 }
 
-fun getMissionDurationRemaining(timeRemaining: Double, savedTime: Long): String {
+fun getMissionDurationRemaining(
+    timeRemaining: Double,
+    savedTime: Long,
+    useAbsoluteTime: Boolean
+): String {
     val newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
-    if (newTimeRemaining <= 0) {
-        return "Finished!"
+    return if (newTimeRemaining <= 0) {
+        "Finished!"
     } else {
         val days = newTimeRemaining / 86400
-        val hoursMinusDays = (newTimeRemaining % 86400) / 3600
-        val hours = newTimeRemaining / 3600
-        val minutes = (newTimeRemaining % 3600) / 60
-
-        return if (days > 1) {
-            "${days.toInt()}d ${hoursMinusDays.toInt()}hr"
+        if (useAbsoluteTime && days < 1) {
+            val currentTime = LocalDateTime.now()
+            val endingTime = currentTime.plusSeconds(newTimeRemaining.toLong())
+            endingTime.format(DateTimeFormatter.ofPattern("h:mm a"))
         } else {
-            "${hours.toInt()}hr ${minutes.toInt()}min"
+            val hoursMinusDays = (newTimeRemaining % 86400) / 3600
+            val hours = newTimeRemaining / 3600
+            val minutes = (newTimeRemaining % 3600) / 60
+
+            if (days > 1) {
+                if (hoursMinusDays.toInt() == 0) {
+                    "${days.toInt()}d"
+                } else {
+                    "${days.toInt()}d ${hoursMinusDays.toInt()}hr"
+                }
+            } else {
+                "${hours.toInt()}hr ${minutes.toInt()}min"
+            }
         }
     }
 }

@@ -42,7 +42,7 @@ val SHIP_TIMES = arrayOf(
     arrayOf(172800, 259200, 345600),
 )
 
-fun getImageFromAfxID(afxId: Int): String {
+fun getImageFromAfxId(afxId: Int): String {
     return when (afxId) {
         23 -> "afx_puzzle_cube_4"
         0 -> "afx_lunar_totem_4"

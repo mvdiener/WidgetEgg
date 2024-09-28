@@ -23,16 +23,16 @@ class PreferencesDatastore(context: Context) {
         private val EI_USER_NAME = stringPreferencesKey("eiUserName")
         private val MISSION_INFO = stringPreferencesKey("missionInfo")
         private val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
-        private val TARGET_ICON_SMALL = booleanPreferencesKey("targetIconSmall")
-        private val TARGET_ICON_MEDIUM = booleanPreferencesKey("targetIconMedium")
+        private val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("targetArtifactSmall")
+        private val TARGET_ARTIFACT_MEDIUM = booleanPreferencesKey("targetArtifactMedium")
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
             MISSION_INFO,
             USE_ABSOLUTE_TIME,
-            TARGET_ICON_SMALL,
-            TARGET_ICON_MEDIUM,
+            TARGET_ARTIFACT_SMALL,
+            TARGET_ARTIFACT_MEDIUM,
             SHOW_TANK_LEVELS
         )
     }
@@ -41,9 +41,21 @@ class PreferencesDatastore(context: Context) {
         it[EID] ?: ""
     }.first()
 
+    suspend fun saveEid(eid: String) {
+        dataStore.edit {
+            it[EID] = eid
+        }
+    }
+
     suspend fun getEiUserName() = dataStore.data.map {
         it[EI_USER_NAME] ?: ""
     }.first()
+
+    suspend fun saveEiUserName(userName: String) {
+        dataStore.edit {
+            it[EI_USER_NAME] = userName
+        }
+    }
 
     suspend fun getMissionInfo(): List<MissionInfoEntry> {
         return dataStore.data.map {
@@ -57,39 +69,15 @@ class PreferencesDatastore(context: Context) {
         }.first()
     }
 
-    suspend fun getUseAbsoluteTime() = dataStore.data.map {
-        it[USE_ABSOLUTE_TIME] ?: false
-    }.first()
-
-    suspend fun getTargetIconSmall() = dataStore.data.map {
-        it[TARGET_ICON_SMALL] ?: false
-    }.first()
-
-    suspend fun getTargetIconMedium() = dataStore.data.map {
-        it[TARGET_ICON_MEDIUM] ?: false
-    }.first()
-
-    suspend fun getShowTankLevels() = dataStore.data.map {
-        it[SHOW_TANK_LEVELS] ?: false
-    }.first()
-
-    suspend fun saveEid(eid: String) {
-        dataStore.edit {
-            it[EID] = eid
-        }
-    }
-
-    suspend fun saveEiUserName(userName: String) {
-        dataStore.edit {
-            it[EI_USER_NAME] = userName
-        }
-    }
-
     suspend fun saveMissionInfo(missionInfo: List<MissionInfoEntry>) {
         dataStore.edit {
             it[MISSION_INFO] = Json.encodeToString(missionInfo)
         }
     }
+
+    suspend fun getUseAbsoluteTime() = dataStore.data.map {
+        it[USE_ABSOLUTE_TIME] ?: false
+    }.first()
 
     suspend fun saveUseAbsoluteTime(useAbsoluteTime: Boolean) {
         dataStore.edit {
@@ -97,17 +85,29 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
-    suspend fun saveTargetIconSmall(targetIconSmall: Boolean) {
+    suspend fun getTargetArtifactSmall() = dataStore.data.map {
+        it[TARGET_ARTIFACT_SMALL] ?: false
+    }.first()
+
+    suspend fun saveTargetArtifactSmall(targetArtifactSmall: Boolean) {
         dataStore.edit {
-            it[TARGET_ICON_SMALL] = targetIconSmall
+            it[TARGET_ARTIFACT_SMALL] = targetArtifactSmall
         }
     }
 
-    suspend fun saveTargetIconMedium(targetIconMedium: Boolean) {
+    suspend fun getTargetArtifactMedium() = dataStore.data.map {
+        it[TARGET_ARTIFACT_MEDIUM] ?: false
+    }.first()
+
+    suspend fun saveTargetArtifactMedium(targetArtifactMedium: Boolean) {
         dataStore.edit {
-            it[TARGET_ICON_MEDIUM] = targetIconMedium
+            it[TARGET_ARTIFACT_MEDIUM] = targetArtifactMedium
         }
     }
+
+    suspend fun getShowTankLevels() = dataStore.data.map {
+        it[SHOW_TANK_LEVELS] ?: false
+    }.first()
 
     suspend fun saveShowTankLevels(showTankLevels: Boolean) {
         dataStore.edit {

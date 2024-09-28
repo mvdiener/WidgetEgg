@@ -84,6 +84,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+
     // Protobuf
     implementation(libs.protobuf.java)
     implementation(libs.protobuf.kotlin)
