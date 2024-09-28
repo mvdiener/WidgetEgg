@@ -1,4 +1,4 @@
-package com.example.widgetegg
+package com.example.widgetegg.main
 
 import android.app.Application
 import androidx.compose.runtime.getValue

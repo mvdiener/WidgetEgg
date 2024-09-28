@@ -47,6 +47,8 @@ class MissionWidget : GlanceAppWidget() {
                 MissionWidgetDataStore().decodeMissionInfo(
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
+            val useAbsoluteTime =
+                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
             Column(
                 verticalAlignment = Alignment.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -69,7 +71,7 @@ class MissionWidget : GlanceAppWidget() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         preferencesMissionData.forEach { mission ->
-                            MissionProgress(assetManager, mission)
+                            MissionProgress(assetManager, mission, useAbsoluteTime)
                         }
                     }
                 }
@@ -123,7 +125,11 @@ fun NoMissionsContent(assetManager: AssetManager) {
 }
 
 @Composable
-fun MissionProgress(assetManager: AssetManager, mission: MissionInfoEntry) {
+fun MissionProgress(
+    assetManager: AssetManager,
+    mission: MissionInfoEntry,
+    useAbsoluteTime: Boolean
+) {
     val percentRemaining = getMissionPercentComplete(
         mission.missionDuration,
         mission.secondsRemaining,
@@ -167,7 +173,8 @@ fun MissionProgress(assetManager: AssetManager, mission: MissionInfoEntry) {
             Text(
                 text = getMissionDurationRemaining(
                     mission.secondsRemaining,
-                    mission.date
+                    mission.date,
+                    useAbsoluteTime
                 ),
                 style = TextStyle(color = ColorProvider(Color.White)),
                 modifier = GlanceModifier.padding(top = 5.dp)

@@ -1,0 +1,44 @@
+package com.example.widgetegg.settings
+
+import android.app.Application
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import user.preferences.PreferencesDatastore
+import widget.MissionWidgetDataStore
+
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val preferences: PreferencesDatastore
+
+    init {
+        val context = getApplication<Application>().applicationContext
+        preferences = PreferencesDatastore(context)
+    }
+
+    var useAbsoluteTime by mutableStateOf(false)
+        private set
+
+    fun updateUseAbsoluteTime(input: Boolean) {
+        useAbsoluteTime = input
+        runBlocking {
+            preferences.saveUseAbsoluteTime(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setUseAbsoluteTime(context, useAbsoluteTime)
+        }
+    }
+
+    var showAbsoluteTimeDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowAbsoluteTimeDialog(input: Boolean) {
+        showAbsoluteTimeDialog = input
+    }
+}
