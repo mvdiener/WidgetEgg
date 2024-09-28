@@ -15,6 +15,7 @@ class MissionWidgetUpdater {
             var preferencesMissionData = preferences.getMissionInfo()
             val prefEid = preferences.getEid()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
+            val prefTargetArtifactSmall = preferences.getTargetArtifactSmall()
 
             try {
                 if (prefEid.isNotBlank()) {
@@ -33,6 +34,10 @@ class MissionWidgetUpdater {
 
                     MissionWidgetDataStore().setEid(context, prefEid)
                     MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
+                    MissionWidgetDataStore().setTargetArtifactSmall(
+                        context,
+                        prefTargetArtifactSmall
+                    )
                 }
             } catch (e: Exception) {
                 throw e

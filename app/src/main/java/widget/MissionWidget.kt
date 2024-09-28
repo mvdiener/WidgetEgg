@@ -20,6 +20,7 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
+import androidx.glance.layout.absolutePadding
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
@@ -28,6 +29,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.MissionInfoEntry
+import data.getImageFromAfxId
 import tools.createCircularProgressBarBitmap
 import tools.getMissionDurationRemaining
 import tools.getMissionPercentComplete
@@ -49,6 +51,9 @@ class MissionWidget : GlanceAppWidget() {
                 )
             val useAbsoluteTime =
                 state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
+            val showTargetArtifact =
+                state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] ?: false
+
             Column(
                 verticalAlignment = Alignment.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -71,7 +76,12 @@ class MissionWidget : GlanceAppWidget() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         preferencesMissionData.forEach { mission ->
-                            MissionProgress(assetManager, mission, useAbsoluteTime)
+                            MissionProgress(
+                                assetManager,
+                                mission,
+                                useAbsoluteTime,
+                                showTargetArtifact
+                            )
                         }
                     }
                 }
@@ -128,7 +138,8 @@ fun NoMissionsContent(assetManager: AssetManager) {
 fun MissionProgress(
     assetManager: AssetManager,
     mission: MissionInfoEntry,
-    useAbsoluteTime: Boolean
+    useAbsoluteTime: Boolean,
+    showTargetArtifact: Boolean
 ) {
     val percentRemaining = getMissionPercentComplete(
         mission.missionDuration,
@@ -149,6 +160,7 @@ fun MissionProgress(
                 mission.durationType,
                 100
             )
+
             Image(
                 provider = ImageProvider(bitmap),
                 contentDescription = "Circular Progress",
@@ -163,6 +175,18 @@ fun MissionProgress(
                 contentDescription = "Ship Icon",
                 modifier = GlanceModifier.size(50.dp)
             )
+
+            val artifactName = getImageFromAfxId(mission.targetArtifact)
+            if (showTargetArtifact && artifactName.isNotBlank()) {
+                val artifactBitmap =
+                    BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
+                Image(
+                    provider = ImageProvider(artifactBitmap),
+                    contentDescription = "Target Artifact",
+                    modifier = GlanceModifier.size(95.dp)
+                        .absolutePadding(bottom = 60.dp, left = 70.dp)
+                )
+            }
         }
 
         Column(

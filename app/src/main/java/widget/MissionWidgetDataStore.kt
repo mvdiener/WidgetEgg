@@ -14,6 +14,7 @@ data object MissionWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")
     val MISSION_INFO = stringPreferencesKey("widgetMissionInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("widgetUseAbsoluteTime")
+    val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("widgetTargetArtifactSmall")
 }
 
 class MissionWidgetDataStore {
@@ -53,6 +54,18 @@ class MissionWidgetDataStore {
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = useAbsoluteTime
+                }
+            }
+
+        MissionWidget().updateAll(context)
+    }
+
+    suspend fun setTargetArtifactSmall(context: Context, showTargetArtifactSmall: Boolean) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] =
+                        showTargetArtifactSmall
                 }
             }
 

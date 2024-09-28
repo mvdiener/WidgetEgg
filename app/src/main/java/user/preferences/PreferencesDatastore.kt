@@ -23,16 +23,16 @@ class PreferencesDatastore(context: Context) {
         private val EI_USER_NAME = stringPreferencesKey("eiUserName")
         private val MISSION_INFO = stringPreferencesKey("missionInfo")
         private val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
-        private val TARGET_ICON_SMALL = booleanPreferencesKey("targetIconSmall")
-        private val TARGET_ICON_MEDIUM = booleanPreferencesKey("targetIconMedium")
+        private val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("targetArtifactSmall")
+        private val TARGET_ARTIFACT_MEDIUM = booleanPreferencesKey("targetArtifactMedium")
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
             MISSION_INFO,
             USE_ABSOLUTE_TIME,
-            TARGET_ICON_SMALL,
-            TARGET_ICON_MEDIUM,
+            TARGET_ARTIFACT_SMALL,
+            TARGET_ARTIFACT_MEDIUM,
             SHOW_TANK_LEVELS
         )
     }
@@ -85,23 +85,23 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
-    suspend fun getTargetIconSmall() = dataStore.data.map {
-        it[TARGET_ICON_SMALL] ?: false
+    suspend fun getTargetArtifactSmall() = dataStore.data.map {
+        it[TARGET_ARTIFACT_SMALL] ?: false
     }.first()
 
-    suspend fun saveTargetIconSmall(targetIconSmall: Boolean) {
+    suspend fun saveTargetArtifactSmall(targetArtifactSmall: Boolean) {
         dataStore.edit {
-            it[TARGET_ICON_SMALL] = targetIconSmall
+            it[TARGET_ARTIFACT_SMALL] = targetArtifactSmall
         }
     }
 
-    suspend fun getTargetIconMedium() = dataStore.data.map {
-        it[TARGET_ICON_MEDIUM] ?: false
+    suspend fun getTargetArtifactMedium() = dataStore.data.map {
+        it[TARGET_ARTIFACT_MEDIUM] ?: false
     }.first()
 
-    suspend fun saveTargetIconMedium(targetIconMedium: Boolean) {
+    suspend fun saveTargetArtifactMedium(targetArtifactMedium: Boolean) {
         dataStore.edit {
-            it[TARGET_ICON_MEDIUM] = targetIconMedium
+            it[TARGET_ARTIFACT_MEDIUM] = targetArtifactMedium
         }
     }
 

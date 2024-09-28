@@ -31,7 +31,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setUseAbsoluteTime(context, useAbsoluteTime)
+            MissionWidgetDataStore().setUseAbsoluteTime(context, input)
         }
     }
 
@@ -40,5 +40,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateShowAbsoluteTimeDialog(input: Boolean) {
         showAbsoluteTimeDialog = input
+    }
+
+    var showTargetArtifactSmall by mutableStateOf(false)
+        private set
+
+    fun updateShowTargetArtifactSmall(input: Boolean) {
+        showTargetArtifactSmall = input
+        runBlocking {
+            preferences.saveTargetArtifactSmall(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setTargetArtifactSmall(context, input)
+        }
     }
 }

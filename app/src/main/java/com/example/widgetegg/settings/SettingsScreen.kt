@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -29,7 +28,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.widgetegg.Routes
-import com.example.widgetegg.main.SignInViewModel
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
 
@@ -40,8 +38,8 @@ fun SettingsScreen(navController: NavController) {
     val context = LocalContext.current
     runBlocking {
         val preferences = PreferencesDatastore(context)
-        val thing = preferences.getUseAbsoluteTime()
-        settingsViewModel.updateUseAbsoluteTime(thing)
+        settingsViewModel.updateUseAbsoluteTime(preferences.getUseAbsoluteTime())
+        settingsViewModel.updateShowTargetArtifactSmall(preferences.getTargetArtifactSmall())
     }
 
     Column(
@@ -68,36 +66,41 @@ fun SettingsScreen(navController: NavController) {
     ) {
         Text(text = "Settings", fontSize = TextUnit(24f, TextUnitType.Sp))
 
-        Row(
-            modifier = Modifier.settingsRowModifier(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Text(text = "Show absolute time")
-                Icon(
-                    Icons.Rounded.Info,
-                    contentDescription = "Absolute time info",
-                    modifier = Modifier
-                        .padding(start = 5.dp)
-                        .size(15.dp)
-                        .clickable {
-                            settingsViewModel.updateShowAbsoluteTimeDialog(true)
-                        }
-                )
-                AbsoluteTimeDialog(settingsViewModel)
-            }
+        AbsoluteTimeRow(settingsViewModel)
+        TargetArtifactRow(settingsViewModel)
+    }
+}
 
-            Switch(
-                checked = settingsViewModel.useAbsoluteTime,
-                onCheckedChange = {
-                    val updated = !settingsViewModel.useAbsoluteTime
-                    settingsViewModel.updateUseAbsoluteTime(updated)
-                }
+@Composable
+fun AbsoluteTimeRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Show absolute time")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Absolute time info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowAbsoluteTimeDialog(true)
+                    }
             )
+            AbsoluteTimeDialog(settingsViewModel)
         }
+
+        Switch(
+            checked = settingsViewModel.useAbsoluteTime,
+            onCheckedChange = {
+                settingsViewModel.updateUseAbsoluteTime(!settingsViewModel.useAbsoluteTime)
+            }
+        )
     }
 }
 
@@ -123,6 +126,23 @@ fun AbsoluteTimeDialog(settingsViewModel: SettingsViewModel) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun TargetArtifactRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "Show target artifact")
+        Switch(
+            checked = settingsViewModel.showTargetArtifactSmall,
+            onCheckedChange = {
+                settingsViewModel.updateShowTargetArtifactSmall(!settingsViewModel.showTargetArtifactSmall)
+            }
+        )
     }
 }
 
