@@ -22,7 +22,7 @@ class MissionWidgetUpdater {
                     // Only make an api call if:
                     // preferencesMissionData is has less than 3 active missions, meaning all active missions haven't been saved OR
                     // preferencesMissionData has complete missions, meaning we need to fetch new active missions
-                    if (preferencesMissionData.size < 3 || anyMissionsComplete(
+                    if (numOfActiveMissions(preferencesMissionData) < 3 || anyMissionsComplete(
                             preferencesMissionData
                         )
                     ) {
@@ -45,9 +45,15 @@ class MissionWidgetUpdater {
         }
     }
 
+    private fun numOfActiveMissions(missions: List<MissionInfoEntry>): Int {
+        return missions.count { mission ->
+            mission.identifier.isNotBlank()
+        }
+    }
+
     private fun anyMissionsComplete(missions: List<MissionInfoEntry>): Boolean {
         return missions.any { mission ->
-            mission.secondsRemaining - (Instant.now().epochSecond - mission.date) <= 0
+            mission.identifier.isNotBlank() && mission.secondsRemaining - (Instant.now().epochSecond - mission.date) <= 0
         }
     }
 }

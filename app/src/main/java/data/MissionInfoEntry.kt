@@ -12,5 +12,6 @@ data class MissionInfoEntry(
     var capacity: Int,
     var shipLevel: Int,
     var targetArtifact: Int,
-    var durationType: Int
+    var durationType: Int,
+    var identifier: String
 )
