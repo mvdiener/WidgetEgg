@@ -6,26 +6,9 @@ import android.graphics.Paint
 import data.MissionData
 import data.ALL_SHIPS
 import data.MissionInfoEntry
-import data.SHIP_TIMES
-import ei.Ei.Backup
-import ei.Ei.MissionInfo
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-fun getMissionDuration(mission: MissionInfo, epicResearch: List<Backup.ResearchItem>): Double {
-    val ftlLevel = epicResearch.find { x -> x.id == "afx_mission_time" }?.level
-
-    ftlLevel?.let {
-        var seconds = SHIP_TIMES[mission.ship.number][mission.durationType.number].toDouble()
-        if (mission.ship.number >= MissionInfo.Spaceship.MILLENIUM_CHICKEN_VALUE) {
-            seconds *= (1 - 0.01 * it.toDouble())
-        }
-        return seconds
-    }
-
-    return 0.toDouble()
-}
 
 fun getMissionPercentComplete(
     missionDuration: Double,
@@ -73,26 +56,30 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
     var formattedMissions: List<MissionInfoEntry> = emptyList()
 
     missionInfo.missions.forEach { mission ->
-        if (mission.identifier.isNotBlank()) {
-            formattedMissions = formattedMissions.plus(
-                MissionInfoEntry(
-                    secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
-                    missionDuration = mission.durationSeconds,
-                    date = Instant.now().epochSecond,
-                    shipId = mission.ship.number,
-                    capacity = mission.capacity,
-                    shipLevel = mission.level,
-                    targetArtifact = mission.targetArtifact.number,
-                    durationType = mission.durationType.number
-                )
+        formattedMissions = formattedMissions.plus(
+            MissionInfoEntry(
+                secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
+                missionDuration = mission.durationSeconds,
+                date = Instant.now().epochSecond,
+                shipId = mission.ship.number,
+                capacity = mission.capacity,
+                shipLevel = mission.level,
+                targetArtifact = mission.targetArtifact.number,
+                durationType = mission.durationType.number,
+                identifier = mission.identifier
             )
-        }
+        )
     }
 
     return formattedMissions
 }
 
-fun createCircularProgressBarBitmap(progress: Float, durationType: Int, size: Int): Bitmap {
+fun createCircularProgressBarBitmap(
+    progress: Float,
+    durationType: Int,
+    size: Int,
+    isFueling: Boolean
+): Bitmap {
     val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     val paint = Paint().apply {
@@ -106,7 +93,7 @@ fun createCircularProgressBarBitmap(progress: Float, durationType: Int, size: In
     val radius = size / 2f - paint.strokeWidth / 2
     canvas.drawCircle(size / 2f, size / 2f, radius, paint)
 
-    paint.color = getMissionColor(durationType)
+    paint.color = getMissionColor(durationType, isFueling)
     val sweepAngle = 360 * progress
     canvas.drawArc(
         paint.strokeWidth / 2,
@@ -126,15 +113,22 @@ fun getShipName(shipId: Int): String {
     return ALL_SHIPS[shipId]
 }
 
-fun getMissionColor(durationType: Int): Int {
+fun getMissionColor(durationType: Int, isFueling: Boolean): Int {
+    val fuelingAlpha =
+        if (isFueling) {
+            100
+        } else {
+            255
+        }
+
     return when (durationType) {
         //short
-        0 -> android.graphics.Color.BLUE
+        0 -> android.graphics.Color.argb(fuelingAlpha, 0, 0, 255) //blue
         //standard
-        1 -> android.graphics.Color.rgb(160, 32, 240) //purple
+        1 -> android.graphics.Color.argb(fuelingAlpha, 160, 32, 240) //purple
         //extended
-        2 -> android.graphics.Color.rgb(255, 165, 0) //orange
+        2 -> android.graphics.Color.argb(fuelingAlpha, 255, 165, 0) //orange
         //tutorial
-        else -> android.graphics.Color.WHITE
+        else -> android.graphics.Color.argb(fuelingAlpha, 255, 255, 255) //white
     }
 }

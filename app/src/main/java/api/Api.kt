@@ -10,7 +10,6 @@ import ei.Ei.EggIncFirstContactRequest
 import ei.Ei.EggIncFirstContactResponse
 import ei.Ei.GetActiveMissionsResponse
 import ei.Ei.MissionInfo
-import ei.copy
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.parameter
@@ -22,7 +21,6 @@ import io.ktor.http.contentType
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.util.encodeBase64
 import tools.buildSecureAuthMessage
-import tools.getMissionDuration
 
 suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<MissionInfo> {
     val url = MISSION_ENDPOINT
@@ -91,13 +89,9 @@ suspend fun fetchData(eid: String): MissionData {
 
     var fuelingMissions: List<MissionInfo> = emptyList()
     val fuelingMission = backup.artifactsDb.fuelingMission
-    var newFuelingMission: MissionInfo
 
     fuelingMission?.let {
-        newFuelingMission = fuelingMission.copy {
-            durationSeconds = getMissionDuration(fuelingMission, backup.game.epicResearchList)
-        }
-        fuelingMissions = fuelingMissions + newFuelingMission
+        fuelingMissions = fuelingMissions + fuelingMission
     }
 
     return MissionData(activeMissions + fuelingMissions, backup.artifacts)

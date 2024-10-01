@@ -5,6 +5,8 @@ import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
@@ -22,6 +24,7 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.absolutePadding
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.state.PreferencesGlanceStateDefinition
@@ -39,8 +42,10 @@ class MissionWidget : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        // Call the updater on load to save existing data into widget state
+        // Call the updater on widget creation to put existing data into widget state
         // This is a hacky way to do this, but it works... for now
+        // The ideal way to do this is to have all widgets read from the same state file
+        // using a custom glanceStateDefinition, but I have not been able to make that work.
         MissionWidgetUpdater().updateMissions(context)
         provideContent {
             val state = currentState<Preferences>()
@@ -71,17 +76,22 @@ class MissionWidget : GlanceAppWidget() {
                     NoMissionsContent(assetManager)
                 } else {
                     Row(
-                        modifier = GlanceModifier.fillMaxSize(),
+                        modifier = GlanceModifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         preferencesMissionData.forEach { mission ->
-                            MissionProgress(
-                                assetManager,
-                                mission,
-                                useAbsoluteTime,
-                                showTargetArtifact
-                            )
+                            Box(
+                                modifier = GlanceModifier.defaultWeight().padding(bottom = 3.dp),
+                                contentAlignment = Alignment.TopCenter
+                            ) {
+                                MissionProgress(
+                                    assetManager,
+                                    mission,
+                                    useAbsoluteTime,
+                                    showTargetArtifact
+                                )
+                            }
                         }
                     }
                 }
@@ -141,68 +151,80 @@ fun MissionProgress(
     useAbsoluteTime: Boolean,
     showTargetArtifact: Boolean
 ) {
-    val percentRemaining = getMissionPercentComplete(
-        mission.missionDuration,
-        mission.secondsRemaining,
-        mission.date
-    )
+    val isFueling = mission.identifier.isBlank()
 
-    Box(
-        modifier = GlanceModifier.size(100.dp),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Box(
-            modifier = GlanceModifier.fillMaxSize().padding(bottom = 15.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            val bitmap = createCircularProgressBarBitmap(
-                percentRemaining,
-                mission.durationType,
-                100
+    val percentRemaining =
+        if (isFueling) {
+            1f
+        } else {
+            getMissionPercentComplete(
+                mission.missionDuration,
+                mission.secondsRemaining,
+                mission.date
             )
-
-            Image(
-                provider = ImageProvider(bitmap),
-                contentDescription = "Circular Progress",
-                modifier = GlanceModifier.size(70.dp)
-            )
-
-            val shipName = getShipName(mission.shipId)
-            val shipBitmap =
-                BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
-            Image(
-                provider = ImageProvider(shipBitmap),
-                contentDescription = "Ship Icon",
-                modifier = GlanceModifier.size(50.dp)
-            )
-
-            val artifactName = getImageFromAfxId(mission.targetArtifact)
-            if (showTargetArtifact && artifactName.isNotBlank()) {
-                val artifactBitmap =
-                    BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
-                Image(
-                    provider = ImageProvider(artifactBitmap),
-                    contentDescription = "Target Artifact",
-                    modifier = GlanceModifier.size(95.dp)
-                        .absolutePadding(bottom = 60.dp, left = 70.dp)
-                )
-            }
         }
 
-        Column(
-            modifier = GlanceModifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            Text(
-                text = getMissionDurationRemaining(
-                    mission.secondsRemaining,
-                    mission.date,
-                    useAbsoluteTime
-                ),
-                style = TextStyle(color = ColorProvider(Color.White)),
-                modifier = GlanceModifier.padding(top = 5.dp)
+    Box(
+        modifier = GlanceModifier.fillMaxSize().padding(bottom = 5.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        val bitmap = createCircularProgressBarBitmap(
+            percentRemaining,
+            mission.durationType,
+            100,
+            isFueling
+        )
+
+        Image(
+            provider = ImageProvider(bitmap),
+            contentDescription = "Circular Progress",
+            modifier = GlanceModifier.size(65.dp)
+        )
+
+        val shipName = getShipName(mission.shipId)
+        val shipBitmap =
+            BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+        Image(
+            provider = ImageProvider(shipBitmap),
+            contentDescription = "Ship Icon",
+            modifier = GlanceModifier.size(35.dp)
+        )
+
+        val artifactName = getImageFromAfxId(mission.targetArtifact)
+        if (showTargetArtifact && artifactName.isNotBlank()) {
+            val artifactBitmap =
+                BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
+            Image(
+                provider = ImageProvider(artifactBitmap),
+                contentDescription = "Target Artifact",
+                modifier = GlanceModifier.size(85.dp)
+                    .absolutePadding(bottom = 65.dp, left = 60.dp)
             )
         }
     }
+
+    Column(
+        modifier = GlanceModifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.Bottom
+    ) {
+        Text(
+            text =
+            if (isFueling) {
+                "Fueling"
+            } else {
+                getMissionDurationRemaining(
+                    mission.secondsRemaining,
+                    mission.date,
+                    useAbsoluteTime
+                )
+            },
+            style = TextStyle(
+                color = ColorProvider(Color.White),
+                fontSize = TextUnit(12f, TextUnitType.Sp)
+            ),
+            modifier = GlanceModifier.padding(bottom = 2.dp)
+        )
+    }
+
 }
