@@ -40,6 +40,7 @@ fun SettingsScreen(navController: NavController) {
         val preferences = PreferencesDatastore(context)
         settingsViewModel.updateUseAbsoluteTime(preferences.getUseAbsoluteTime())
         settingsViewModel.updateShowTargetArtifactSmall(preferences.getTargetArtifactSmall())
+        settingsViewModel.updateShowFuelingShip(preferences.getShowFuelingShip())
     }
 
     Column(
