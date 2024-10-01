@@ -15,6 +15,7 @@ data object MissionWidgetDataStorePreferencesKeys {
     val MISSION_INFO = stringPreferencesKey("widgetMissionInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("widgetUseAbsoluteTime")
     val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("widgetTargetArtifactSmall")
+    val SHOW_FUELING_SHIP = booleanPreferencesKey("widgetShowFuelingShip")
 }
 
 class MissionWidgetDataStore {
@@ -66,6 +67,18 @@ class MissionWidgetDataStore {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] =
                         showTargetArtifactSmall
+                }
+            }
+
+        MissionWidget().updateAll(context)
+    }
+
+    suspend fun setShowFuelingShip(context: Context, showFuelingShip: Boolean) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] =
+                        showFuelingShip
                 }
             }
 

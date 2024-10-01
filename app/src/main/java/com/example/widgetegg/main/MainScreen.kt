@@ -322,7 +322,7 @@ fun WhatNextDialog(signInViewModel: SignInViewModel) {
                 "1. Long press on your home screen to begin editing.",
                 """2. Select the "Widgets" option.""",
                 """3. Search for "WidgetEgg", select a widget and press the "Add" button.""",
-                "4. It may take up to 30 minutes for your data to appear in the widget."
+                "4. Once added, the widget will automatically update every 15 minutes."
             )
             val length = instructions.size
             Column(

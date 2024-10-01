@@ -58,6 +58,8 @@ class MissionWidget : GlanceAppWidget() {
                 state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
             val showTargetArtifact =
                 state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] ?: false
+            val showFuelingShip =
+                state[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] ?: false
 
             Column(
                 verticalAlignment = Alignment.Bottom,
@@ -81,6 +83,7 @@ class MissionWidget : GlanceAppWidget() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         preferencesMissionData.forEach { mission ->
+                            if (mission.identifier.isBlank() && !showFuelingShip) return@forEach
                             Box(
                                 modifier = GlanceModifier.defaultWeight().padding(bottom = 3.dp),
                                 contentAlignment = Alignment.TopCenter

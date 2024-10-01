@@ -26,7 +26,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         private set
 
     fun updateEid(input: String) {
-        eid = input
+        eid = input.trim()
     }
 
     var eiUserName by mutableStateOf("")

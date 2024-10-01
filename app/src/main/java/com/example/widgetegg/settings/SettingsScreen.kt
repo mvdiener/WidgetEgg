@@ -68,6 +68,7 @@ fun SettingsScreen(navController: NavController) {
 
         AbsoluteTimeRow(settingsViewModel)
         TargetArtifactRow(settingsViewModel)
+        ShowFuelingShipRow(settingsViewModel)
     }
 }
 
@@ -141,6 +142,23 @@ fun TargetArtifactRow(settingsViewModel: SettingsViewModel) {
             checked = settingsViewModel.showTargetArtifactSmall,
             onCheckedChange = {
                 settingsViewModel.updateShowTargetArtifactSmall(!settingsViewModel.showTargetArtifactSmall)
+            }
+        )
+    }
+}
+
+@Composable
+fun ShowFuelingShipRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "Show fueling ship")
+        Switch(
+            checked = settingsViewModel.showFuelingShip,
+            onCheckedChange = {
+                settingsViewModel.updateShowFuelingShip(!settingsViewModel.showFuelingShip)
             }
         )
     }

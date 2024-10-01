@@ -56,4 +56,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             MissionWidgetDataStore().setTargetArtifactSmall(context, input)
         }
     }
+
+    var showFuelingShip by mutableStateOf(false)
+        private set
+
+    fun updateShowFuelingShip(input: Boolean) {
+        showFuelingShip = input
+        runBlocking {
+            preferences.saveShowFuelingShip(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setShowFuelingShip(context, input)
+        }
+    }
 }
