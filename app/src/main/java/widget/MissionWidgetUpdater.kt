@@ -16,6 +16,7 @@ class MissionWidgetUpdater {
             val prefEid = preferences.getEid()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
             val prefTargetArtifactSmall = preferences.getTargetArtifactSmall()
+            val prefShowFuelingShip = preferences.getShowFuelingShip()
 
             try {
                 if (prefEid.isNotBlank()) {
@@ -38,6 +39,7 @@ class MissionWidgetUpdater {
                         context,
                         prefTargetArtifactSmall
                     )
+                    MissionWidgetDataStore().setShowFuelingShip(context, prefShowFuelingShip)
                 }
             } catch (e: Exception) {
                 throw e

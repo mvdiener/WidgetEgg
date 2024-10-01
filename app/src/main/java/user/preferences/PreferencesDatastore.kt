@@ -25,6 +25,7 @@ class PreferencesDatastore(context: Context) {
         private val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
         private val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("targetArtifactSmall")
         private val TARGET_ARTIFACT_MEDIUM = booleanPreferencesKey("targetArtifactMedium")
+        private val SHOW_FUELING_SHIP = booleanPreferencesKey("showFuelingShip")
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
         private val ALL_KEYS = listOf(
             EID,
@@ -33,6 +34,7 @@ class PreferencesDatastore(context: Context) {
             USE_ABSOLUTE_TIME,
             TARGET_ARTIFACT_SMALL,
             TARGET_ARTIFACT_MEDIUM,
+            SHOW_FUELING_SHIP,
             SHOW_TANK_LEVELS
         )
     }
@@ -102,6 +104,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveTargetArtifactMedium(targetArtifactMedium: Boolean) {
         dataStore.edit {
             it[TARGET_ARTIFACT_MEDIUM] = targetArtifactMedium
+        }
+    }
+
+    suspend fun getShowFuelingShip() = dataStore.data.map {
+        it[SHOW_FUELING_SHIP] ?: false
+    }.first()
+
+    suspend fun saveShowFuelingShip(showFuelingShip: Boolean) {
+        dataStore.edit {
+            it[SHOW_FUELING_SHIP] = showFuelingShip
         }
     }
 

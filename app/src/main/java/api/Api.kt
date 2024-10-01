@@ -84,17 +84,18 @@ suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
 
 suspend fun fetchData(eid: String): MissionData {
     val basicRequestInfo = getBasicRequestInfo(eid)
-    val activeMissions = fetchActiveMissions(basicRequestInfo)
+    var activeMissions = fetchActiveMissions(basicRequestInfo)
     val backup = fetchBackup(basicRequestInfo)
 
-    var fuelingMissions: List<MissionInfo> = emptyList()
     val fuelingMission = backup.artifactsDb.fuelingMission
 
     fuelingMission?.let {
-        fuelingMissions = fuelingMissions + fuelingMission
+        if (fuelingMission.capacity > 0) {
+            activeMissions = activeMissions + fuelingMission
+        }
     }
 
-    return MissionData(activeMissions + fuelingMissions, backup.artifacts)
+    return MissionData(activeMissions, backup.artifacts)
 }
 
 fun getBasicRequestInfo(eid: String): BasicRequestInfo {
