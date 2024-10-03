@@ -22,8 +22,17 @@ class MissionWidgetUpdater {
 
             try {
                 if (prefEid.isNotBlank()) {
-                    val missionInfo = fetchData(prefEid)
-                    preferencesMissionData = formatMissionData(missionInfo)
+                    // Only make an api call if:
+                    // preferencesMissionData is has less than 3 active missions, meaning all active missions haven't been saved
+                    // preferencesMissionData has complete missions, meaning we need to fetch new active missions
+                    // preferencesShowFuelingShip is enabled, meaning we want fresh data every time
+                    if (numOfActiveMissions(preferencesMissionData) < 3 || anyMissionsComplete(
+                            preferencesMissionData
+                        ) || prefShowFuelingShip
+                    ) {
+                        val missionInfo = fetchData(prefEid)
+                        preferencesMissionData = formatMissionData(missionInfo)
+                    }
 
                     preferences.saveMissionInfo(preferencesMissionData)
                     MissionWidgetDataStore().setMissionInfo(context, preferencesMissionData)
