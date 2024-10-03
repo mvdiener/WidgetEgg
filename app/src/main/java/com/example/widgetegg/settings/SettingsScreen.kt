@@ -41,6 +41,7 @@ fun SettingsScreen(navController: NavController) {
         settingsViewModel.updateUseAbsoluteTime(preferences.getUseAbsoluteTime())
         settingsViewModel.updateShowTargetArtifactSmall(preferences.getTargetArtifactSmall())
         settingsViewModel.updateShowFuelingShip(preferences.getShowFuelingShip())
+        settingsViewModel.updateOpenEggInc(preferences.getOpenEggInc())
     }
 
     Column(
@@ -70,6 +71,7 @@ fun SettingsScreen(navController: NavController) {
         AbsoluteTimeRow(settingsViewModel)
         TargetArtifactRow(settingsViewModel)
         ShowFuelingShipRow(settingsViewModel)
+        OpenEggIncRow(settingsViewModel)
     }
 }
 
@@ -162,6 +164,69 @@ fun ShowFuelingShipRow(settingsViewModel: SettingsViewModel) {
                 settingsViewModel.updateShowFuelingShip(!settingsViewModel.showFuelingShip)
             }
         )
+    }
+}
+
+@Composable
+fun OpenEggIncRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Open egg inc")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Open egg inc info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowOpenEggIncDialog(true)
+                    }
+            )
+            OpenEggIncDialog(settingsViewModel)
+        }
+
+        Switch(
+            checked = settingsViewModel.openEggInc,
+            onCheckedChange = {
+                settingsViewModel.updateOpenEggInc(!settingsViewModel.openEggInc)
+            }
+        )
+    }
+}
+
+@Composable
+fun OpenEggIncDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showOpenEggIncDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowOpenEggIncDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                    """
+Tapping the widget will open Egg, Inc. instead of manually refreshing the displayed missions.
+                        
+Automatic widget updates every 15 minutes will still happen independent of this setting.
+                    """
+                )
+            }
+        }
     }
 }
 

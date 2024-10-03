@@ -16,6 +16,7 @@ data object MissionWidgetDataStorePreferencesKeys {
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("widgetUseAbsoluteTime")
     val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("widgetTargetArtifactSmall")
     val SHOW_FUELING_SHIP = booleanPreferencesKey("widgetShowFuelingShip")
+    val OPEN_EGG_INC = booleanPreferencesKey("widgetOpenEggInc")
 }
 
 class MissionWidgetDataStore {
@@ -79,6 +80,18 @@ class MissionWidgetDataStore {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] =
                         showFuelingShip
+                }
+            }
+
+        MissionWidget().updateAll(context)
+    }
+
+    suspend fun setOpenEggInc(context: Context, openEggInc: Boolean) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] =
+                        openEggInc
                 }
             }
 
