@@ -39,4 +39,8 @@
         </receiver>
     </application>
 
+    <queries>
+        <package android:name="com.auxbrain.egginc" />
+    </queries>
+
 </manifest>

@@ -71,4 +71,26 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             MissionWidgetDataStore().setShowFuelingShip(context, input)
         }
     }
+
+    var openEggInc by mutableStateOf(false)
+        private set
+
+    fun updateOpenEggInc(input: Boolean) {
+        openEggInc = input
+        runBlocking {
+            preferences.saveOpenEggInc(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setOpenEggInc(context, input)
+        }
+    }
+
+    var showOpenEggIncDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowOpenEggIncDialog(input: Boolean) {
+        showOpenEggIncDialog = input
+    }
 }

@@ -27,6 +27,7 @@ class PreferencesDatastore(context: Context) {
         private val TARGET_ARTIFACT_MEDIUM = booleanPreferencesKey("targetArtifactMedium")
         private val SHOW_FUELING_SHIP = booleanPreferencesKey("showFuelingShip")
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
+        private val OPEN_EGG_INC = booleanPreferencesKey("openEggInc")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
@@ -35,7 +36,8 @@ class PreferencesDatastore(context: Context) {
             TARGET_ARTIFACT_SMALL,
             TARGET_ARTIFACT_MEDIUM,
             SHOW_FUELING_SHIP,
-            SHOW_TANK_LEVELS
+            SHOW_TANK_LEVELS,
+            OPEN_EGG_INC
         )
     }
 
@@ -124,6 +126,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveShowTankLevels(showTankLevels: Boolean) {
         dataStore.edit {
             it[SHOW_TANK_LEVELS] = showTankLevels
+        }
+    }
+
+    suspend fun getOpenEggInc() = dataStore.data.map {
+        it[OPEN_EGG_INC] ?: false
+    }.first()
+
+    suspend fun saveOpenEggInc(openEggInc: Boolean) {
+        dataStore.edit {
+            it[OPEN_EGG_INC] = openEggInc
         }
     }
 

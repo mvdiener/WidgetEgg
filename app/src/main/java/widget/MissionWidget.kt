@@ -1,6 +1,8 @@
 package widget
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
@@ -60,6 +62,8 @@ class MissionWidget : GlanceAppWidget() {
                 state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] ?: false
             val showFuelingShip =
                 state[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] ?: false
+            val openEggInc =
+                state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
 
             Column(
                 verticalAlignment = Alignment.Bottom,
@@ -68,7 +72,16 @@ class MissionWidget : GlanceAppWidget() {
                     .fillMaxSize()
                     .background(Color(0xff181818))
                     .clickable {
-                        MissionWidgetUpdater().updateMissions(context)
+                        if (openEggInc) {
+                            val packageManager: PackageManager = context.packageManager
+                            val launchIntent: Intent? =
+                                packageManager.getLaunchIntentForPackage("com.auxbrain.egginc")
+                            if (launchIntent != null) {
+                                context.startActivity(launchIntent)
+                            }
+                        } else {
+                            MissionWidgetUpdater().updateMissions(context)
+                        }
                     }
             ) {
                 val assetManager = context.assets
