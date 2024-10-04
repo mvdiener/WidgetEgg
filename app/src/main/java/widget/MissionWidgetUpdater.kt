@@ -3,14 +3,16 @@ package widget
 import android.content.Context
 import api.fetchData
 import data.MissionInfoEntry
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tools.formatMissionData
 import user.preferences.PreferencesDatastore
 import java.time.Instant
 
 class MissionWidgetUpdater {
     fun updateMissions(context: Context) {
-        runBlocking {
+        CoroutineScope(context = Dispatchers.IO).launch {
             val preferences = PreferencesDatastore(context)
             var preferencesMissionData = preferences.getMissionInfo()
 
@@ -47,7 +49,7 @@ class MissionWidgetUpdater {
                     MissionWidgetDataStore().setOpenEggInc(context, prefOpenEggInc)
                 }
             } catch (e: Exception) {
-                throw e
+                println("Error was here $e")
             }
         }
     }
