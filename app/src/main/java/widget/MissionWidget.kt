@@ -44,11 +44,6 @@ class MissionWidget : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        // Call the updater on widget creation to put existing data into widget state
-        // This is a hacky way to do this, but it works... for now
-        // The ideal way to do this is to have all widgets read from the same state file
-        // using a custom glanceStateDefinition, but I have not been able to make that work.
-        MissionWidgetUpdater().updateMissions(context)
         provideContent {
             val state = currentState<Preferences>()
             val prefEid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
@@ -64,6 +59,12 @@ class MissionWidget : GlanceAppWidget() {
                 state[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] ?: false
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
+
+            if (prefEid.isBlank()) {
+                // If EID is blank, could either mean state is not initialized or user is not logged in
+                // Attempt to load state in case it is needed, otherwise login composable will show
+                MissionWidgetUpdater().updateMissions(context)
+            }
 
             Column(
                 verticalAlignment = Alignment.Bottom,
@@ -85,9 +86,7 @@ class MissionWidget : GlanceAppWidget() {
                     }
             ) {
                 val assetManager = context.assets
-                if (prefEid.isBlank()) {
-                    LoggedOutContent(assetManager)
-                } else if (preferencesMissionData.isEmpty()) {
+                if (prefEid.isBlank() || preferencesMissionData.isEmpty()) {
                     NoMissionsContent(assetManager)
                 } else {
                     Row(
@@ -129,22 +128,6 @@ fun LogoContent(assetManager: AssetManager) {
 }
 
 @Composable
-fun LoggedOutContent(assetManager: AssetManager) {
-    LogoContent(assetManager)
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Please log in!",
-            style = TextStyle(color = ColorProvider(Color.White)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
-    }
-}
-
-@Composable
 fun NoMissionsContent(assetManager: AssetManager) {
     LogoContent(assetManager)
     Column(
@@ -153,7 +136,7 @@ fun NoMissionsContent(assetManager: AssetManager) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Loading mission data...",
+            text = "Waiting for mission data...",
             style = TextStyle(color = ColorProvider(Color.White)),
             modifier = GlanceModifier.padding(top = 5.dp)
         )
