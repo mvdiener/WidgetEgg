@@ -24,6 +24,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <receiver
             android:name="widget.MissionWidgetReceiver"
             android:enabled="true"
@@ -33,9 +34,19 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/mission_widget">
+                android:resource="@xml/mission_widget_normal" />
+        </receiver>
 
-            </meta-data>
+        <receiver
+            android:name="widget.MissionWidgetMinimalReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/mission_widget_minimal" />
         </receiver>
     </application>
 

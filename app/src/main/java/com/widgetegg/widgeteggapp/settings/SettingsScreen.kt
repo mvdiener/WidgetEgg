@@ -220,7 +220,7 @@ fun OpenEggIncDialog(settingsViewModel: SettingsViewModel) {
                 Text(
                     text =
                     """
-Tapping the widget will open Egg, Inc. instead of manually refreshing the displayed missions.
+Tapping any widget will open Egg, Inc. instead of manually refreshing the displayed missions.
                         
 Automatic widget updates every 15 minutes will still happen independent of this setting.
                     """

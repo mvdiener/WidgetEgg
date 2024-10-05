@@ -8,8 +8,6 @@ import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
@@ -19,13 +17,11 @@ import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
-import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
-import androidx.glance.layout.absolutePadding
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
@@ -35,16 +31,14 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.MissionInfoEntry
-import data.getImageFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.createCircularProgressBarBitmap
-import tools.getMissionDurationRemaining
 import tools.getMissionPercentComplete
 import tools.getShipName
 
-class MissionWidget : GlanceAppWidget() {
+class MissionWidgetMinimal : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -55,12 +49,6 @@ class MissionWidget : GlanceAppWidget() {
                 MissionWidgetDataStore().decodeMissionInfo(
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
-            val useAbsoluteTime =
-                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
-            val showTargetArtifact =
-                state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] ?: false
-            val showFuelingShip =
-                state[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] ?: false
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
 
@@ -75,11 +63,10 @@ class MissionWidget : GlanceAppWidget() {
             }
 
             Column(
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(Color(0xff181818))
                     .clickable {
                         if (openEggInc) {
                             val packageManager: PackageManager = context.packageManager
@@ -95,24 +82,19 @@ class MissionWidget : GlanceAppWidget() {
             ) {
                 val assetManager = context.assets
                 if (prefEid.isBlank() || preferencesMissionData.isEmpty()) {
-                    NoMissionsContent(assetManager)
+                    NoMissionsContentMinimal(assetManager)
                 } else {
-                    Row(
-                        modifier = GlanceModifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        preferencesMissionData.forEach { mission ->
-                            if (mission.identifier.isBlank() && !showFuelingShip) return@forEach
-                            Box(
-                                modifier = GlanceModifier.defaultWeight().padding(bottom = 3.dp),
-                                contentAlignment = Alignment.TopCenter
-                            ) {
-                                MissionProgress(
+                    val missionsChunked = preferencesMissionData.chunked(2)
+                    missionsChunked.forEach { missionGroup ->
+                        Row(
+                            modifier = GlanceModifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            missionGroup.forEach { mission ->
+                                MissionProgressMinimal(
                                     assetManager,
-                                    mission,
-                                    useAbsoluteTime,
-                                    showTargetArtifact
+                                    mission
                                 )
                             }
                         }
@@ -124,25 +106,25 @@ class MissionWidget : GlanceAppWidget() {
 }
 
 @Composable
-fun LogoContent(assetManager: AssetManager) {
+fun LogoContentMinimal(assetManager: AssetManager) {
     val bitmapImage =
         BitmapFactory.decodeStream(assetManager.open("icons/logo-dark-mode.png"))
 
     Image(
         provider = ImageProvider(bitmapImage),
         contentDescription = "Empty Widget Logo",
-        modifier = GlanceModifier.size(60.dp)
+        modifier = GlanceModifier.size(40.dp)
     )
 }
 
 @Composable
-fun NoMissionsContent(assetManager: AssetManager) {
-    LogoContent(assetManager)
+fun NoMissionsContentMinimal(assetManager: AssetManager) {
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        LogoContentMinimal(assetManager)
         Text(
             text = "Waiting for mission data...",
             style = TextStyle(color = ColorProvider(Color.White)),
@@ -152,11 +134,9 @@ fun NoMissionsContent(assetManager: AssetManager) {
 }
 
 @Composable
-fun MissionProgress(
+fun MissionProgressMinimal(
     assetManager: AssetManager,
-    mission: MissionInfoEntry,
-    useAbsoluteTime: Boolean,
-    showTargetArtifact: Boolean
+    mission: MissionInfoEntry
 ) {
     val isFueling = mission.identifier.isBlank()
 
@@ -172,7 +152,7 @@ fun MissionProgress(
         }
 
     Box(
-        modifier = GlanceModifier.fillMaxSize().padding(bottom = 5.dp),
+        modifier = GlanceModifier.padding(2.dp),
         contentAlignment = Alignment.Center
     ) {
         val bitmap = createCircularProgressBarBitmap(
@@ -185,7 +165,7 @@ fun MissionProgress(
         Image(
             provider = ImageProvider(bitmap),
             contentDescription = "Circular Progress",
-            modifier = GlanceModifier.size(65.dp)
+            modifier = GlanceModifier.size(45.dp)
         )
 
         val shipName = getShipName(mission.shipId)
@@ -194,44 +174,7 @@ fun MissionProgress(
         Image(
             provider = ImageProvider(shipBitmap),
             contentDescription = "Ship Icon",
-            modifier = GlanceModifier.size(35.dp)
-        )
-
-        val artifactName = getImageFromAfxId(mission.targetArtifact)
-        if (showTargetArtifact && artifactName.isNotBlank()) {
-            val artifactBitmap =
-                BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
-            Image(
-                provider = ImageProvider(artifactBitmap),
-                contentDescription = "Target Artifact",
-                modifier = GlanceModifier.size(85.dp)
-                    .absolutePadding(bottom = 65.dp, left = 60.dp)
-            )
-        }
-    }
-
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        Text(
-            text =
-            if (isFueling) {
-                "Fueling"
-            } else {
-                getMissionDurationRemaining(
-                    mission.secondsRemaining,
-                    mission.date,
-                    useAbsoluteTime
-                )
-            },
-            style = TextStyle(
-                color = ColorProvider(Color.White),
-                fontSize = TextUnit(12f, TextUnitType.Sp)
-            ),
-            modifier = GlanceModifier.padding(bottom = 2.dp)
+            modifier = GlanceModifier.size(25.dp)
         )
     }
-
 }

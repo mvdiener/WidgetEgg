@@ -21,26 +21,34 @@ data object MissionWidgetDataStorePreferencesKeys {
 
 class MissionWidgetDataStore {
     suspend fun setEid(context: Context, eid: String) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.EID] = eid
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     suspend fun setMissionInfo(context: Context, missionInfo: List<MissionInfoEntry>) {
         val missionString = Json.encodeToString(missionInfo)
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] = missionString
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     fun decodeMissionInfo(missionJson: String): List<MissionInfoEntry> {
@@ -52,18 +60,18 @@ class MissionWidgetDataStore {
     }
 
     suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = useAbsoluteTime
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     suspend fun setTargetArtifactSmall(context: Context, showTargetArtifactSmall: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] =
@@ -71,11 +79,11 @@ class MissionWidgetDataStore {
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     suspend fun setShowFuelingShip(context: Context, showFuelingShip: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] =
@@ -83,11 +91,15 @@ class MissionWidgetDataStore {
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     suspend fun setOpenEggInc(context: Context, openEggInc: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] =
@@ -95,17 +107,26 @@ class MissionWidgetDataStore {
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     suspend fun clearAllData(context: Context) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs.clear()
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
+    }
+
+    private suspend fun updateAllWidgets(context: Context) {
+        MissionWidgetNormal().updateAll(context)
+        MissionWidgetMinimal().updateAll(context)
     }
 }
