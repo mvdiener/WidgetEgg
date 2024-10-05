@@ -42,6 +42,28 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showAbsoluteTimeDialog = input
     }
 
+    var openEggInc by mutableStateOf(false)
+        private set
+
+    fun updateOpenEggInc(input: Boolean) {
+        openEggInc = input
+        runBlocking {
+            preferences.saveOpenEggInc(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setOpenEggInc(context, input)
+        }
+    }
+
+    var showOpenEggIncDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowOpenEggIncDialog(input: Boolean) {
+        showOpenEggIncDialog = input
+    }
+
     var showTargetArtifactNormalWidget by mutableStateOf(false)
         private set
 
@@ -72,25 +94,40 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    var openEggInc by mutableStateOf(false)
+    var showTargetArtifactLargeWidget by mutableStateOf(false)
         private set
 
-    fun updateOpenEggInc(input: Boolean) {
-        openEggInc = input
+    fun updateShowTargetArtifactLargeWidget(input: Boolean) {
+        showTargetArtifactLargeWidget = input
         runBlocking {
-            preferences.saveOpenEggInc(input)
+            preferences.saveTargetArtifactLargeWidget(input)
         }
 
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setOpenEggInc(context, input)
+            MissionWidgetDataStore().setTargetArtifactLargeWidget(context, input)
         }
     }
 
-    var showOpenEggIncDialog by mutableStateOf(false)
+    var showTankLevels by mutableStateOf(false)
         private set
 
-    fun updateShowOpenEggIncDialog(input: Boolean) {
-        showOpenEggIncDialog = input
+    fun updateShowTankLevels(input: Boolean) {
+        showTankLevels = input
+        runBlocking {
+            preferences.saveShowTankLevels(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setShowTankLevels(context, input)
+        }
+    }
+
+    var showTankLevelsDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowTankLevelsDialog(input: Boolean) {
+        showTankLevelsDialog = input
     }
 }

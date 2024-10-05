@@ -46,7 +46,6 @@ import tools.getShipName
 import widget.MissionWidgetDataStore
 import widget.MissionWidgetDataStorePreferencesKeys
 import widget.MissionWidgetUpdater
-import widget.normal.NoMissionsContent
 
 class MissionWidgetLarge : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -63,8 +62,8 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
             val showTargetArtifact =
                 state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] ?: false
-            val showFuelingShip =
-                state[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] ?: false
+            val showTankLevels =
+                state[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] ?: false
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
 
@@ -107,7 +106,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         preferencesMissionData.forEach { mission ->
-                            if (mission.identifier.isBlank() && !showFuelingShip) return@forEach
+                            if (mission.identifier.isBlank() && !showTankLevels) return@forEach
                             Box(
                                 modifier = GlanceModifier.defaultWeight().padding(bottom = 3.dp),
                                 contentAlignment = Alignment.TopCenter

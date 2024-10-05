@@ -83,6 +83,24 @@ class MissionWidgetDataStore {
         updateAllWidgets(context)
     }
 
+    suspend fun setOpenEggInc(context: Context, openEggInc: Boolean) {
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] =
+                        openEggInc
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
     suspend fun setTargetArtifactNormalWidget(
         context: Context,
         showTargetArtifactNormalWidget: Boolean
@@ -110,18 +128,27 @@ class MissionWidgetDataStore {
         updateAllWidgets(context)
     }
 
-    suspend fun setOpenEggInc(context: Context, openEggInc: Boolean) {
-        val missionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
-        val missionWidgetMinimalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
-        val missionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
+    suspend fun setTargetArtifactLargeWidget(
+        context: Context,
+        showTargetArtifactLargeWidget: Boolean
+    ) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] =
-                        openEggInc
+                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] =
+                        showTargetArtifactLargeWidget
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setShowTankLevels(context: Context, showTankLevels: Boolean) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] =
+                        showTankLevels
                 }
             }
 
