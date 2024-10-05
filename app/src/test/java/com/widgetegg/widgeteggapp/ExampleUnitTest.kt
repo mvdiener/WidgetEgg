@@ -1,4 +1,4 @@
-package com.example.widgetegg
+package com.widgetegg.widgeteggapp
 
 import org.junit.Test
 

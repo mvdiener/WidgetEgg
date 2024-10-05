@@ -1,4 +1,4 @@
-package com.example.widgetegg.settings
+package com.widgetegg.widgeteggapp.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.widgetegg.Routes
+import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
 

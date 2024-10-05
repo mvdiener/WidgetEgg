@@ -1,4 +1,4 @@
-package com.example.widgetegg
+package com.widgetegg.widgeteggapp
 
 object Routes {
     var mainScreen = "main_screen"

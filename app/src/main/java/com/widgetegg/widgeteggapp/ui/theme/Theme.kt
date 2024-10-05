@@ -1,6 +1,5 @@
-package com.example.widgetegg.ui.theme
+package com.widgetegg.widgeteggapp.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

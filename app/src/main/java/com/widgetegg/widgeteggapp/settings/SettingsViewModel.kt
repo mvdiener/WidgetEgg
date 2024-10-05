@@ -1,4 +1,4 @@
-package com.example.widgetegg.settings
+package com.widgetegg.widgeteggapp.settings
 
 import android.app.Application
 import androidx.compose.runtime.getValue

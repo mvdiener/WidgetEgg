@@ -1,4 +1,4 @@
-package com.example.widgetegg.main
+package com.widgetegg.widgeteggapp.main
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.widgetegg.Routes
+import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
 

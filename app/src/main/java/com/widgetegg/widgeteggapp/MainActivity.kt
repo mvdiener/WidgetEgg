@@ -1,4 +1,4 @@
-package com.example.widgetegg
+package com.widgetegg.widgeteggapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,9 +8,9 @@ import androidx.compose.material3.Surface
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.widgetegg.main.MainScreen
-import com.example.widgetegg.settings.SettingsScreen
-import com.example.widgetegg.ui.theme.WidgetEggTheme
+import com.widgetegg.widgeteggapp.main.MainScreen
+import com.widgetegg.widgeteggapp.settings.SettingsScreen
+import com.widgetegg.widgeteggapp.ui.theme.WidgetEggTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

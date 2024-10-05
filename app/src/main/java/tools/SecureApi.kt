@@ -1,6 +1,6 @@
 package tools
 
-import com.example.widgetegg.BuildConfig
+import com.widgetegg.widgeteggapp.BuildConfig
 import ei.Ei.AuthenticatedMessage
 import ei.Ei.BasicRequestInfo
 import java.security.MessageDigest
