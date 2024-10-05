@@ -39,7 +39,7 @@ fun SettingsScreen(navController: NavController) {
     runBlocking {
         val preferences = PreferencesDatastore(context)
         settingsViewModel.updateUseAbsoluteTime(preferences.getUseAbsoluteTime())
-        settingsViewModel.updateShowTargetArtifactSmall(preferences.getTargetArtifactSmall())
+        settingsViewModel.updateShowTargetArtifactNormalWidget(preferences.getTargetArtifactNormalWidget())
         settingsViewModel.updateShowFuelingShip(preferences.getShowFuelingShip())
         settingsViewModel.updateOpenEggInc(preferences.getOpenEggInc())
     }
@@ -142,9 +142,9 @@ fun TargetArtifactRow(settingsViewModel: SettingsViewModel) {
     ) {
         Text(text = "Show target artifact")
         Switch(
-            checked = settingsViewModel.showTargetArtifactSmall,
+            checked = settingsViewModel.showTargetArtifactNormalWidget,
             onCheckedChange = {
-                settingsViewModel.updateShowTargetArtifactSmall(!settingsViewModel.showTargetArtifactSmall)
+                settingsViewModel.updateShowTargetArtifactNormalWidget(!settingsViewModel.showTargetArtifactNormalWidget)
             }
         )
     }

@@ -9,13 +9,18 @@ import androidx.glance.appwidget.updateAll
 import data.MissionInfoEntry
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import widget.large.MissionWidgetLarge
+import widget.minimal.MissionWidgetMinimal
+import widget.normal.MissionWidgetNormal
 
 data object MissionWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")
     val MISSION_INFO = stringPreferencesKey("widgetMissionInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("widgetUseAbsoluteTime")
-    val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("widgetTargetArtifactSmall")
+    val TARGET_ARTIFACT_NORMAL_WIDGET = booleanPreferencesKey("widgetNormalTargetArtifact")
+    val TARGET_ARTIFACT_LARGE_WIDGET = booleanPreferencesKey("widgetLargeTargetArtifact")
     val SHOW_FUELING_SHIP = booleanPreferencesKey("widgetShowFuelingShip")
+    val SHOW_TANK_LEVELS = booleanPreferencesKey("widgetShowTankLevels")
     val OPEN_EGG_INC = booleanPreferencesKey("widgetOpenEggInc")
 }
 
@@ -25,7 +30,9 @@ class MissionWidgetDataStore {
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
         val missionWidgetMinimalIds =
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
-        (missionWidgetNormalIds + missionWidgetMinimalIds)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.EID] = eid
@@ -41,7 +48,9 @@ class MissionWidgetDataStore {
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
         val missionWidgetMinimalIds =
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
-        (missionWidgetNormalIds + missionWidgetMinimalIds)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] = missionString
@@ -60,7 +69,11 @@ class MissionWidgetDataStore {
     }
 
     suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = useAbsoluteTime
@@ -70,12 +83,15 @@ class MissionWidgetDataStore {
         updateAllWidgets(context)
     }
 
-    suspend fun setTargetArtifactSmall(context: Context, showTargetArtifactSmall: Boolean) {
+    suspend fun setTargetArtifactNormalWidget(
+        context: Context,
+        showTargetArtifactNormalWidget: Boolean
+    ) {
         GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] =
-                        showTargetArtifactSmall
+                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_NORMAL_WIDGET] =
+                        showTargetArtifactNormalWidget
                 }
             }
 
@@ -99,7 +115,9 @@ class MissionWidgetDataStore {
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
         val missionWidgetMinimalIds =
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
-        (missionWidgetNormalIds + missionWidgetMinimalIds)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] =
@@ -128,5 +146,6 @@ class MissionWidgetDataStore {
     private suspend fun updateAllWidgets(context: Context) {
         MissionWidgetNormal().updateAll(context)
         MissionWidgetMinimal().updateAll(context)
+        MissionWidgetLarge().updateAll(context)
     }
 }

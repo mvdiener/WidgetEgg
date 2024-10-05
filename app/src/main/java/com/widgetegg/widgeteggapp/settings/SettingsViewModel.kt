@@ -42,18 +42,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showAbsoluteTimeDialog = input
     }
 
-    var showTargetArtifactSmall by mutableStateOf(false)
+    var showTargetArtifactNormalWidget by mutableStateOf(false)
         private set
 
-    fun updateShowTargetArtifactSmall(input: Boolean) {
-        showTargetArtifactSmall = input
+    fun updateShowTargetArtifactNormalWidget(input: Boolean) {
+        showTargetArtifactNormalWidget = input
         runBlocking {
-            preferences.saveTargetArtifactSmall(input)
+            preferences.saveTargetArtifactNormalWidget(input)
         }
 
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setTargetArtifactSmall(context, input)
+            MissionWidgetDataStore().setTargetArtifactNormalWidget(context, input)
         }
     }
 

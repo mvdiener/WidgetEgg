@@ -8,6 +8,7 @@ import androidx.work.BackoffPolicy
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import widget.normal.MissionWidgetNormal
 import java.util.concurrent.TimeUnit
 
 open class MissionWidgetReceiver : GlanceAppWidgetReceiver() {

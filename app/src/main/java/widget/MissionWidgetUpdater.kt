@@ -16,7 +16,7 @@ class MissionWidgetUpdater {
 
             val prefEid = preferences.getEid()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
-            val prefTargetArtifactSmall = preferences.getTargetArtifactSmall()
+            val prefTargetArtifactNormalWidget = preferences.getTargetArtifactNormalWidget()
             val prefShowFuelingShip = preferences.getShowFuelingShip()
             val prefOpenEggInc = preferences.getOpenEggInc()
 
@@ -39,9 +39,9 @@ class MissionWidgetUpdater {
 
                     MissionWidgetDataStore().setEid(context, prefEid)
                     MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
-                    MissionWidgetDataStore().setTargetArtifactSmall(
+                    MissionWidgetDataStore().setTargetArtifactNormalWidget(
                         context,
-                        prefTargetArtifactSmall
+                        prefTargetArtifactNormalWidget
                     )
                     MissionWidgetDataStore().setShowFuelingShip(context, prefShowFuelingShip)
                     MissionWidgetDataStore().setOpenEggInc(context, prefOpenEggInc)
