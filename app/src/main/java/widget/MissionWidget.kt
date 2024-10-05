@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -35,6 +36,9 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.MissionInfoEntry
 import data.getImageFromAfxId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import tools.createCircularProgressBarBitmap
 import tools.getMissionDurationRemaining
 import tools.getMissionPercentComplete
@@ -63,7 +67,11 @@ class MissionWidget : GlanceAppWidget() {
             if (prefEid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
-                MissionWidgetUpdater().updateMissions(context)
+                LaunchedEffect(true) {
+                    CoroutineScope(context = Dispatchers.IO).launch {
+                        MissionWidgetUpdater().updateMissions(context)
+                    }
+                }
             }
 
             Column(
