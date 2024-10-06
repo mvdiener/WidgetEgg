@@ -26,6 +26,7 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.absolutePadding
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
@@ -107,9 +108,11 @@ class MissionWidgetNormal : GlanceAppWidget() {
                     ) {
                         preferencesMissionData.forEach { mission ->
                             if (mission.identifier.isBlank() && !showFuelingShip) return@forEach
-                            Box(
-                                modifier = GlanceModifier.defaultWeight().padding(bottom = 3.dp),
-                                contentAlignment = Alignment.TopCenter
+                            Column(
+                                modifier = GlanceModifier.fillMaxHeight().defaultWeight()
+                                    .padding(vertical = 5.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 MissionProgress(
                                     assetManager,
@@ -175,7 +178,7 @@ fun MissionProgress(
         }
 
     Box(
-        modifier = GlanceModifier.fillMaxSize().padding(bottom = 5.dp),
+        modifier = GlanceModifier.fillMaxWidth().padding(bottom = 5.dp),
         contentAlignment = Alignment.Center
     ) {
         val bitmap = createCircularProgressBarBitmap(
@@ -214,9 +217,9 @@ fun MissionProgress(
     }
 
     Column(
-        modifier = GlanceModifier.fillMaxSize(),
+        modifier = GlanceModifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.Bottom
+        verticalAlignment = Alignment.Top
     ) {
         Text(
             text =
@@ -231,9 +234,8 @@ fun MissionProgress(
             },
             style = TextStyle(
                 color = ColorProvider(Color.White),
-                fontSize = TextUnit(12f, TextUnitType.Sp)
-            ),
-            modifier = GlanceModifier.padding(bottom = 2.dp)
+                fontSize = TextUnit(13f, TextUnitType.Sp)
+            )
         )
     }
 }
