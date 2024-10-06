@@ -10,7 +10,7 @@ import api.fetchData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.formatMissionData
-import tools.formatTankFuels
+import tools.formatTankInfo
 import user.preferences.PreferencesDatastore
 import widget.MissionWidgetDataStore
 
@@ -105,11 +105,11 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 if (prefEid.isNotBlank()) {
                     val missionResult = fetchData(prefEid)
                     val formattedMissionData = formatMissionData(missionResult)
-                    val formattedTankFuels = formatTankFuels(missionResult)
+                    val formattedTankInfo = formatTankInfo(missionResult)
                     preferences.saveMissionInfo(formattedMissionData)
-                    preferences.saveTankFuels(formattedTankFuels)
+                    preferences.saveTankInfo(formattedTankInfo)
                     MissionWidgetDataStore().setMissionInfo(context, formattedMissionData)
-                    MissionWidgetDataStore().setTankFuels(context, formattedTankFuels)
+                    MissionWidgetDataStore().setTankInfo(context, formattedTankInfo)
                 }
             } catch (_: Exception) {
             }

@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.MissionInfoEntry
-import data.TankLevelEntry
+import data.TankInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
@@ -84,21 +84,21 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
-    suspend fun getTankFuels(): List<TankLevelEntry> {
+    suspend fun getTankInfo(): TankInfo {
         return dataStore.data.map {
             it[TANK_INFO]?.let { tankJson ->
                 try {
-                    Json.decodeFromString<List<TankLevelEntry>>(tankJson)
+                    Json.decodeFromString<TankInfo>(tankJson)
                 } catch (e: Exception) {
-                    emptyList()
+                    TankInfo()
                 }
-            } ?: emptyList()
+            } ?: TankInfo()
         }.first()
     }
 
-    suspend fun saveTankFuels(tankFuels: List<TankLevelEntry>) {
+    suspend fun saveTankInfo(tankInfo: TankInfo) {
         dataStore.edit {
-            it[TANK_INFO] = Json.encodeToString(tankFuels)
+            it[TANK_INFO] = Json.encodeToString(tankInfo)
         }
     }
 

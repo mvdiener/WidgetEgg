@@ -5,8 +5,10 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import data.MissionData
 import data.ALL_SHIPS
+import data.FuelLevelInfo
 import data.MissionInfoEntry
-import data.TankLevelEntry
+import data.TANK_SIZES
+import data.TankInfo
 import ei.Ei.Egg
 import java.time.Instant
 import java.time.LocalDateTime
@@ -80,13 +82,17 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
     return formattedMissions
 }
 
-fun formatTankFuels(missionInfo: MissionData): List<TankLevelEntry> {
-    var formattedTankLevels: List<TankLevelEntry> = emptyList()
+fun getTankCapacity(tankLevel: Int): Long {
+    return TANK_SIZES[tankLevel]
+}
+
+fun formatTankInfo(missionInfo: MissionData): TankInfo {
+    var formattedFuelLevels: List<FuelLevelInfo> = emptyList()
 
     missionInfo.artifacts.tankFuelsList.forEachIndexed { index, fuel ->
         if (fuel > 0) {
-            formattedTankLevels = formattedTankLevels.plus(
-                TankLevelEntry(
+            formattedFuelLevels = formattedFuelLevels.plus(
+                FuelLevelInfo(
                     eggId = index + 1,
                     fuelQuantity = fuel
                 )
@@ -94,7 +100,10 @@ fun formatTankFuels(missionInfo: MissionData): List<TankLevelEntry> {
         }
     }
 
-    return formattedTankLevels
+    return TankInfo(
+        level = missionInfo.artifacts.tankLevel,
+        fuelLevels = formattedFuelLevels
+    )
 }
 
 // Used to help show fuel tanks in the large widget

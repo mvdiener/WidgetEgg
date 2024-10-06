@@ -5,7 +5,7 @@ import api.fetchData
 import data.MissionInfoEntry
 import kotlinx.coroutines.runBlocking
 import tools.formatMissionData
-import tools.formatTankFuels
+import tools.formatTankInfo
 import user.preferences.PreferencesDatastore
 import java.time.Instant
 
@@ -14,7 +14,7 @@ class MissionWidgetUpdater {
         runBlocking {
             val preferences = PreferencesDatastore(context)
             var preferencesMissionData = preferences.getMissionInfo()
-            var preferencesTankFuels = preferences.getTankFuels()
+            var preferencesTankInfo = preferences.getTankInfo()
 
             val prefEid = preferences.getEid()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
@@ -35,7 +35,7 @@ class MissionWidgetUpdater {
                     ) {
                         val missionInfo = fetchData(prefEid)
                         preferencesMissionData = formatMissionData(missionInfo)
-                        preferencesTankFuels = formatTankFuels(missionInfo)
+                        preferencesTankInfo = formatTankInfo(missionInfo)
                     }
 
                     // Mission data and tank fuels need to get saved back to preferences because they are changing regularly
@@ -43,9 +43,9 @@ class MissionWidgetUpdater {
                     // If these items aren't updated in preferences, then a new widget will display old/outdated info
                     // Figuring out how to get all widgets and preferences to read from the same data store might fix this
                     preferences.saveMissionInfo(preferencesMissionData)
-                    preferences.saveTankFuels(preferencesTankFuels)
+                    preferences.saveTankInfo(preferencesTankInfo)
                     MissionWidgetDataStore().setMissionInfo(context, preferencesMissionData)
-                    MissionWidgetDataStore().setTankFuels(context, preferencesTankFuels)
+                    MissionWidgetDataStore().setTankInfo(context, preferencesTankInfo)
 
                     MissionWidgetDataStore().setEid(context, prefEid)
                     MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
