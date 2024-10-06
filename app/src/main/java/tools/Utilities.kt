@@ -204,3 +204,60 @@ fun getMissionColor(durationType: Int, isFueling: Boolean): Int {
         else -> android.graphics.Color.argb(fuelingAlpha, 255, 255, 255) //white
     }
 }
+
+fun getFuelPercentFilled(capacity: Long, fuelQuantity: Double): Float {
+    return fuelQuantity.toFloat() / capacity.toFloat()
+}
+
+fun getFuelAmount(fuelQuantity: Double): String {
+    var number = fuelQuantity
+    var unit = ""
+
+    if (number < 1000) {
+        return number.toInt().toString()
+    }
+
+    var units = arrayOf(
+        "k",
+        "M",
+        "B",
+        "T",
+        "Q",
+        "q",
+        "s",
+        "S",
+        "o",
+        "N",
+        "d",
+        "U",
+        "D",
+        "Td",
+        "qd",
+        "Qd",
+        "sd",
+        "Sd",
+        "Od",
+        "Nd",
+        "V",
+        "uV",
+        "dV",
+        "tV",
+        "qV",
+        "QV",
+        "sV",
+        "SV",
+        "OV",
+        "NV",
+        "tT"
+    )
+
+    while (number >= 1000) {
+        number /= 1000
+        unit = units.first()
+        units = units.drop(1).toTypedArray()
+    }
+
+    val formatted = String.format("%.3g", number)
+
+    return "$formatted$unit"
+}

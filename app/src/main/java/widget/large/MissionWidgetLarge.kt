@@ -16,6 +16,7 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
@@ -25,24 +26,29 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.MissionInfoEntry
-import data.TankLevelEntry
+import data.TankInfo
 import data.getImageFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.createCircularProgressBarBitmap
 import tools.getEggName
+import tools.getFuelAmount
+import tools.getFuelPercentFilled
 import tools.getMissionDurationRemaining
 import tools.getMissionPercentComplete
 import tools.getMissionsWithFuelTank
 import tools.getShipName
+import tools.getTankCapacity
 import widget.MissionWidgetDataStore
 import widget.MissionWidgetDataStorePreferencesKeys
 import widget.MissionWidgetUpdater
@@ -58,7 +64,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 MissionWidgetDataStore().decodeMissionInfo(
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
-            val tankFuels = MissionWidgetDataStore().decodeTankInfo(
+            val tankInfo = MissionWidgetDataStore().decodeTankInfo(
                 state[MissionWidgetDataStorePreferencesKeys.TANK_INFO] ?: ""
             )
             val useAbsoluteTime =
@@ -125,7 +131,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     if (mission.identifier == "fuelTankMission") {
-                                        FuelTankContent(tankFuels)
+                                        TankInfoContent(tankInfo, assetManager)
                                     } else {
                                         MissionProgressLarge(
                                             assetManager,
@@ -306,15 +312,49 @@ fun TargetArtifactContent(artifactName: String, assetManager: AssetManager) {
 }
 
 @Composable
-fun FuelTankContent(tankFuels: List<TankLevelEntry>) {
-    if (tankFuels.isEmpty()) {
+fun TankInfoContent(tankInfo: TankInfo, assetManager: AssetManager) {
+    if (tankInfo.fuelLevels.isEmpty()) {
         Text(
             text = "Your tanks are empty!",
             style = TextStyle(color = ColorProvider(Color.White))
         )
     } else {
-        tankFuels.forEach { fuel ->
-            getEggName(fuel.eggId)
+        Column(
+            modifier = GlanceModifier.fillMaxWidth().padding(end = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val capacity = getTankCapacity(tankInfo.level)
+            tankInfo.fuelLevels.forEach { fuel ->
+                val eggName = getEggName(fuel.eggId)
+                val eggBitmap =
+                    BitmapFactory.decodeStream(assetManager.open("eggs/$eggName.png"))
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        provider = ImageProvider(eggBitmap),
+                        contentDescription = "Egg icon",
+                        modifier = GlanceModifier.size(20.dp)
+                    )
+                    LinearProgressIndicator(
+                        modifier = GlanceModifier.height(5.dp).width(100.dp)
+                            .padding(horizontal = 5.dp),
+                        progress = getFuelPercentFilled(capacity, fuel.fuelQuantity),
+                        color = ColorProvider(color = Color(0xff6bd55f)),
+                        backgroundColor = ColorProvider(color = Color(0xff464646))
+                    )
+                    Row(
+                        modifier = GlanceModifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            text = getFuelAmount(fuel.fuelQuantity),
+                            style = TextStyle(color = ColorProvider(Color.White))
+                        )
+                    }
+                }
+            }
         }
     }
 }
