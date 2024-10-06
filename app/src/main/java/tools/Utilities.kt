@@ -46,7 +46,11 @@ fun getMissionDurationRemaining(
                     "${days.toInt()}d ${hoursMinusDays.toInt()}hr"
                 }
             } else {
-                "${hours.toInt()}hr ${minutes.toInt()}min"
+                if (hours.toInt() == 0) {
+                    "${minutes.toInt()}min"
+                } else {
+                    "${hours.toInt()}hr ${minutes.toInt()}min"
+                }
             }
         }
     }

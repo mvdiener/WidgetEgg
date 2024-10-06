@@ -8,8 +8,6 @@ import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
@@ -25,8 +23,6 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
-import androidx.glance.layout.absolutePadding
-import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
@@ -104,14 +100,14 @@ class MissionWidgetLarge : GlanceAppWidget() {
                     val missionsChunked = preferencesMissionData.chunked(2)
                     missionsChunked.forEach { missionGroup ->
                         Row(
-                            modifier = GlanceModifier.fillMaxWidth(),
+                            modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             missionGroup.forEach { mission ->
                                 Row(
                                     modifier = GlanceModifier.defaultWeight()
-                                        .padding(horizontal = 3.dp),
+                                        .padding(start = 10.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     MissionProgressLarge(
@@ -179,20 +175,19 @@ fun MissionProgressLarge(
         }
 
     Box(
-        modifier = GlanceModifier.padding(5.dp),
         contentAlignment = Alignment.Center
     ) {
         val bitmap = createCircularProgressBarBitmap(
             percentRemaining,
             mission.durationType,
-            100,
+            150,
             isFueling
         )
 
         Image(
             provider = ImageProvider(bitmap),
             contentDescription = "Circular Progress",
-            modifier = GlanceModifier.size(95.dp)
+            modifier = GlanceModifier.size(80.dp)
         )
 
         val shipName = getShipName(mission.shipId)
@@ -203,51 +198,91 @@ fun MissionProgressLarge(
             contentDescription = "Ship Icon",
             modifier = GlanceModifier.size(55.dp)
         )
-
-        val artifactName = getImageFromAfxId(mission.targetArtifact)
-        if (showTargetArtifact && artifactName.isNotBlank()) {
-            val artifactBitmap =
-                BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
-            Image(
-                provider = ImageProvider(artifactBitmap),
-                contentDescription = "Target Artifact",
-                modifier = GlanceModifier.size(85.dp)
-                    .absolutePadding(bottom = 65.dp, left = 60.dp)
-            )
-        }
     }
+
+    val artifactName = getImageFromAfxId(mission.targetArtifact)
 
     Column(
-        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp),
+        modifier = GlanceModifier.fillMaxWidth().padding(end = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.End
     ) {
-        Text(text = "time", style = TextStyle(color = ColorProvider(Color.White)))
-        Text(text = "stars", style = TextStyle(color = ColorProvider(Color.White)))
-        Text(text = "cap", style = TextStyle(color = ColorProvider(Color.White)))
+        TimeRemainingContent(isFueling, useAbsoluteTime, mission)
+        MissionLevelContent(mission)
+        CapacityContent(mission, assetManager)
+        if (showTargetArtifact && artifactName.isNotBlank()) {
+            TargetArtifactContent(artifactName, assetManager)
+        }
     }
+}
 
-//    Column(
-//        modifier = GlanceModifier.fillMaxSize(),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalAlignment = Alignment.Bottom
-//    ) {
-//        Text(
-//            text =
-//            if (isFueling) {
-//                "Fueling"
-//            } else {
-//                getMissionDurationRemaining(
-//                    mission.secondsRemaining,
-//                    mission.date,
-//                    useAbsoluteTime
-//                )
-//            },
-//            style = TextStyle(
-//                color = ColorProvider(Color.White),
-//                fontSize = TextUnit(12f, TextUnitType.Sp)
-//            ),
-//            modifier = GlanceModifier.padding(bottom = 2.dp)
-//        )
-//    }
+@Composable
+fun TimeRemainingContent(isFueling: Boolean, useAbsoluteTime: Boolean, mission: MissionInfoEntry) {
+    Text(
+        text =
+        if (isFueling) {
+            "Fueling"
+        } else {
+            getMissionDurationRemaining(
+                mission.secondsRemaining,
+                mission.date,
+                useAbsoluteTime
+            )
+        },
+        style = TextStyle(
+            color = ColorProvider(Color.White),
+        )
+    )
+}
+
+@Composable
+fun MissionLevelContent(mission: MissionInfoEntry) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "${mission.shipLevel} ",
+            style = TextStyle(color = ColorProvider(Color.White))
+        )
+        Text(
+            text = "★",
+            style = TextStyle(color = ColorProvider(Color.Yellow))
+        )
+    }
+}
+
+@Composable
+fun CapacityContent(mission: MissionInfoEntry, assetManager: AssetManager) {
+    val crateBitmap =
+        BitmapFactory.decodeStream(assetManager.open("other/icon_afx_chest_3.png"))
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "${mission.capacity} ",
+            style = TextStyle(color = ColorProvider(Color.White))
+        )
+        Image(
+            provider = ImageProvider(crateBitmap),
+            contentDescription = "Artifact Container",
+            modifier = GlanceModifier.size(15.dp)
+        )
+    }
+}
+
+@Composable
+fun TargetArtifactContent(artifactName: String, assetManager: AssetManager) {
+    val artifactBitmap =
+        BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            provider = ImageProvider(artifactBitmap),
+            contentDescription = "Target Artifact",
+            modifier = GlanceModifier.size(20.dp)
+        )
+    }
 }

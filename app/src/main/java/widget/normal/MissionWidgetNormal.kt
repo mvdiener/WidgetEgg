@@ -184,7 +184,7 @@ fun MissionProgress(
         val bitmap = createCircularProgressBarBitmap(
             percentRemaining,
             mission.durationType,
-            100,
+            115,
             isFueling
         )
 
