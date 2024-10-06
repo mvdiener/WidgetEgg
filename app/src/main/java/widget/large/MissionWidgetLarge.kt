@@ -26,6 +26,7 @@ import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.absolutePadding
+import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
@@ -78,7 +79,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
             }
 
             Column(
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = GlanceModifier
                     .fillMaxSize()
@@ -100,23 +101,26 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 if (prefEid.isBlank() || preferencesMissionData.isEmpty()) {
                     NoMissionsContentLarge(assetManager)
                 } else {
-                    Row(
-                        modifier = GlanceModifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        preferencesMissionData.forEach { mission ->
-                            if (mission.identifier.isBlank() && !showTankLevels) return@forEach
-                            Box(
-                                modifier = GlanceModifier.defaultWeight().padding(bottom = 3.dp),
-                                contentAlignment = Alignment.TopCenter
-                            ) {
-                                MissionProgressLarge(
-                                    assetManager,
-                                    mission,
-                                    useAbsoluteTime,
-                                    showTargetArtifact
-                                )
+                    val missionsChunked = preferencesMissionData.chunked(2)
+                    missionsChunked.forEach { missionGroup ->
+                        Row(
+                            modifier = GlanceModifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            missionGroup.forEach { mission ->
+                                Row(
+                                    modifier = GlanceModifier.defaultWeight()
+                                        .padding(horizontal = 3.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    MissionProgressLarge(
+                                        assetManager,
+                                        mission,
+                                        useAbsoluteTime,
+                                        showTargetArtifact
+                                    )
+                                }
                             }
                         }
                     }
@@ -175,7 +179,7 @@ fun MissionProgressLarge(
         }
 
     Box(
-        modifier = GlanceModifier.fillMaxSize().padding(bottom = 5.dp),
+        modifier = GlanceModifier.padding(5.dp),
         contentAlignment = Alignment.Center
     ) {
         val bitmap = createCircularProgressBarBitmap(
@@ -188,7 +192,7 @@ fun MissionProgressLarge(
         Image(
             provider = ImageProvider(bitmap),
             contentDescription = "Circular Progress",
-            modifier = GlanceModifier.size(65.dp)
+            modifier = GlanceModifier.size(95.dp)
         )
 
         val shipName = getShipName(mission.shipId)
@@ -197,7 +201,7 @@ fun MissionProgressLarge(
         Image(
             provider = ImageProvider(shipBitmap),
             contentDescription = "Ship Icon",
-            modifier = GlanceModifier.size(35.dp)
+            modifier = GlanceModifier.size(55.dp)
         )
 
         val artifactName = getImageFromAfxId(mission.targetArtifact)
@@ -214,26 +218,36 @@ fun MissionProgressLarge(
     }
 
     Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.Bottom
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.Start
     ) {
-        Text(
-            text =
-            if (isFueling) {
-                "Fueling"
-            } else {
-                getMissionDurationRemaining(
-                    mission.secondsRemaining,
-                    mission.date,
-                    useAbsoluteTime
-                )
-            },
-            style = TextStyle(
-                color = ColorProvider(Color.White),
-                fontSize = TextUnit(12f, TextUnitType.Sp)
-            ),
-            modifier = GlanceModifier.padding(bottom = 2.dp)
-        )
+        Text(text = "time", style = TextStyle(color = ColorProvider(Color.White)))
+        Text(text = "stars", style = TextStyle(color = ColorProvider(Color.White)))
+        Text(text = "cap", style = TextStyle(color = ColorProvider(Color.White)))
     }
+
+//    Column(
+//        modifier = GlanceModifier.fillMaxSize(),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalAlignment = Alignment.Bottom
+//    ) {
+//        Text(
+//            text =
+//            if (isFueling) {
+//                "Fueling"
+//            } else {
+//                getMissionDurationRemaining(
+//                    mission.secondsRemaining,
+//                    mission.date,
+//                    useAbsoluteTime
+//                )
+//            },
+//            style = TextStyle(
+//                color = ColorProvider(Color.White),
+//                fontSize = TextUnit(12f, TextUnitType.Sp)
+//            ),
+//            modifier = GlanceModifier.padding(bottom = 2.dp)
+//        )
+//    }
 }

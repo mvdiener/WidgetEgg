@@ -79,7 +79,7 @@ class MissionWidgetNormal : GlanceAppWidget() {
             }
 
             Column(
-                verticalAlignment = Alignment.Bottom,
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = GlanceModifier
                     .fillMaxSize()
