@@ -25,7 +25,6 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
-import androidx.glance.layout.absolutePadding
 import androidx.glance.layout.fillMaxHeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
@@ -179,40 +178,48 @@ fun MissionProgress(
 
     Box(
         modifier = GlanceModifier.fillMaxWidth().padding(bottom = 5.dp),
-        contentAlignment = Alignment.Center
     ) {
-        val bitmap = createCircularProgressBarBitmap(
-            percentRemaining,
-            mission.durationType,
-            115,
-            isFueling
-        )
-
-        Image(
-            provider = ImageProvider(bitmap),
-            contentDescription = "Circular Progress",
-            modifier = GlanceModifier.size(65.dp)
-        )
-
-        val shipName = getShipName(mission.shipId)
-        val shipBitmap =
-            BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
-        Image(
-            provider = ImageProvider(shipBitmap),
-            contentDescription = "Ship Icon",
-            modifier = GlanceModifier.size(35.dp)
-        )
-
-        val artifactName = getImageFromAfxId(mission.targetArtifact)
-        if (showTargetArtifact && artifactName.isNotBlank()) {
-            val artifactBitmap =
-                BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
-            Image(
-                provider = ImageProvider(artifactBitmap),
-                contentDescription = "Target Artifact",
-                modifier = GlanceModifier.size(85.dp)
-                    .absolutePadding(bottom = 65.dp, left = 60.dp)
+        Box(
+            modifier = GlanceModifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            val bitmap = createCircularProgressBarBitmap(
+                percentRemaining,
+                mission.durationType,
+                115,
+                isFueling
             )
+
+            Image(
+                provider = ImageProvider(bitmap),
+                contentDescription = "Circular Progress",
+                modifier = GlanceModifier.size(65.dp)
+            )
+
+            val shipName = getShipName(mission.shipId)
+            val shipBitmap =
+                BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+            Image(
+                provider = ImageProvider(shipBitmap),
+                contentDescription = "Ship Icon",
+                modifier = GlanceModifier.size(35.dp)
+            )
+        }
+
+        Box(
+            modifier = GlanceModifier.fillMaxWidth(),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            val artifactName = getImageFromAfxId(mission.targetArtifact)
+            if (showTargetArtifact && artifactName.isNotBlank()) {
+                val artifactBitmap =
+                    BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
+                Image(
+                    provider = ImageProvider(artifactBitmap),
+                    contentDescription = "Target Artifact",
+                    modifier = GlanceModifier.size(20.dp)
+                )
+            }
         }
     }
 
