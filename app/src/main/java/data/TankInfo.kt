@@ -2,7 +2,7 @@ package data
 
 import kotlinx.serialization.Serializable
 
-// Data class used to save mission fuel tank info to preferences
+// Data class used to save fuel tank info to preferences
 @Serializable
 data class TankInfo(
     var level: Int = 0,
