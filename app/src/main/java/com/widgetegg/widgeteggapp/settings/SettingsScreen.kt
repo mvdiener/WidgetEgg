@@ -348,7 +348,7 @@ fun ShowTankLevelsDialog(settingsViewModel: SettingsViewModel) {
                 Text(
                     text =
                     """
-                        Show the fuel tank levels instead of the fueling ship.
+                        Show the fuel tank levels in the last slot of the widget. Will take the place of the fueling ship if it exists.
                     """.trimIndent()
                 )
             }
