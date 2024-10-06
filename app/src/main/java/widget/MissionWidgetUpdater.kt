@@ -19,6 +19,7 @@ class MissionWidgetUpdater {
             val prefEid = preferences.getEid()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
             val prefTargetArtifactNormalWidget = preferences.getTargetArtifactNormalWidget()
+            val prefTargetArtifactLargeWidget = preferences.getTargetArtifactLargeWidget()
             val prefShowFuelingShip = preferences.getShowFuelingShip()
             val prefOpenEggInc = preferences.getOpenEggInc()
             val prefShowTankLevels = preferences.getShowTankLevels()
@@ -53,8 +54,13 @@ class MissionWidgetUpdater {
                         context,
                         prefTargetArtifactNormalWidget
                     )
+                    MissionWidgetDataStore().setTargetArtifactLargeWidget(
+                        context,
+                        prefTargetArtifactLargeWidget
+                    )
                     MissionWidgetDataStore().setShowFuelingShip(context, prefShowFuelingShip)
                     MissionWidgetDataStore().setOpenEggInc(context, prefOpenEggInc)
+                    MissionWidgetDataStore().setShowTankLevels(context, prefShowTankLevels)
                 }
             } catch (e: Exception) {
                 throw e
