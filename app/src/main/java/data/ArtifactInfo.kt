@@ -28,20 +28,6 @@ val TANK_SIZES = arrayOf(
     500000000000000
 )
 
-val SHIP_TIMES = arrayOf(
-    arrayOf(1200, 3600, 7200, 60),
-    arrayOf(1800, 3600, 10800),
-    arrayOf(2700, 5400, 14400),
-    arrayOf(5400, 14400, 28800),
-    arrayOf(10800, 21600, 43200),
-    arrayOf(14400, 43200, 86400),
-    arrayOf(21600, 57600, 108000),
-    arrayOf(28800, 86400, 172800),
-    arrayOf(43200, 129600, 259200),
-    arrayOf(86400, 172800, 345600),
-    arrayOf(172800, 259200, 345600),
-)
-
 fun getImageFromAfxId(afxId: Int): String {
     return when (afxId) {
         23 -> "afx_puzzle_cube_4"

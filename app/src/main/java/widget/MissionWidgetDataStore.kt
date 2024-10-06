@@ -7,40 +7,59 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.MissionInfoEntry
+import data.TankInfo
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import widget.large.MissionWidgetLarge
+import widget.minimal.MissionWidgetMinimal
+import widget.normal.MissionWidgetNormal
 
 data object MissionWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")
     val MISSION_INFO = stringPreferencesKey("widgetMissionInfo")
+    val TANK_INFO = stringPreferencesKey("widgetTankInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("widgetUseAbsoluteTime")
-    val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("widgetTargetArtifactSmall")
+    val TARGET_ARTIFACT_NORMAL_WIDGET = booleanPreferencesKey("widgetNormalTargetArtifact")
+    val TARGET_ARTIFACT_LARGE_WIDGET = booleanPreferencesKey("widgetLargeTargetArtifact")
     val SHOW_FUELING_SHIP = booleanPreferencesKey("widgetShowFuelingShip")
+    val SHOW_TANK_LEVELS = booleanPreferencesKey("widgetShowTankLevels")
     val OPEN_EGG_INC = booleanPreferencesKey("widgetOpenEggInc")
 }
 
 class MissionWidgetDataStore {
     suspend fun setEid(context: Context, eid: String) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.EID] = eid
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     suspend fun setMissionInfo(context: Context, missionInfo: List<MissionInfoEntry>) {
         val missionString = Json.encodeToString(missionInfo)
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] = missionString
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     fun decodeMissionInfo(missionJson: String): List<MissionInfoEntry> {
@@ -51,43 +70,49 @@ class MissionWidgetDataStore {
         }
     }
 
+    suspend fun setTankInfo(context: Context, tankInfo: TankInfo) {
+        val tankInfoString = Json.encodeToString(tankInfo)
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.TANK_INFO] = tankInfoString
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    fun decodeTankInfo(tankInfoJson: String): TankInfo {
+        return try {
+            Json.decodeFromString<TankInfo>(tankInfoJson)
+        } catch (e: Exception) {
+            TankInfo()
+        }
+    }
+
     suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = useAbsoluteTime
                 }
             }
 
-        MissionWidget().updateAll(context)
-    }
-
-    suspend fun setTargetArtifactSmall(context: Context, showTargetArtifactSmall: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_SMALL] =
-                        showTargetArtifactSmall
-                }
-            }
-
-        MissionWidget().updateAll(context)
-    }
-
-    suspend fun setShowFuelingShip(context: Context, showFuelingShip: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] =
-                        showFuelingShip
-                }
-            }
-
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
     }
 
     suspend fun setOpenEggInc(context: Context, openEggInc: Boolean) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] =
@@ -95,17 +120,81 @@ class MissionWidgetDataStore {
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
+    }
+
+    suspend fun setTargetArtifactNormalWidget(
+        context: Context,
+        showTargetArtifactNormalWidget: Boolean
+    ) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_NORMAL_WIDGET] =
+                        showTargetArtifactNormalWidget
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setShowFuelingShip(context: Context, showFuelingShip: Boolean) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] =
+                        showFuelingShip
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setTargetArtifactLargeWidget(
+        context: Context,
+        showTargetArtifactLargeWidget: Boolean
+    ) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] =
+                        showTargetArtifactLargeWidget
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setShowTankLevels(context: Context, showTankLevels: Boolean) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] =
+                        showTankLevels
+                }
+            }
+
+        updateAllWidgets(context)
     }
 
     suspend fun clearAllData(context: Context) {
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidget::class.java)
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs.clear()
                 }
             }
 
-        MissionWidget().updateAll(context)
+        updateAllWidgets(context)
+    }
+
+    private suspend fun updateAllWidgets(context: Context) {
+        MissionWidgetNormal().updateAll(context)
+        MissionWidgetMinimal().updateAll(context)
+        MissionWidgetLarge().updateAll(context)
     }
 }

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.MissionInfoEntry
+import data.TankInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
@@ -22,9 +23,12 @@ class PreferencesDatastore(context: Context) {
         private val EID = stringPreferencesKey("eid")
         private val EI_USER_NAME = stringPreferencesKey("eiUserName")
         private val MISSION_INFO = stringPreferencesKey("missionInfo")
+        private val TANK_INFO = stringPreferencesKey("tankInfo")
         private val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
-        private val TARGET_ARTIFACT_SMALL = booleanPreferencesKey("targetArtifactSmall")
-        private val TARGET_ARTIFACT_MEDIUM = booleanPreferencesKey("targetArtifactMedium")
+        private val TARGET_ARTIFACT_NORMAL_WIDGET =
+            booleanPreferencesKey("targetArtifactNormalWidget")
+        private val TARGET_ARTIFACT_LARGE_WIDGET =
+            booleanPreferencesKey("targetArtifactLargeWidget")
         private val SHOW_FUELING_SHIP = booleanPreferencesKey("showFuelingShip")
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
         private val OPEN_EGG_INC = booleanPreferencesKey("openEggInc")
@@ -32,9 +36,10 @@ class PreferencesDatastore(context: Context) {
             EID,
             EI_USER_NAME,
             MISSION_INFO,
+            TANK_INFO,
             USE_ABSOLUTE_TIME,
-            TARGET_ARTIFACT_SMALL,
-            TARGET_ARTIFACT_MEDIUM,
+            TARGET_ARTIFACT_NORMAL_WIDGET,
+            TARGET_ARTIFACT_LARGE_WIDGET,
             SHOW_FUELING_SHIP,
             SHOW_TANK_LEVELS,
             OPEN_EGG_INC
@@ -79,6 +84,24 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
+    suspend fun getTankInfo(): TankInfo {
+        return dataStore.data.map {
+            it[TANK_INFO]?.let { tankJson ->
+                try {
+                    Json.decodeFromString<TankInfo>(tankJson)
+                } catch (e: Exception) {
+                    TankInfo()
+                }
+            } ?: TankInfo()
+        }.first()
+    }
+
+    suspend fun saveTankInfo(tankInfo: TankInfo) {
+        dataStore.edit {
+            it[TANK_INFO] = Json.encodeToString(tankInfo)
+        }
+    }
+
     suspend fun getUseAbsoluteTime() = dataStore.data.map {
         it[USE_ABSOLUTE_TIME] ?: false
     }.first()
@@ -89,23 +112,23 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
-    suspend fun getTargetArtifactSmall() = dataStore.data.map {
-        it[TARGET_ARTIFACT_SMALL] ?: false
+    suspend fun getTargetArtifactNormalWidget() = dataStore.data.map {
+        it[TARGET_ARTIFACT_NORMAL_WIDGET] ?: false
     }.first()
 
-    suspend fun saveTargetArtifactSmall(targetArtifactSmall: Boolean) {
+    suspend fun saveTargetArtifactNormalWidget(targetArtifactNormalWidget: Boolean) {
         dataStore.edit {
-            it[TARGET_ARTIFACT_SMALL] = targetArtifactSmall
+            it[TARGET_ARTIFACT_NORMAL_WIDGET] = targetArtifactNormalWidget
         }
     }
 
-    suspend fun getTargetArtifactMedium() = dataStore.data.map {
-        it[TARGET_ARTIFACT_MEDIUM] ?: false
+    suspend fun getTargetArtifactLargeWidget() = dataStore.data.map {
+        it[TARGET_ARTIFACT_LARGE_WIDGET] ?: false
     }.first()
 
-    suspend fun saveTargetArtifactMedium(targetArtifactMedium: Boolean) {
+    suspend fun saveTargetArtifactLargeWidget(targetArtifactLargeWidget: Boolean) {
         dataStore.edit {
-            it[TARGET_ARTIFACT_MEDIUM] = targetArtifactMedium
+            it[TARGET_ARTIFACT_LARGE_WIDGET] = targetArtifactLargeWidget
         }
     }
 

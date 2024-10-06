@@ -9,15 +9,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.widgetegg"
+    namespace = "com.widgetegg.widgeteggapp"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.widgetegg"
+        applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "0.7.1"
+        versionName = "0.8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
