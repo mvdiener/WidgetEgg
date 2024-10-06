@@ -5,6 +5,7 @@ import api.fetchData
 import data.MissionInfoEntry
 import kotlinx.coroutines.runBlocking
 import tools.formatMissionData
+import tools.formatTankFuels
 import user.preferences.PreferencesDatastore
 import java.time.Instant
 
@@ -13,12 +14,14 @@ class MissionWidgetUpdater {
         runBlocking {
             val preferences = PreferencesDatastore(context)
             var preferencesMissionData = preferences.getMissionInfo()
+            var preferencesTankFuels = preferences.getTankFuels()
 
             val prefEid = preferences.getEid()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
             val prefTargetArtifactNormalWidget = preferences.getTargetArtifactNormalWidget()
             val prefShowFuelingShip = preferences.getShowFuelingShip()
             val prefOpenEggInc = preferences.getOpenEggInc()
+            val prefShowTankLevels = preferences.getShowTankLevels()
 
             try {
                 if (prefEid.isNotBlank()) {
@@ -28,14 +31,21 @@ class MissionWidgetUpdater {
                     // preferencesShowFuelingShip is enabled, meaning we want fresh data every time
                     if (numOfActiveMissions(preferencesMissionData) < 3 || anyMissionsComplete(
                             preferencesMissionData
-                        ) || prefShowFuelingShip
+                        ) || prefShowFuelingShip || prefShowTankLevels
                     ) {
                         val missionInfo = fetchData(prefEid)
                         preferencesMissionData = formatMissionData(missionInfo)
+                        preferencesTankFuels = formatTankFuels(missionInfo)
                     }
 
+                    // Mission data and tank fuels need to get saved back to preferences because they are changing regularly
+                    // When a widget is initialized it needs to pull data from preferences before it can save into local widget state
+                    // If these items aren't updated in preferences, then a new widget will display old/outdated info
+                    // Figuring out how to get all widgets and preferences to read from the same data store might fix this
                     preferences.saveMissionInfo(preferencesMissionData)
+                    preferences.saveTankFuels(preferencesTankFuels)
                     MissionWidgetDataStore().setMissionInfo(context, preferencesMissionData)
+                    MissionWidgetDataStore().setTankFuels(context, preferencesTankFuels)
 
                     MissionWidgetDataStore().setEid(context, prefEid)
                     MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)

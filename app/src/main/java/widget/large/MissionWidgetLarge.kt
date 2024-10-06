@@ -32,13 +32,16 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.MissionInfoEntry
+import data.TankLevelEntry
 import data.getImageFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.createCircularProgressBarBitmap
+import tools.getEggName
 import tools.getMissionDurationRemaining
 import tools.getMissionPercentComplete
+import tools.getMissionsWithFuelTank
 import tools.getShipName
 import widget.MissionWidgetDataStore
 import widget.MissionWidgetDataStorePreferencesKeys
@@ -50,11 +53,14 @@ class MissionWidgetLarge : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             val state = currentState<Preferences>()
-            val prefEid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
-            val preferencesMissionData =
+            val eid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
+            val missionData =
                 MissionWidgetDataStore().decodeMissionInfo(
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
+            val tankFuels = MissionWidgetDataStore().decodeTankInfo(
+                state[MissionWidgetDataStorePreferencesKeys.TANK_INFO] ?: ""
+            )
             val useAbsoluteTime =
                 state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
             val showTargetArtifact =
@@ -64,7 +70,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
 
-            if (prefEid.isBlank()) {
+            if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
@@ -94,10 +100,18 @@ class MissionWidgetLarge : GlanceAppWidget() {
                     }
             ) {
                 val assetManager = context.assets
-                if (prefEid.isBlank() || preferencesMissionData.isEmpty()) {
+                if (eid.isBlank() || missionData.isEmpty()) {
                     NoMissionsContentLarge(assetManager)
                 } else {
-                    val missionsChunked = preferencesMissionData.chunked(2)
+
+                    val missionsWithFuel: List<MissionInfoEntry> =
+                        if (showTankLevels) {
+                            getMissionsWithFuelTank(missionData)
+                        } else {
+                            missionData
+                        }
+
+                    val missionsChunked = missionsWithFuel.chunked(2)
                     missionsChunked.forEach { missionGroup ->
                         Row(
                             modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
@@ -110,12 +124,16 @@ class MissionWidgetLarge : GlanceAppWidget() {
                                         .padding(start = 10.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    MissionProgressLarge(
-                                        assetManager,
-                                        mission,
-                                        useAbsoluteTime,
-                                        showTargetArtifact
-                                    )
+                                    if (mission.identifier == "fuelTankMission") {
+                                        FuelTankContent(tankFuels)
+                                    } else {
+                                        MissionProgressLarge(
+                                            assetManager,
+                                            mission,
+                                            useAbsoluteTime,
+                                            showTargetArtifact
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -203,7 +221,7 @@ fun MissionProgressLarge(
     val artifactName = getImageFromAfxId(mission.targetArtifact)
 
     Column(
-        modifier = GlanceModifier.fillMaxWidth().padding(end = 10.dp),
+        modifier = GlanceModifier.padding(start = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.End
     ) {
@@ -284,5 +302,19 @@ fun TargetArtifactContent(artifactName: String, assetManager: AssetManager) {
             contentDescription = "Target Artifact",
             modifier = GlanceModifier.size(20.dp)
         )
+    }
+}
+
+@Composable
+fun FuelTankContent(tankFuels: List<TankLevelEntry>) {
+    if (tankFuels.isEmpty()) {
+        Text(
+            text = "Your tanks are empty!",
+            style = TextStyle(color = ColorProvider(Color.White))
+        )
+    } else {
+        tankFuels.forEach { fuel ->
+            getEggName(fuel.eggId)
+        }
     }
 }

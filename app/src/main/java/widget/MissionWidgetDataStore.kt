@@ -7,6 +7,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.MissionInfoEntry
+import data.TankLevelEntry
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import widget.large.MissionWidgetLarge
@@ -16,6 +17,7 @@ import widget.normal.MissionWidgetNormal
 data object MissionWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")
     val MISSION_INFO = stringPreferencesKey("widgetMissionInfo")
+    val TANK_INFO = stringPreferencesKey("widgetTankInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("widgetUseAbsoluteTime")
     val TARGET_ARTIFACT_NORMAL_WIDGET = booleanPreferencesKey("widgetNormalTargetArtifact")
     val TARGET_ARTIFACT_LARGE_WIDGET = booleanPreferencesKey("widgetLargeTargetArtifact")
@@ -63,6 +65,26 @@ class MissionWidgetDataStore {
     fun decodeMissionInfo(missionJson: String): List<MissionInfoEntry> {
         return try {
             Json.decodeFromString<List<MissionInfoEntry>>(missionJson)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    suspend fun setTankFuels(context: Context, tankFuels: List<TankLevelEntry>) {
+        val tankFuelsString = Json.encodeToString(tankFuels)
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.TANK_INFO] = tankFuelsString
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    fun decodeTankInfo(tankFuelsJson: String): List<TankLevelEntry> {
+        return try {
+            Json.decodeFromString<List<TankLevelEntry>>(tankFuelsJson)
         } catch (e: Exception) {
             emptyList()
         }

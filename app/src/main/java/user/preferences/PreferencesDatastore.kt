@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.MissionInfoEntry
+import data.TankLevelEntry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
@@ -22,6 +23,7 @@ class PreferencesDatastore(context: Context) {
         private val EID = stringPreferencesKey("eid")
         private val EI_USER_NAME = stringPreferencesKey("eiUserName")
         private val MISSION_INFO = stringPreferencesKey("missionInfo")
+        private val TANK_INFO = stringPreferencesKey("tankInfo")
         private val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
         private val TARGET_ARTIFACT_NORMAL_WIDGET =
             booleanPreferencesKey("targetArtifactNormalWidget")
@@ -34,6 +36,7 @@ class PreferencesDatastore(context: Context) {
             EID,
             EI_USER_NAME,
             MISSION_INFO,
+            TANK_INFO,
             USE_ABSOLUTE_TIME,
             TARGET_ARTIFACT_NORMAL_WIDGET,
             TARGET_ARTIFACT_LARGE_WIDGET,
@@ -78,6 +81,24 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveMissionInfo(missionInfo: List<MissionInfoEntry>) {
         dataStore.edit {
             it[MISSION_INFO] = Json.encodeToString(missionInfo)
+        }
+    }
+
+    suspend fun getTankFuels(): List<TankLevelEntry> {
+        return dataStore.data.map {
+            it[TANK_INFO]?.let { tankJson ->
+                try {
+                    Json.decodeFromString<List<TankLevelEntry>>(tankJson)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList()
+        }.first()
+    }
+
+    suspend fun saveTankFuels(tankFuels: List<TankLevelEntry>) {
+        dataStore.edit {
+            it[TANK_INFO] = Json.encodeToString(tankFuels)
         }
     }
 

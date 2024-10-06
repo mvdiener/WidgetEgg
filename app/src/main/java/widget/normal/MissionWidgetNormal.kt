@@ -54,8 +54,8 @@ class MissionWidgetNormal : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             val state = currentState<Preferences>()
-            val prefEid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
-            val preferencesMissionData =
+            val eid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
+            val missionData =
                 MissionWidgetDataStore().decodeMissionInfo(
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
@@ -68,7 +68,7 @@ class MissionWidgetNormal : GlanceAppWidget() {
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
 
-            if (prefEid.isBlank()) {
+            if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
@@ -98,7 +98,7 @@ class MissionWidgetNormal : GlanceAppWidget() {
                     }
             ) {
                 val assetManager = context.assets
-                if (prefEid.isBlank() || preferencesMissionData.isEmpty()) {
+                if (eid.isBlank() || missionData.isEmpty()) {
                     NoMissionsContent(assetManager)
                 } else {
                     Row(
@@ -106,7 +106,7 @@ class MissionWidgetNormal : GlanceAppWidget() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        preferencesMissionData.forEach { mission ->
+                        missionData.forEach { mission ->
                             if (mission.identifier.isBlank() && !showFuelingShip) return@forEach
                             Column(
                                 modifier = GlanceModifier.fillMaxHeight().defaultWeight()

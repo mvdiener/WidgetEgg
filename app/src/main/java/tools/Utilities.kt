@@ -6,6 +6,8 @@ import android.graphics.Paint
 import data.MissionData
 import data.ALL_SHIPS
 import data.MissionInfoEntry
+import data.TankLevelEntry
+import ei.Ei.Egg
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -78,6 +80,54 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
     return formattedMissions
 }
 
+fun formatTankFuels(missionInfo: MissionData): List<TankLevelEntry> {
+    var formattedTankLevels: List<TankLevelEntry> = emptyList()
+
+    missionInfo.artifacts.tankFuelsList.forEachIndexed { index, fuel ->
+        if (fuel > 0) {
+            formattedTankLevels = formattedTankLevels.plus(
+                TankLevelEntry(
+                    eggId = index + 1,
+                    fuelQuantity = fuel
+                )
+            )
+        }
+    }
+
+    return formattedTankLevels
+}
+
+// Used to help show fuel tanks in the large widget
+// We only want the fuel list to show in the last slot
+// If the last slot is a fueling ship, replace that entry with the fuel mission
+// Otherwise, add a fuel mission to the end of the existing mission list
+fun getMissionsWithFuelTank(missions: List<MissionInfoEntry>): List<MissionInfoEntry> {
+    var missionsCopy = missions.toList()
+    val fuelMission = MissionInfoEntry(
+        secondsRemaining = 0.0,
+        missionDuration = 0.0,
+        date = 0,
+        shipId = 0,
+        capacity = 0,
+        shipLevel = 0,
+        targetArtifact = 0,
+        durationType = 0,
+        identifier = "fuelTankMission"
+    )
+
+    missionsCopy.forEach { mission ->
+        if (mission.identifier.isBlank()) {
+            mission.identifier = "fuelTankMission"
+        }
+    }
+
+    if (!missionsCopy.any { mission -> mission.identifier == "fuelTankMission" }) {
+        missionsCopy = missionsCopy + fuelMission
+    }
+
+    return missionsCopy
+}
+
 fun createCircularProgressBarBitmap(
     progress: Float,
     durationType: Int,
@@ -115,6 +165,15 @@ fun createCircularProgressBarBitmap(
 
 fun getShipName(shipId: Int): String {
     return ALL_SHIPS[shipId]
+}
+
+fun getEggName(eggId: Int): String {
+    val eggName = Egg.forNumber(eggId)?.name?.lowercase()
+    return if (eggName.isNullOrBlank()) {
+        "egg_unknown"
+    } else {
+        "egg_${eggName}"
+    }
 }
 
 fun getMissionColor(durationType: Int, isFueling: Boolean): Int {

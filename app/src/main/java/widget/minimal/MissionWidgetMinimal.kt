@@ -47,15 +47,15 @@ class MissionWidgetMinimal : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             val state = currentState<Preferences>()
-            val prefEid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
-            val preferencesMissionData =
+            val eid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
+            val missionData =
                 MissionWidgetDataStore().decodeMissionInfo(
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
 
-            if (prefEid.isBlank()) {
+            if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
@@ -84,10 +84,10 @@ class MissionWidgetMinimal : GlanceAppWidget() {
                     }
             ) {
                 val assetManager = context.assets
-                if (prefEid.isBlank() || preferencesMissionData.isEmpty()) {
+                if (eid.isBlank() || missionData.isEmpty()) {
                     NoMissionsContentMinimal(assetManager)
                 } else {
-                    val missionsChunked = preferencesMissionData.chunked(2)
+                    val missionsChunked = missionData.chunked(2)
                     missionsChunked.forEach { missionGroup ->
                         Row(
                             modifier = GlanceModifier.fillMaxWidth(),
