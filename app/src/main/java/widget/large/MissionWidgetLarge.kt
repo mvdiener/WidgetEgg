@@ -335,17 +335,16 @@ fun TankInfoContent(tankInfo: TankInfo, assetManager: AssetManager) {
                     Image(
                         provider = ImageProvider(eggBitmap),
                         contentDescription = "Egg icon",
-                        modifier = GlanceModifier.size(20.dp)
+                        modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
                     )
                     LinearProgressIndicator(
-                        modifier = GlanceModifier.height(5.dp).width(100.dp)
-                            .padding(horizontal = 5.dp),
+                        modifier = GlanceModifier.height(5.dp).defaultWeight(),
                         progress = getFuelPercentFilled(capacity, fuel.fuelQuantity),
                         color = ColorProvider(color = Color(0xff6bd55f)),
                         backgroundColor = ColorProvider(color = Color(0xff464646))
                     )
                     Row(
-                        modifier = GlanceModifier.fillMaxWidth(),
+                        modifier = GlanceModifier.width(50.dp),
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
