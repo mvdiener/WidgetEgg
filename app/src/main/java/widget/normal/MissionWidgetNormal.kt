@@ -39,6 +39,7 @@ import data.getImageFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.bitmapResize
 import tools.createCircularProgressBarBitmap
 import tools.getMissionDurationRemaining
 import tools.getMissionPercentComplete
@@ -197,8 +198,8 @@ fun MissionProgress(
             )
 
             val shipName = getShipName(mission.shipId)
-            val shipBitmap =
-                BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+            val shipBitmap = BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+
             Image(
                 provider = ImageProvider(shipBitmap),
                 contentDescription = "Ship Icon",
@@ -212,8 +213,9 @@ fun MissionProgress(
         ) {
             val artifactName = getImageFromAfxId(mission.targetArtifact)
             if (showTargetArtifact && artifactName.isNotBlank()) {
-                val artifactBitmap =
+                val artifactBitmap = bitmapResize(
                     BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
+                )
                 Image(
                     provider = ImageProvider(artifactBitmap),
                     contentDescription = "Target Artifact",

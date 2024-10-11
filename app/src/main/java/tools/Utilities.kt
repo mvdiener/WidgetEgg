@@ -47,13 +47,13 @@ fun getMissionDurationRemaining(
                 if (hoursMinusDays.toInt() == 0) {
                     "${days.toInt()}d"
                 } else {
-                    "${days.toInt()}d ${hoursMinusDays.toInt()}hr"
+                    "${days.toInt()}d ${hoursMinusDays.toInt()}h"
                 }
             } else {
                 if (hours.toInt() == 0) {
-                    "${minutes.toInt()}min"
+                    "${minutes.toInt()}m"
                 } else {
-                    "${hours.toInt()}hr ${minutes.toInt()}min"
+                    "${hours.toInt()}h ${minutes.toInt()}m"
                 }
             }
         }
@@ -172,6 +172,19 @@ fun createCircularProgressBarBitmap(
     return bitmap
 }
 
+fun bitmapResize(image: Bitmap): Bitmap {
+    val width = image.width
+    val height = image.height
+    val aspectRatio = width / height
+    val newWidth = 100
+    return if (width > newWidth) {
+        val newHeight = newWidth * aspectRatio
+        Bitmap.createScaledBitmap(image, newWidth, newHeight, false)
+    } else {
+        image
+    }
+}
+
 fun getShipName(shipId: Int): String {
     return ALL_SHIPS[shipId]
 }
@@ -181,7 +194,7 @@ fun getEggName(eggId: Int): String {
     return if (eggName.isNullOrBlank()) {
         "egg_unknown"
     } else {
-        "egg_${eggName}"
+        "egg_$eggName"
     }
 }
 

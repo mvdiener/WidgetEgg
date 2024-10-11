@@ -3,7 +3,7 @@
     android:description="@string/normal_widget"
     android:minWidth="300dp"
     android:minHeight="50dp"
-    android:minResizeWidth="50dp"
+    android:minResizeWidth="200dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen" />

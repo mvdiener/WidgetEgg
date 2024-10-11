@@ -40,6 +40,7 @@ import data.getImageFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.bitmapResize
 import tools.createCircularProgressBarBitmap
 import tools.getEggName
 import tools.getFuelAmount
@@ -215,8 +216,7 @@ fun MissionProgressLarge(
         )
 
         val shipName = getShipName(mission.shipId)
-        val shipBitmap =
-            BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+        val shipBitmap = BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
         Image(
             provider = ImageProvider(shipBitmap),
             contentDescription = "Ship Icon",
@@ -227,7 +227,7 @@ fun MissionProgressLarge(
     val artifactName = getImageFromAfxId(mission.targetArtifact)
 
     Column(
-        modifier = GlanceModifier.padding(start = 20.dp),
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.End
     ) {
@@ -297,8 +297,9 @@ fun CapacityContent(mission: MissionInfoEntry, assetManager: AssetManager) {
 
 @Composable
 fun TargetArtifactContent(artifactName: String, assetManager: AssetManager) {
-    val artifactBitmap =
+    val artifactBitmap = bitmapResize(
         BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
+    )
 
     Row(
         verticalAlignment = Alignment.CenterVertically
@@ -326,8 +327,9 @@ fun TankInfoContent(tankInfo: TankInfo, assetManager: AssetManager) {
             val capacity = getTankCapacity(tankInfo.level)
             tankInfo.fuelLevels.forEach { fuel ->
                 val eggName = getEggName(fuel.eggId)
-                val eggBitmap =
+                val eggBitmap = bitmapResize(
                     BitmapFactory.decodeStream(assetManager.open("eggs/$eggName.png"))
+                )
                 Row(
                     modifier = GlanceModifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically

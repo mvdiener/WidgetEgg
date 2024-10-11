@@ -130,4 +130,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun updateShowTankLevelsDialog(input: Boolean) {
         showTankLevelsDialog = input
     }
+
+    var isOptimizationDisabled by mutableStateOf(true)
+        private set
+
+    fun updateIsOptimizationDisabled(input: Boolean) {
+        isOptimizationDisabled = input
+    }
+
+    var showBatteryOptimizationDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowBatteryOptimizationDialog(input: Boolean) {
+        showBatteryOptimizationDialog = input
+    }
 }
