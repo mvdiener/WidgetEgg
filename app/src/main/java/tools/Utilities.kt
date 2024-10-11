@@ -13,6 +13,7 @@ import ei.Ei.Egg
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 fun getMissionPercentComplete(
     missionDuration: Double,
@@ -270,7 +271,32 @@ fun getFuelAmount(fuelQuantity: Double): String {
         units = units.drop(1).toTypedArray()
     }
 
-    val formatted = String.format("%.3g", number)
+    var formatted = String.format(Locale.ROOT, "%.2e", number)
+
+    // If using %.3g for the string format it _sometimes_ ends up in sci. notation
+    // So let's just use %.2e for sci. notation all the time and add more formatting below
+
+    if (formatted.contains("e+")) {
+        val split = formatted.split("e+")
+
+        when (split[1]) {
+            "03" -> {
+                val unitIndex = units.indexOf(unit)
+                unit = units[unitIndex + 1]
+                formatted = split[0]
+            }
+
+            "02" -> {
+                formatted = ((split[0].toFloat()) * 100).toInt().toString()
+            }
+
+            "01" -> {
+                formatted = ((split[0].toFloat()) * 10).toString()
+            }
+
+            else -> formatted = split[0]
+        }
+    }
 
     return "$formatted$unit"
 }
