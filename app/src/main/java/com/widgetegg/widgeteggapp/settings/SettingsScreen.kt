@@ -128,9 +128,9 @@ fun BatteryPermissionsContent(
             modifier = Modifier
                 .padding(end = 5.dp)
                 .size(35.dp),
-            tint = Color.Yellow
+            tint = Color(0xffffa500)
         )
-        Text(text = "Battery Optimization Enabled", color = Color.White)
+        Text(text = "Battery Optimization Enabled")
         Icon(
             Icons.Rounded.Info,
             contentDescription = "Battery optimization info",
