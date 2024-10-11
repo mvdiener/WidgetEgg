@@ -216,21 +216,20 @@ fun SignOutButton(signInViewModel: SignInViewModel, modifier: Modifier) {
 
 @Composable
 fun HelpButton(signInViewModel: SignInViewModel) {
+    val modifier = Modifier
+        .fillMaxWidth()
+        .padding(start = 16.dp, bottom = 80.dp, end = 16.dp)
     if (signInViewModel.eiUserName.isBlank()) {
         Button(
             onClick = { signInViewModel.updateShowFindMyEidDialog(true) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, bottom = 50.dp, end = 16.dp)
+            modifier = modifier
         ) {
             Text("Where do I find my EID?")
         }
     } else {
         Button(
             onClick = { signInViewModel.updateShowWhatNextDialog(true) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, bottom = 50.dp, end = 16.dp)
+            modifier = modifier
         ) {
             Text("What next?")
         }
@@ -322,7 +321,8 @@ fun WhatNextDialog(signInViewModel: SignInViewModel) {
                 "1. Long press on your home screen to begin editing.",
                 """2. Select the "Widgets" option.""",
                 """3. Search for "WidgetEgg", select a widget and press the "Add" button.""",
-                "4. Once added, the widget will automatically update every 15 minutes."
+                "4. Once added, the widget will automatically update every 15 minutes.",
+                "5. Check the settings gear at the top right of the app to configure your widgets."
             )
             val length = instructions.size
             Column(
