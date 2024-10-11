@@ -172,6 +172,19 @@ fun createCircularProgressBarBitmap(
     return bitmap
 }
 
+fun bitmapResize(image: Bitmap): Bitmap {
+    val width = image.width
+    val height = image.height
+    val aspectRatio = width / height
+    val newWidth = 100
+    return if (width > newWidth) {
+        val newHeight = newWidth * aspectRatio
+        Bitmap.createScaledBitmap(image, newWidth, newHeight, false)
+    } else {
+        image
+    }
+}
+
 fun getShipName(shipId: Int): String {
     return ALL_SHIPS[shipId]
 }

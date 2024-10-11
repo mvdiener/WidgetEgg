@@ -34,6 +34,7 @@ import data.MissionInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.bitmapResize
 import tools.createCircularProgressBarBitmap
 import tools.getMissionPercentComplete
 import tools.getShipName
@@ -172,8 +173,8 @@ fun MissionProgressMinimal(
         )
 
         val shipName = getShipName(mission.shipId)
-        val shipBitmap =
-            BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+        val shipBitmap = BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+
         Image(
             provider = ImageProvider(shipBitmap),
             contentDescription = "Ship Icon",
