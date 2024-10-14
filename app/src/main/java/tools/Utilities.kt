@@ -3,9 +3,9 @@ package tools
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import data.MissionData
 import data.ALL_SHIPS
 import data.FuelLevelInfo
+import data.MissionData
 import data.MissionInfoEntry
 import data.TANK_SIZES
 import data.TankInfo

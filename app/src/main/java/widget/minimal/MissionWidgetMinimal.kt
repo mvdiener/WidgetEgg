@@ -34,7 +34,6 @@ import data.MissionInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import tools.bitmapResize
 import tools.createCircularProgressBarBitmap
 import tools.getMissionPercentComplete
 import tools.getShipName
