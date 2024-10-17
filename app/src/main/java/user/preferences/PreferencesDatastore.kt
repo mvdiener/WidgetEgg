@@ -31,6 +31,7 @@ class PreferencesDatastore(context: Context) {
             booleanPreferencesKey("targetArtifactLargeWidget")
         private val SHOW_FUELING_SHIP = booleanPreferencesKey("showFuelingShip")
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
+        private val USE_SLIDER_CAPACITY = booleanPreferencesKey("useSliderCapacity")
         private val OPEN_EGG_INC = booleanPreferencesKey("openEggInc")
         private val ALL_KEYS = listOf(
             EID,
@@ -42,6 +43,7 @@ class PreferencesDatastore(context: Context) {
             TARGET_ARTIFACT_LARGE_WIDGET,
             SHOW_FUELING_SHIP,
             SHOW_TANK_LEVELS,
+            USE_SLIDER_CAPACITY,
             OPEN_EGG_INC
         )
     }
@@ -149,6 +151,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveShowTankLevels(showTankLevels: Boolean) {
         dataStore.edit {
             it[SHOW_TANK_LEVELS] = showTankLevels
+        }
+    }
+
+    suspend fun getUseSliderCapacity() = dataStore.data.map {
+        it[USE_SLIDER_CAPACITY] ?: false
+    }.first()
+
+    suspend fun saveUseSliderCapacity(useSliderCapacity: Boolean) {
+        dataStore.edit {
+            it[USE_SLIDER_CAPACITY] = useSliderCapacity
         }
     }
 

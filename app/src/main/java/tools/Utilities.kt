@@ -95,7 +95,8 @@ fun formatTankInfo(missionInfo: MissionData): TankInfo {
             formattedFuelLevels = formattedFuelLevels.plus(
                 FuelLevelInfo(
                     eggId = index + 1,
-                    fuelQuantity = fuel
+                    fuelQuantity = fuel,
+                    fuelSlider = missionInfo.artifacts.tankLimitsList[index]
                 )
             )
         }
@@ -220,6 +221,7 @@ fun getMissionColor(durationType: Int, isFueling: Boolean): Int {
 }
 
 fun getFuelPercentFilled(capacity: Long, fuelQuantity: Double): Float {
+    if (capacity == 0L) return 0f
     return fuelQuantity.toFloat() / capacity.toFloat()
 }
 

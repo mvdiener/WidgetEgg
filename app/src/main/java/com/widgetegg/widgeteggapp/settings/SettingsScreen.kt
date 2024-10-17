@@ -56,6 +56,7 @@ fun SettingsScreen(navController: NavController) {
         settingsViewModel.updateShowFuelingShip(preferences.getShowFuelingShip())
         settingsViewModel.updateShowTargetArtifactLargeWidget(preferences.getTargetArtifactLargeWidget())
         settingsViewModel.updateShowTankLevels(preferences.getShowTankLevels())
+        settingsViewModel.updateUseSliderCapacity(preferences.getUseSliderCapacity())
     }
 
     val packageName = context.packageName
@@ -221,6 +222,7 @@ fun LargeWidgetGroup(settingsViewModel: SettingsViewModel) {
         Text(text = "Large Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
         TargetArtifactLargeWidgetRow(settingsViewModel)
         ShowTankLevelsRow(settingsViewModel)
+        UseSliderCapacityRow(settingsViewModel)
     }
 }
 
@@ -429,6 +431,9 @@ fun ShowTankLevelsRow(settingsViewModel: SettingsViewModel) {
             checked = settingsViewModel.showTankLevels,
             onCheckedChange = {
                 settingsViewModel.updateShowTankLevels(!settingsViewModel.showTankLevels)
+                if (!settingsViewModel.showTankLevels) {
+                    settingsViewModel.updateUseSliderCapacity(false)
+                }
             }
         )
     }
@@ -455,6 +460,70 @@ fun ShowTankLevelsDialog(settingsViewModel: SettingsViewModel) {
                     text =
                     """
                         Show the fuel tank levels in the last slot of the widget. Will take the place of the fueling ship if it exists.
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun UseSliderCapacityRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Use slider capacity")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Slider percent info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowSliderCapacityDialog(true)
+                    }
+            )
+            ShowSliderCapacityDialog(settingsViewModel)
+        }
+
+        Switch(
+            checked = settingsViewModel.useSliderCapacity,
+            onCheckedChange = {
+                settingsViewModel.updateUseSliderCapacity(!settingsViewModel.useSliderCapacity)
+            },
+            enabled = settingsViewModel.showTankLevels
+        )
+    }
+}
+
+@Composable
+fun ShowSliderCapacityDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showSliderCapacityDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowSliderCapacityDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                    """
+                        The fuel bar percentage filled is based on the tank slider for that individual fuel, instead of the overall tank capacity.
+                        
+                        Show tank levels must be enabled for this to take effect.
                     """.trimIndent()
                 )
             }

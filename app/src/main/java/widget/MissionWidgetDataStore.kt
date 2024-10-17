@@ -23,6 +23,7 @@ data object MissionWidgetDataStorePreferencesKeys {
     val TARGET_ARTIFACT_LARGE_WIDGET = booleanPreferencesKey("widgetLargeTargetArtifact")
     val SHOW_FUELING_SHIP = booleanPreferencesKey("widgetShowFuelingShip")
     val SHOW_TANK_LEVELS = booleanPreferencesKey("widgetShowTankLevels")
+    val USE_SLIDER_CAPACITY = booleanPreferencesKey("widgetUseSliderCapacity")
     val OPEN_EGG_INC = booleanPreferencesKey("widgetOpenEggInc")
 }
 
@@ -171,6 +172,18 @@ class MissionWidgetDataStore {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] =
                         showTankLevels
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setUseSliderCapacity(context: Context, useSliderCapacity: Boolean) {
+        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.USE_SLIDER_CAPACITY] =
+                        useSliderCapacity
                 }
             }
 

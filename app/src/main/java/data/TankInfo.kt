@@ -12,5 +12,6 @@ data class TankInfo(
 @Serializable
 data class FuelLevelInfo(
     var eggId: Int,
-    var fuelQuantity: Double
+    var fuelQuantity: Double,
+    var fuelSlider: Double
 )
