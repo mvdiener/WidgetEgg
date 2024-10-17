@@ -74,6 +74,8 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] ?: false
             val showTankLevels =
                 state[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] ?: false
+            val useSliderCapacity =
+                state[MissionWidgetDataStorePreferencesKeys.USE_SLIDER_CAPACITY] ?: false
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
 
@@ -132,7 +134,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     if (mission.identifier == "fuelTankMission") {
-                                        TankInfoContent(tankInfo, assetManager)
+                                        TankInfoContent(tankInfo, useSliderCapacity, assetManager)
                                     } else {
                                         MissionProgressLarge(
                                             assetManager,
@@ -313,7 +315,7 @@ fun TargetArtifactContent(artifactName: String, assetManager: AssetManager) {
 }
 
 @Composable
-fun TankInfoContent(tankInfo: TankInfo, assetManager: AssetManager) {
+fun TankInfoContent(tankInfo: TankInfo, useSliderCapacity: Boolean, assetManager: AssetManager) {
     if (tankInfo.fuelLevels.isEmpty()) {
         Text(
             text = "Your tanks are empty!",
@@ -330,6 +332,12 @@ fun TankInfoContent(tankInfo: TankInfo, assetManager: AssetManager) {
                 val eggBitmap = bitmapResize(
                     BitmapFactory.decodeStream(assetManager.open("eggs/$eggName.png"))
                 )
+                val adjustedCapacity =
+                    if (useSliderCapacity) {
+                        (capacity * fuel.fuelSlider).toLong()
+                    } else {
+                        capacity
+                    }
                 Row(
                     modifier = GlanceModifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -341,7 +349,7 @@ fun TankInfoContent(tankInfo: TankInfo, assetManager: AssetManager) {
                     )
                     LinearProgressIndicator(
                         modifier = GlanceModifier.height(5.dp).defaultWeight(),
-                        progress = getFuelPercentFilled(capacity, fuel.fuelQuantity),
+                        progress = getFuelPercentFilled(adjustedCapacity, fuel.fuelQuantity),
                         color = ColorProvider(color = Color(0xff6bd55f)),
                         backgroundColor = ColorProvider(color = Color(0xff464646))
                     )

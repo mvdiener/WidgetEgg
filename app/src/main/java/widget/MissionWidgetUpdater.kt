@@ -23,6 +23,7 @@ class MissionWidgetUpdater {
             val prefShowFuelingShip = preferences.getShowFuelingShip()
             val prefOpenEggInc = preferences.getOpenEggInc()
             val prefShowTankLevels = preferences.getShowTankLevels()
+            val prefUseSliderCapacity = preferences.getUseSliderCapacity()
 
             try {
                 if (prefEid.isNotBlank()) {
@@ -61,6 +62,7 @@ class MissionWidgetUpdater {
                     MissionWidgetDataStore().setShowFuelingShip(context, prefShowFuelingShip)
                     MissionWidgetDataStore().setOpenEggInc(context, prefOpenEggInc)
                     MissionWidgetDataStore().setShowTankLevels(context, prefShowTankLevels)
+                    MissionWidgetDataStore().setUseSliderCapacity(context, prefUseSliderCapacity)
                 }
             } catch (e: Exception) {
                 throw e

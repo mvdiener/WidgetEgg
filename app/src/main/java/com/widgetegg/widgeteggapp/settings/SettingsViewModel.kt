@@ -144,4 +144,26 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun updateShowBatteryOptimizationDialog(input: Boolean) {
         showBatteryOptimizationDialog = input
     }
+
+    var useSliderCapacity by mutableStateOf(false)
+        private set
+
+    fun updateUseSliderCapacity(input: Boolean) {
+        useSliderCapacity = input
+        runBlocking {
+            preferences.saveUseSliderCapacity(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setUseSliderCapacity(context, input)
+        }
+    }
+
+    var showSliderCapacityDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowSliderCapacityDialog(input: Boolean) {
+        showSliderCapacityDialog = input
+    }
 }
