@@ -182,7 +182,9 @@ class MissionWidgetDataStore {
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
         val missionWidgetMinimalIds =
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
-        (missionWidgetNormalIds + missionWidgetMinimalIds)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs.clear()
