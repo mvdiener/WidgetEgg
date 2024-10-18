@@ -85,7 +85,7 @@ fun SettingsScreen(navController: NavController) {
 
     Column(
         modifier = Modifier
-            .padding(top = 100.dp)
+            .padding(vertical = 100.dp)
             .verticalScroll(rememberScrollState())
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
