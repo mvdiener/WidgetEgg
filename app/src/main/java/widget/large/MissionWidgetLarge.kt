@@ -42,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.bitmapResize
 import tools.createCircularProgressBarBitmap
+import tools.getBlankMission
 import tools.getEggName
 import tools.getFuelAmount
 import tools.getFuelPercentFilled
@@ -113,14 +114,18 @@ class MissionWidgetLarge : GlanceAppWidget() {
                     NoMissionsContentLarge(assetManager)
                 } else {
 
-                    val missionsWithFuel: List<MissionInfoEntry> =
+                    val adjustedMissions: List<MissionInfoEntry> =
                         if (showTankLevels) {
                             getMissionsWithFuelTank(missionData)
                         } else {
-                            missionData
+                            if (missionData.size % 2 == 1) {
+                                getBlankMission(missionData)
+                            } else {
+                                missionData
+                            }
                         }
 
-                    val missionsChunked = missionsWithFuel.chunked(2)
+                    val missionsChunked = adjustedMissions.chunked(2)
                     missionsChunked.forEach { missionGroup ->
                         Row(
                             modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
@@ -133,15 +138,27 @@ class MissionWidgetLarge : GlanceAppWidget() {
                                         .padding(start = 10.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    if (mission.identifier == "fuelTankMission") {
-                                        TankInfoContent(tankInfo, useSliderCapacity, assetManager)
-                                    } else {
-                                        MissionProgressLarge(
-                                            assetManager,
-                                            mission,
-                                            useAbsoluteTime,
-                                            showTargetArtifact
-                                        )
+                                    when (mission.identifier) {
+                                        "fuelTankMission" -> {
+                                            TankInfoContent(
+                                                tankInfo,
+                                                useSliderCapacity,
+                                                assetManager
+                                            )
+                                        }
+
+                                        "blankMission" -> {
+                                            BlankMissionContent()
+                                        }
+
+                                        else -> {
+                                            MissionProgressLarge(
+                                                assetManager,
+                                                mission,
+                                                useAbsoluteTime,
+                                                showTargetArtifact
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -366,4 +383,9 @@ fun TankInfoContent(tankInfo: TankInfo, useSliderCapacity: Boolean, assetManager
             }
         }
     }
+}
+
+@Composable
+fun BlankMissionContent() {
+    Column(modifier = GlanceModifier.fillMaxWidth().padding(end = 10.dp)) { }
 }

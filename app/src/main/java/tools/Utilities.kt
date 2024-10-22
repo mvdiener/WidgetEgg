@@ -139,6 +139,24 @@ fun getMissionsWithFuelTank(missions: List<MissionInfoEntry>): List<MissionInfoE
     return missionsCopy
 }
 
+// When using the large widget, if you are not showing tanks and have an odd number of missions (1 or 3)
+// the spacing gets really weird. So add an empty mission to take up the extra space
+fun getBlankMission(missions: List<MissionInfoEntry>): List<MissionInfoEntry> {
+    val blankMission = MissionInfoEntry(
+        secondsRemaining = 0.0,
+        missionDuration = 0.0,
+        date = 0,
+        shipId = 0,
+        capacity = 0,
+        shipLevel = 0,
+        targetArtifact = 0,
+        durationType = 0,
+        identifier = "blankMission"
+    )
+
+    return missions + blankMission
+}
+
 fun createCircularProgressBarBitmap(
     progress: Float,
     durationType: Int,
