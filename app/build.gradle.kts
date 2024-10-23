@@ -16,8 +16,8 @@ android {
         applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.0.2"
+        versionCode = 7
+        versionName = "1.1.0"
 
         ndk {
             debugSymbolLevel = "SYMBOL_TABLE"
@@ -60,7 +60,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.13"
     }
     packaging {
         resources {
