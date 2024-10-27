@@ -25,6 +25,7 @@ class PreferencesDatastore(context: Context) {
         private val MISSION_INFO = stringPreferencesKey("missionInfo")
         private val TANK_INFO = stringPreferencesKey("tankInfo")
         private val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
+        private val USE_ABSOLUTE_TIME_PLUS_DAY = booleanPreferencesKey("useAbsoluteTimePlusDay")
         private val TARGET_ARTIFACT_NORMAL_WIDGET =
             booleanPreferencesKey("targetArtifactNormalWidget")
         private val TARGET_ARTIFACT_LARGE_WIDGET =
@@ -39,6 +40,7 @@ class PreferencesDatastore(context: Context) {
             MISSION_INFO,
             TANK_INFO,
             USE_ABSOLUTE_TIME,
+            USE_ABSOLUTE_TIME_PLUS_DAY,
             TARGET_ARTIFACT_NORMAL_WIDGET,
             TARGET_ARTIFACT_LARGE_WIDGET,
             SHOW_FUELING_SHIP,
@@ -111,6 +113,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveUseAbsoluteTime(useAbsoluteTime: Boolean) {
         dataStore.edit {
             it[USE_ABSOLUTE_TIME] = useAbsoluteTime
+        }
+    }
+
+    suspend fun getUseAbsoluteTimePlusDay() = dataStore.data.map {
+        it[USE_ABSOLUTE_TIME_PLUS_DAY] ?: false
+    }.first()
+
+    suspend fun saveUseAbsoluteTimePlusDay(useAbsoluteTimePlusDay: Boolean) {
+        dataStore.edit {
+            it[USE_ABSOLUTE_TIME_PLUS_DAY] = useAbsoluteTimePlusDay
         }
     }
 

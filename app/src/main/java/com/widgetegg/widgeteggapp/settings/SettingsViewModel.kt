@@ -42,6 +42,28 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showAbsoluteTimeDialog = input
     }
 
+    var useAbsoluteTimePlusDay by mutableStateOf(false)
+        private set
+
+    fun updateUseAbsoluteTimePlusDay(input: Boolean) {
+        useAbsoluteTimePlusDay = input
+        runBlocking {
+            preferences.saveUseAbsoluteTimePlusDay(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setUseAbsoluteTimePlusDay(context, input)
+        }
+    }
+
+    var showAbsoluteTimePlusDayDialog by mutableStateOf(false)
+        private set
+
+    fun updateAbsoluteTimePlusDayDialog(input: Boolean) {
+        showAbsoluteTimePlusDayDialog = input
+    }
+
     var openEggInc by mutableStateOf(false)
         private set
 

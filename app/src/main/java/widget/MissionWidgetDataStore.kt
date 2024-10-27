@@ -19,6 +19,7 @@ data object MissionWidgetDataStorePreferencesKeys {
     val MISSION_INFO = stringPreferencesKey("widgetMissionInfo")
     val TANK_INFO = stringPreferencesKey("widgetTankInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("widgetUseAbsoluteTime")
+    val USE_ABSOLUTE_TIME_PLUS_DAY = booleanPreferencesKey("widgetUseAbsoluteTimePlusDay")
     val TARGET_ARTIFACT_NORMAL_WIDGET = booleanPreferencesKey("widgetNormalTargetArtifact")
     val TARGET_ARTIFACT_LARGE_WIDGET = booleanPreferencesKey("widgetLargeTargetArtifact")
     val SHOW_FUELING_SHIP = booleanPreferencesKey("widgetShowFuelingShip")
@@ -100,6 +101,22 @@ class MissionWidgetDataStore {
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = useAbsoluteTime
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setUseAbsoluteTimePlusDay(context: Context, useAbsoluteTimePlusDay: Boolean) {
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetLargeIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] =
+                        useAbsoluteTimePlusDay
                 }
             }
 

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
+import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
@@ -71,6 +72,8 @@ class MissionWidgetLarge : GlanceAppWidget() {
             )
             val useAbsoluteTime =
                 state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
+            val useAbsoluteTimePlusDay =
+                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] ?: false
             val showTargetArtifact =
                 state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] ?: false
             val showTankLevels =
@@ -113,7 +116,6 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 if (eid.isBlank() || missionData.isEmpty()) {
                     NoMissionsContentLarge(assetManager)
                 } else {
-
                     val adjustedMissions: List<MissionInfoEntry> =
                         if (showTankLevels) {
                             getMissionsWithFuelTank(missionData)
@@ -125,6 +127,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
                             }
                         }
 
+                    val use24HrFormat = DateFormat.is24HourFormat(context)
                     val missionsChunked = adjustedMissions.chunked(2)
                     missionsChunked.forEach { missionGroup ->
                         Row(
@@ -156,6 +159,8 @@ class MissionWidgetLarge : GlanceAppWidget() {
                                                 assetManager,
                                                 mission,
                                                 useAbsoluteTime,
+                                                useAbsoluteTimePlusDay,
+                                                use24HrFormat,
                                                 showTargetArtifact
                                             )
                                         }
@@ -203,6 +208,8 @@ fun MissionProgressLarge(
     assetManager: AssetManager,
     mission: MissionInfoEntry,
     useAbsoluteTime: Boolean,
+    useAbsoluteTimePlusDay: Boolean,
+    use24HrFormat: Boolean,
     showTargetArtifact: Boolean
 ) {
     val isFueling = mission.identifier.isBlank()
@@ -246,11 +253,17 @@ fun MissionProgressLarge(
     val artifactName = getImageFromAfxId(mission.targetArtifact)
 
     Column(
-        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 10.dp),
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 2.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.End
     ) {
-        TimeRemainingContent(isFueling, useAbsoluteTime, mission)
+        TimeRemainingContent(
+            isFueling,
+            useAbsoluteTime,
+            useAbsoluteTimePlusDay,
+            use24HrFormat,
+            mission
+        )
         MissionLevelContent(mission)
         CapacityContent(mission, assetManager)
         if (showTargetArtifact && artifactName.isNotBlank()) {
@@ -260,7 +273,13 @@ fun MissionProgressLarge(
 }
 
 @Composable
-fun TimeRemainingContent(isFueling: Boolean, useAbsoluteTime: Boolean, mission: MissionInfoEntry) {
+fun TimeRemainingContent(
+    isFueling: Boolean,
+    useAbsoluteTime: Boolean,
+    useAbsoluteTimePlusDay: Boolean,
+    use24HrFormat: Boolean,
+    mission: MissionInfoEntry
+) {
     Text(
         text =
         if (isFueling) {
@@ -269,7 +288,9 @@ fun TimeRemainingContent(isFueling: Boolean, useAbsoluteTime: Boolean, mission: 
             getMissionDurationRemaining(
                 mission.secondsRemaining,
                 mission.date,
-                useAbsoluteTime
+                useAbsoluteTime,
+                useAbsoluteTimePlusDay,
+                use24HrFormat
             )
         },
         style = TextStyle(

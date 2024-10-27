@@ -18,6 +18,7 @@ class MissionWidgetUpdater {
 
             val prefEid = preferences.getEid()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
+            val prefUseAbsoluteTimePlusDay = preferences.getUseAbsoluteTimePlusDay()
             val prefTargetArtifactNormalWidget = preferences.getTargetArtifactNormalWidget()
             val prefTargetArtifactLargeWidget = preferences.getTargetArtifactLargeWidget()
             val prefShowFuelingShip = preferences.getShowFuelingShip()
@@ -51,6 +52,10 @@ class MissionWidgetUpdater {
 
                     MissionWidgetDataStore().setEid(context, prefEid)
                     MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
+                    MissionWidgetDataStore().setUseAbsoluteTimePlusDay(
+                        context,
+                        prefUseAbsoluteTimePlusDay
+                    )
                     MissionWidgetDataStore().setTargetArtifactNormalWidget(
                         context,
                         prefTargetArtifactNormalWidget
