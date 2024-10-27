@@ -57,6 +57,7 @@ fun SettingsScreen(navController: NavController) {
         settingsViewModel.updateShowTargetArtifactLargeWidget(preferences.getTargetArtifactLargeWidget())
         settingsViewModel.updateShowTankLevels(preferences.getShowTankLevels())
         settingsViewModel.updateUseSliderCapacity(preferences.getUseSliderCapacity())
+        settingsViewModel.updateUseAbsoluteTimePlusDay(preferences.getUseAbsoluteTimePlusDay())
     }
 
     val packageName = context.packageName
@@ -195,6 +196,7 @@ fun AllWidgetsGroup(settingsViewModel: SettingsViewModel) {
     ) {
         Text(text = "General", fontSize = TextUnit(18f, TextUnitType.Sp))
         AbsoluteTimeRow(settingsViewModel)
+        AbsoluteTimePlusDayRow(settingsViewModel)
         OpenEggIncRow(settingsViewModel)
     }
 }
@@ -254,6 +256,9 @@ fun AbsoluteTimeRow(settingsViewModel: SettingsViewModel) {
             checked = settingsViewModel.useAbsoluteTime,
             onCheckedChange = {
                 settingsViewModel.updateUseAbsoluteTime(!settingsViewModel.useAbsoluteTime)
+                if (!settingsViewModel.useAbsoluteTime) {
+                    settingsViewModel.updateUseAbsoluteTimePlusDay(false)
+                }
             }
         )
     }
@@ -282,6 +287,70 @@ fun AbsoluteTimeDialog(settingsViewModel: SettingsViewModel) {
                         If a ship has less than 24 hours left, show the time of return instead of the time remaining.
                         
                         Only applies to widgets that show a time.
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun AbsoluteTimePlusDayRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Including 24hrs")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Absolute time plus day info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateAbsoluteTimePlusDayDialog(true)
+                    }
+            )
+            AbsoluteTimePlusDayDialog(settingsViewModel)
+        }
+
+        Switch(
+            checked = settingsViewModel.useAbsoluteTimePlusDay,
+            onCheckedChange = {
+                settingsViewModel.updateUseAbsoluteTimePlusDay(!settingsViewModel.useAbsoluteTimePlusDay)
+            },
+            enabled = settingsViewModel.useAbsoluteTime
+        )
+    }
+}
+
+@Composable
+fun AbsoluteTimePlusDayDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showAbsoluteTimePlusDayDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateAbsoluteTimePlusDayDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                    """
+                        Show the time of return even if there are more than 24 hours left.
+                        
+                        Show absolute time must be enabled for this to take effect. Only applies to widgets that show a time.
                     """.trimIndent()
                 )
             }

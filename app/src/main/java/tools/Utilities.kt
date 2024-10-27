@@ -28,17 +28,23 @@ fun getMissionPercentComplete(
 fun getMissionDurationRemaining(
     timeRemaining: Double,
     savedTime: Long,
-    useAbsoluteTime: Boolean
+    useAbsoluteTime: Boolean,
+    useAbsoluteTimePlusDay: Boolean,
+    use24HrFormat: Boolean
 ): String {
     val newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
     return if (newTimeRemaining <= 0) {
         "Finished!"
     } else {
         val days = newTimeRemaining / 86400
-        if (useAbsoluteTime && days < 1) {
+        if (useAbsoluteTime && (useAbsoluteTimePlusDay || days < 1)) {
             val currentTime = LocalDateTime.now()
             val endingTime = currentTime.plusSeconds(newTimeRemaining.toLong())
-            endingTime.format(DateTimeFormatter.ofPattern("h:mm a"))
+            if (use24HrFormat) {
+                endingTime.format(DateTimeFormatter.ofPattern("H:mm"))
+            } else {
+                endingTime.format(DateTimeFormatter.ofPattern("h:mm a"))
+            }
         } else {
             val hoursMinusDays = (newTimeRemaining % 86400) / 3600
             val hours = newTimeRemaining / 3600

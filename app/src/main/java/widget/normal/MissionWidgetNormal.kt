@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
+import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
@@ -61,6 +62,8 @@ class MissionWidgetNormal : GlanceAppWidget() {
                 )
             val useAbsoluteTime =
                 state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
+            val useAbsoluteTimePlusDay =
+                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] ?: false
             val showTargetArtifact =
                 state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_NORMAL_WIDGET] ?: false
             val showFuelingShip =
@@ -106,6 +109,7 @@ class MissionWidgetNormal : GlanceAppWidget() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val use24HrFormat = DateFormat.is24HourFormat(context)
                         missionData.forEach { mission ->
                             if (mission.identifier.isBlank() && !showFuelingShip) return@forEach
                             Column(
@@ -118,6 +122,8 @@ class MissionWidgetNormal : GlanceAppWidget() {
                                     assetManager,
                                     mission,
                                     useAbsoluteTime,
+                                    useAbsoluteTimePlusDay,
+                                    use24HrFormat,
                                     showTargetArtifact
                                 )
                             }
@@ -162,6 +168,8 @@ fun MissionProgress(
     assetManager: AssetManager,
     mission: MissionInfoEntry,
     useAbsoluteTime: Boolean,
+    useAbsoluteTimePlusDay: Boolean,
+    use24HrFormat: Boolean,
     showTargetArtifact: Boolean
 ) {
     val isFueling = mission.identifier.isBlank()
@@ -238,7 +246,9 @@ fun MissionProgress(
                 getMissionDurationRemaining(
                     mission.secondsRemaining,
                     mission.date,
-                    useAbsoluteTime
+                    useAbsoluteTime,
+                    useAbsoluteTimePlusDay,
+                    use24HrFormat
                 )
             },
             style = TextStyle(
