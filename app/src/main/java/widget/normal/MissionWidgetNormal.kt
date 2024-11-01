@@ -243,13 +243,18 @@ fun MissionProgress(
             if (isFueling) {
                 "Fueling"
             } else {
-                getMissionDurationRemaining(
+                val (timeText, plusDay) = getMissionDurationRemaining(
                     mission.secondsRemaining,
                     mission.date,
                     useAbsoluteTime,
                     useAbsoluteTimePlusDay,
                     use24HrFormat
                 )
+                if (useAbsoluteTimePlusDay && plusDay) {
+                    "$timeText⁺¹"
+                } else {
+                    timeText
+                }
             },
             style = TextStyle(
                 color = ColorProvider(Color.White),

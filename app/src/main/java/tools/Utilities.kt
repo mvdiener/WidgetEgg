@@ -31,17 +31,17 @@ fun getMissionDurationRemaining(
     useAbsoluteTime: Boolean,
     useAbsoluteTimePlusDay: Boolean,
     use24HrFormat: Boolean
-): String {
+): Pair<String, Boolean> {
     val newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
     return if (newTimeRemaining <= 0) {
-        "Finished!"
+        Pair("Finished", false)
     } else {
         val days = newTimeRemaining / 86400
-        if (useAbsoluteTime && (useAbsoluteTimePlusDay || days < 1)) {
+        val timeText = if (useAbsoluteTime && (useAbsoluteTimePlusDay || days < 1)) {
             val currentTime = LocalDateTime.now()
             val endingTime = currentTime.plusSeconds(newTimeRemaining.toLong())
             if (use24HrFormat) {
-                endingTime.format(DateTimeFormatter.ofPattern("H:mm"))
+                endingTime.format(DateTimeFormatter.ofPattern("HH:mm"))
             } else {
                 endingTime.format(DateTimeFormatter.ofPattern("h:mm a"))
             }
@@ -64,6 +64,8 @@ fun getMissionDurationRemaining(
                 }
             }
         }
+
+        Pair(timeText, days >= 1)
     }
 }
 
@@ -146,8 +148,9 @@ fun getMissionsWithFuelTank(missions: List<MissionInfoEntry>): List<MissionInfoE
 }
 
 // When using the large widget, if you are not showing tanks and have an odd number of missions (1 or 3)
+// OR you are showing tanks and have an even number of missions (2)
 // the spacing gets really weird. So add an empty mission to take up the extra space
-fun getBlankMission(missions: List<MissionInfoEntry>): List<MissionInfoEntry> {
+fun getMissionsWithBlankMission(missions: List<MissionInfoEntry>): List<MissionInfoEntry> {
     val blankMission = MissionInfoEntry(
         secondsRemaining = 0.0,
         missionDuration = 0.0,

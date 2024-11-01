@@ -43,7 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.bitmapResize
 import tools.createCircularProgressBarBitmap
-import tools.getBlankMission
+import tools.getMissionsWithBlankMission
 import tools.getEggName
 import tools.getFuelAmount
 import tools.getFuelPercentFilled
@@ -118,10 +118,14 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 } else {
                     val adjustedMissions: List<MissionInfoEntry> =
                         if (showTankLevels) {
-                            getMissionsWithFuelTank(missionData)
+                            if (missionData.count { m -> m.identifier.isNotBlank() } == 2) {
+                                getMissionsWithBlankMission(getMissionsWithFuelTank(missionData))
+                            } else {
+                                getMissionsWithFuelTank(missionData)
+                            }
                         } else {
                             if (missionData.size % 2 == 1) {
-                                getBlankMission(missionData)
+                                getMissionsWithBlankMission(missionData)
                             } else {
                                 missionData
                             }
@@ -285,13 +289,18 @@ fun TimeRemainingContent(
         if (isFueling) {
             "Fueling"
         } else {
-            getMissionDurationRemaining(
+            val (timeText, plusDay) = getMissionDurationRemaining(
                 mission.secondsRemaining,
                 mission.date,
                 useAbsoluteTime,
                 useAbsoluteTimePlusDay,
                 use24HrFormat
             )
+            if (useAbsoluteTimePlusDay && plusDay) {
+                "$timeText⁺¹"
+            } else {
+                timeText
+            }
         },
         style = TextStyle(
             color = ColorProvider(Color.White),
