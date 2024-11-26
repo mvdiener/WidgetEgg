@@ -5,6 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -30,7 +33,8 @@ class MainActivity : ComponentActivity() {
                             composable(Routes.settingsScreen) {
                                 SettingsScreen(navController)
                             }
-                        })
+                        },
+                        modifier = Modifier.semantics { contentDescription = "WidgetEgg" })
                 }
             }
         }
