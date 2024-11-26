@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,7 +56,8 @@ fun MainScreen(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(end = 25.dp, top = 50.dp),
+            .padding(end = 25.dp, top = 50.dp)
+            .semantics { contentDescription = "Main Screen" },
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.Top
     ) {
@@ -175,6 +178,7 @@ fun EidInput(signInViewModel: SignInViewModel) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 5.dp)
+            .semantics { contentDescription = "EID Input" }
     )
 }
 
