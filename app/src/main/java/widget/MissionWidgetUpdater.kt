@@ -1,12 +1,15 @@
 package widget
 
 import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import api.fetchData
 import data.MissionInfoEntry
 import kotlinx.coroutines.runBlocking
 import tools.formatMissionData
 import tools.formatTankInfo
 import user.preferences.PreferencesDatastore
+import widget.large.MissionWidgetLarge
+import widget.normal.MissionWidgetNormal
 import java.time.Instant
 
 class MissionWidgetUpdater {
@@ -28,14 +31,7 @@ class MissionWidgetUpdater {
 
             try {
                 if (prefEid.isNotBlank()) {
-                    // Only make an api call if:
-                    // preferencesMissionData is has less than 3 active missions, meaning all active missions haven't been saved
-                    // preferencesMissionData has complete missions, meaning we need to fetch new active missions
-                    // preferencesShowFuelingShip is enabled, meaning we want fresh data every time
-                    if (numOfActiveMissions(preferencesMissionData) < 3 || anyMissionsComplete(
-                            preferencesMissionData
-                        ) || prefShowFuelingShip || prefShowTankLevels
-                    ) {
+                    if (shouldMakeApiCall(context, preferencesMissionData, prefShowFuelingShip)) {
                         val missionInfo = fetchData(prefEid)
                         preferencesMissionData = formatMissionData(missionInfo)
                         preferencesTankInfo = formatTankInfo(missionInfo)
@@ -84,6 +80,37 @@ class MissionWidgetUpdater {
     private fun anyMissionsComplete(missions: List<MissionInfoEntry>): Boolean {
         return missions.any { mission ->
             mission.identifier.isNotBlank() && mission.secondsRemaining - (Instant.now().epochSecond - mission.date) <= 0
+        }
+    }
+
+    private suspend fun shouldMakeApiCall(
+        context: Context,
+        preferencesMissionData: List<MissionInfoEntry>,
+        prefShowFuelingShip: Boolean
+    ): Boolean {
+        // Only make an api call if:
+        // preferencesMissionData has less than 3 active missions, meaning all active missions haven't been saved
+        // preferencesMissionData has complete missions, meaning we need to fetch new active missions
+        // preferencesShowFuelingShip is enabled for the normal widget, meaning we want fresh data every time
+        // the user has any large widgets, as this widget either needs up-to-date fueling ship or fuel tank info
+        return if (numOfActiveMissions(preferencesMissionData) < 3
+            || anyMissionsComplete(
+                preferencesMissionData
+            )
+        ) {
+            true
+        } else if (prefShowFuelingShip && GlanceAppWidgetManager(context).getGlanceIds(
+                MissionWidgetNormal::class.java
+            ).isNotEmpty()
+        ) {
+            true
+        } else if (GlanceAppWidgetManager(context).getGlanceIds(
+                MissionWidgetLarge::class.java
+            ).isNotEmpty()
+        ) {
+            true
+        } else {
+            false
         }
     }
 }
