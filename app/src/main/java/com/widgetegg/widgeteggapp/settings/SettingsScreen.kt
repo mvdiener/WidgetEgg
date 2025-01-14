@@ -2,7 +2,9 @@ package com.widgetegg.widgeteggapp.settings
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.background
@@ -37,16 +39,19 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
 
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen(navController: NavController, activity: MainActivity) {
     val settingsViewModel = viewModel<SettingsViewModel>()
 
     val context = LocalContext.current
@@ -60,6 +65,7 @@ fun SettingsScreen(navController: NavController) {
         settingsViewModel.updateShowTankLevels(preferences.getShowTankLevels())
         settingsViewModel.updateUseSliderCapacity(preferences.getUseSliderCapacity())
         settingsViewModel.updateUseAbsoluteTimePlusDay(preferences.getUseAbsoluteTimePlusDay())
+        settingsViewModel.updateSendNotifications(preferences.getSendNotifications())
     }
 
     val packageName = context.packageName
@@ -67,8 +73,35 @@ fun SettingsScreen(navController: NavController) {
         context.getSystemService(Context.POWER_SERVICE) as PowerManager
     settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
 
+    val hasNotificationPermissions =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    settingsViewModel.updateHasNotificationPermissions(hasNotificationPermissions)
+    if (!hasNotificationPermissions) {
+        settingsViewModel.updateSendNotifications(false)
+    }
+
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val onResumeNotificationPermissions = ContextCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            settingsViewModel.updateHasNotificationPermissions(
+                onResumeNotificationPermissions
+            )
+            if (!onResumeNotificationPermissions) {
+                settingsViewModel.updateSendNotifications(false)
+            }
+        }
     }
 
     Column(
@@ -101,7 +134,7 @@ fun SettingsScreen(navController: NavController) {
             BatteryPermissionsContent(settingsViewModel, packageName, context)
         }
 
-        AllWidgetsGroup(settingsViewModel)
+        AllWidgetsGroup(settingsViewModel, packageName, context, activity)
         NormalWidgetGroup(settingsViewModel)
         LargeWidgetGroup(settingsViewModel)
     }
@@ -191,7 +224,12 @@ fun BatteryPermissionsDialog(
 }
 
 @Composable
-fun AllWidgetsGroup(settingsViewModel: SettingsViewModel) {
+fun AllWidgetsGroup(
+    settingsViewModel: SettingsViewModel,
+    packageName: String,
+    context: Context,
+    activity: MainActivity
+) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
         horizontalAlignment = Alignment.Start,
@@ -201,6 +239,7 @@ fun AllWidgetsGroup(settingsViewModel: SettingsViewModel) {
         AbsoluteTimeRow(settingsViewModel)
         AbsoluteTimePlusDayRow(settingsViewModel)
         OpenEggIncRow(settingsViewModel)
+        SendNotificationsRow(settingsViewModel, packageName, context, activity)
     }
 }
 
@@ -419,6 +458,101 @@ fun OpenEggIncDialog(settingsViewModel: SettingsViewModel) {
                         Automatic widget updates every 15 minutes will still happen independent of this setting.
                     """.trimIndent()
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun SendNotificationsRow(
+    settingsViewModel: SettingsViewModel,
+    packageName: String,
+    context: Context,
+    activity: MainActivity
+) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Notify on ship return")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Notifications info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowNotificationsDialog(true)
+                    }
+            )
+            SendNotificationsDialog(settingsViewModel, packageName, context)
+        }
+
+        Switch(
+            checked = settingsViewModel.sendNotifications,
+            onCheckedChange = {
+                if (settingsViewModel.hasNotificationPermissions) {
+                    settingsViewModel.updateSendNotifications(!settingsViewModel.sendNotifications)
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        ActivityCompat.requestPermissions(
+                            activity,
+                            arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                            101
+                        )
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun SendNotificationsDialog(
+    settingsViewModel: SettingsViewModel,
+    packageName: String,
+    context: Context
+) {
+    if (settingsViewModel.showNotificationsDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowNotificationsDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                    """
+                        The app will attempt to send notifications at the time of return for any in-flight ship.   
+                        
+                        If you have previously denied notification permissions, you will need to manually enable it within app settings.
+                    """.trimIndent()
+                )
+                Button(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 5.dp),
+                    onClick = {
+                        settingsViewModel.updateShowNotificationsDialog(false)
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = Uri.parse("package:$packageName")
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text(text = "App Settings")
+                }
             }
         }
     }

@@ -34,6 +34,7 @@ class PreferencesDatastore(context: Context) {
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
         private val USE_SLIDER_CAPACITY = booleanPreferencesKey("useSliderCapacity")
         private val OPEN_EGG_INC = booleanPreferencesKey("openEggInc")
+        private val SEND_NOTIFICATIONS = booleanPreferencesKey("sendNotifications")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
@@ -46,7 +47,8 @@ class PreferencesDatastore(context: Context) {
             SHOW_FUELING_SHIP,
             SHOW_TANK_LEVELS,
             USE_SLIDER_CAPACITY,
-            OPEN_EGG_INC
+            OPEN_EGG_INC,
+            SEND_NOTIFICATIONS
         )
     }
 
@@ -183,6 +185,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveOpenEggInc(openEggInc: Boolean) {
         dataStore.edit {
             it[OPEN_EGG_INC] = openEggInc
+        }
+    }
+
+    suspend fun getSendNotifications() = dataStore.data.map {
+        it[SEND_NOTIFICATIONS] ?: false
+    }.first()
+
+    suspend fun saveSendNotifications(sendNotifications: Boolean) {
+        dataStore.edit {
+            it[SEND_NOTIFICATIONS] = sendNotifications
         }
     }
 

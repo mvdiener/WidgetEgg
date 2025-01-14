@@ -188,4 +188,28 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun updateShowSliderCapacityDialog(input: Boolean) {
         showSliderCapacityDialog = input
     }
+
+    var hasNotificationPermissions by mutableStateOf(false)
+        private set
+
+    fun updateHasNotificationPermissions(input: Boolean) {
+        hasNotificationPermissions = input
+    }
+
+    var sendNotifications by mutableStateOf(false)
+        private set
+
+    fun updateSendNotifications(input: Boolean) {
+        sendNotifications = input
+        runBlocking {
+            preferences.saveSendNotifications(input)
+        }
+    }
+
+    var showNotificationsDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowNotificationsDialog(input: Boolean) {
+        showNotificationsDialog = input
+    }
 }
