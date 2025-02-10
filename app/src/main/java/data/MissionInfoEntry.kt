@@ -13,5 +13,6 @@ data class MissionInfoEntry(
     var shipLevel: Int,
     var targetArtifact: Int,
     var durationType: Int,
-    var identifier: String
+    var identifier: String,
+    var eventScheduled: Boolean
 )

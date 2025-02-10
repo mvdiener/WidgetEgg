@@ -7,6 +7,7 @@ import data.MissionInfoEntry
 import kotlinx.coroutines.runBlocking
 import tools.formatMissionData
 import tools.formatTankInfo
+import tools.scheduleCalendarEvents
 import user.preferences.PreferencesDatastore
 import widget.large.MissionWidgetLarge
 import widget.normal.MissionWidgetNormal
@@ -20,6 +21,7 @@ class MissionWidgetUpdater {
             var preferencesTankInfo = preferences.getTankInfo()
 
             val prefEid = preferences.getEid()
+            val prefEiUserName = preferences.getEiUserName()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
             val prefUseAbsoluteTimePlusDay = preferences.getUseAbsoluteTimePlusDay()
             val prefTargetArtifactNormalWidget = preferences.getTargetArtifactNormalWidget()
@@ -28,13 +30,20 @@ class MissionWidgetUpdater {
             val prefOpenEggInc = preferences.getOpenEggInc()
             val prefShowTankLevels = preferences.getShowTankLevels()
             val prefUseSliderCapacity = preferences.getUseSliderCapacity()
+            val prefScheduleEvents = preferences.getScheduleEvents()
 
             try {
                 if (prefEid.isNotBlank()) {
                     if (shouldMakeApiCall(context, preferencesMissionData, prefShowFuelingShip)) {
                         val missionInfo = fetchData(prefEid)
-                        preferencesMissionData = formatMissionData(missionInfo)
+                        preferencesMissionData =
+                            formatMissionData(missionInfo, preferencesMissionData)
                         preferencesTankInfo = formatTankInfo(missionInfo)
+                    }
+
+                    if (prefScheduleEvents) {
+                        preferencesMissionData =
+                            scheduleCalendarEvents(context, preferencesMissionData, prefEiUserName)
                     }
 
                     // Mission data and tank fuels need to get saved back to preferences because they are changing regularly

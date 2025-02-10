@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import data.CalendarEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -189,27 +190,37 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showSliderCapacityDialog = input
     }
 
-    var hasNotificationPermissions by mutableStateOf(false)
+    var hasScheduleEventPermissions by mutableStateOf(false)
         private set
 
-    fun updateHasNotificationPermissions(input: Boolean) {
-        hasNotificationPermissions = input
+    fun updateHasScheduleEventPermissions(input: Boolean) {
+        hasScheduleEventPermissions = input
     }
 
-    var sendNotifications by mutableStateOf(false)
+    var scheduleEvents by mutableStateOf(false)
         private set
 
-    fun updateSendNotifications(input: Boolean) {
-        sendNotifications = input
+    fun updateScheduleEvents(input: Boolean) {
+        scheduleEvents = input
         runBlocking {
-            preferences.saveSendNotifications(input)
+            preferences.saveScheduleEvents(input)
         }
     }
 
-    var showNotificationsDialog by mutableStateOf(false)
+    var showScheduleEventsDialog by mutableStateOf(false)
         private set
 
-    fun updateShowNotificationsDialog(input: Boolean) {
-        showNotificationsDialog = input
+    fun updateShowScheduleEventsDialog(input: Boolean) {
+        showScheduleEventsDialog = input
+    }
+
+    var selectedCalendar by mutableStateOf(CalendarEntry())
+        private set
+
+    fun updateSelectedCalendar(input: CalendarEntry) {
+        selectedCalendar = input
+        runBlocking {
+            preferences.saveSelectedCalendar(input)
+        }
     }
 }

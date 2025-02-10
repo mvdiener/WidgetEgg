@@ -1,11 +1,12 @@
 package com.widgetegg.widgeteggapp.settings
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.PowerManager
+import android.provider.CalendarContract.Calendars
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,11 +25,20 @@ import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,14 +50,15 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
+import data.CalendarEntry
 import kotlinx.coroutines.runBlocking
+import tools.hasCalendarPermissions
 import user.preferences.PreferencesDatastore
 
 @Composable
@@ -65,7 +76,8 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
         settingsViewModel.updateShowTankLevels(preferences.getShowTankLevels())
         settingsViewModel.updateUseSliderCapacity(preferences.getUseSliderCapacity())
         settingsViewModel.updateUseAbsoluteTimePlusDay(preferences.getUseAbsoluteTimePlusDay())
-        settingsViewModel.updateSendNotifications(preferences.getSendNotifications())
+        settingsViewModel.updateScheduleEvents(preferences.getScheduleEvents())
+        settingsViewModel.updateSelectedCalendar(preferences.getSelectedCalendar())
     }
 
     val packageName = context.packageName
@@ -73,34 +85,22 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
         context.getSystemService(Context.POWER_SERVICE) as PowerManager
     settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
 
-    val hasNotificationPermissions =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true
-        }
-    settingsViewModel.updateHasNotificationPermissions(hasNotificationPermissions)
-    if (!hasNotificationPermissions) {
-        settingsViewModel.updateSendNotifications(false)
+    val hasScheduleEventPermissions = hasCalendarPermissions(context)
+
+    settingsViewModel.updateHasScheduleEventPermissions(hasScheduleEventPermissions)
+    if (!hasScheduleEventPermissions) {
+        settingsViewModel.updateScheduleEvents(false)
     }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val onResumeNotificationPermissions = ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
+        val onResumeScheduleEventPermissions = hasCalendarPermissions(context)
 
-            settingsViewModel.updateHasNotificationPermissions(
-                onResumeNotificationPermissions
-            )
-            if (!onResumeNotificationPermissions) {
-                settingsViewModel.updateSendNotifications(false)
-            }
+        settingsViewModel.updateHasScheduleEventPermissions(
+            onResumeScheduleEventPermissions
+        )
+        if (!onResumeScheduleEventPermissions) {
+            settingsViewModel.updateScheduleEvents(false)
         }
     }
 
@@ -239,7 +239,10 @@ fun AllWidgetsGroup(
         AbsoluteTimeRow(settingsViewModel)
         AbsoluteTimePlusDayRow(settingsViewModel)
         OpenEggIncRow(settingsViewModel)
-        SendNotificationsRow(settingsViewModel, packageName, context, activity)
+        ScheduleEventsRow(settingsViewModel, packageName, context, activity)
+        if (settingsViewModel.scheduleEvents) {
+            CalendarsDropdownRow(settingsViewModel, context)
+        }
     }
 }
 
@@ -464,7 +467,7 @@ fun OpenEggIncDialog(settingsViewModel: SettingsViewModel) {
 }
 
 @Composable
-fun SendNotificationsRow(
+fun ScheduleEventsRow(
     settingsViewModel: SettingsViewModel,
     packageName: String,
     context: Context,
@@ -478,33 +481,34 @@ fun SendNotificationsRow(
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(text = "Notify on ship return")
+            Text(text = "Schedule calendar events")
             Icon(
                 Icons.Rounded.Info,
-                contentDescription = "Notifications info",
+                contentDescription = "Schedule events info",
                 modifier = Modifier
                     .padding(start = 5.dp)
                     .size(15.dp)
                     .clickable {
-                        settingsViewModel.updateShowNotificationsDialog(true)
+                        settingsViewModel.updateShowScheduleEventsDialog(true)
                     }
             )
-            SendNotificationsDialog(settingsViewModel, packageName, context)
+            ScheduleEventsDialog(settingsViewModel, packageName, context)
         }
 
         Switch(
-            checked = settingsViewModel.sendNotifications,
+            checked = settingsViewModel.scheduleEvents,
             onCheckedChange = {
-                if (settingsViewModel.hasNotificationPermissions) {
-                    settingsViewModel.updateSendNotifications(!settingsViewModel.sendNotifications)
+                if (settingsViewModel.hasScheduleEventPermissions) {
+                    settingsViewModel.updateScheduleEvents(!settingsViewModel.scheduleEvents)
                 } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        ActivityCompat.requestPermissions(
-                            activity,
-                            arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
-                            101
-                        )
-                    }
+                    ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(
+                            android.Manifest.permission.READ_CALENDAR,
+                            android.Manifest.permission.WRITE_CALENDAR
+                        ),
+                        101
+                    )
                 }
             }
         )
@@ -512,15 +516,15 @@ fun SendNotificationsRow(
 }
 
 @Composable
-fun SendNotificationsDialog(
+fun ScheduleEventsDialog(
     settingsViewModel: SettingsViewModel,
     packageName: String,
     context: Context
 ) {
-    if (settingsViewModel.showNotificationsDialog) {
+    if (settingsViewModel.showScheduleEventsDialog) {
         Dialog(
             onDismissRequest = {
-                settingsViewModel.updateShowNotificationsDialog(false)
+                settingsViewModel.updateShowScheduleEventsDialog(false)
             }
         ) {
             Column(
@@ -535,9 +539,9 @@ fun SendNotificationsDialog(
                 Text(
                     text =
                     """
-                        The app will attempt to send notifications at the time of return for any in-flight ship.   
+                        The app will attempt to schedule a calendar event and reminder at the time of return for any in-flight ship.
                         
-                        If you have previously denied notification permissions, you will need to manually enable it within app settings.
+                        If you have previously denied calendar permissions, you will need to manually enable it within app settings.
                     """.trimIndent()
                 )
                 Button(
@@ -545,13 +549,82 @@ fun SendNotificationsDialog(
                         .align(Alignment.CenterHorizontally)
                         .padding(top = 5.dp),
                     onClick = {
-                        settingsViewModel.updateShowNotificationsDialog(false)
+                        settingsViewModel.updateShowScheduleEventsDialog(false)
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         intent.data = Uri.parse("package:$packageName")
                         context.startActivity(intent)
                     }
                 ) {
                     Text(text = "App Settings")
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel, context: Context) {
+    val contentResolver: ContentResolver = context.contentResolver
+    var calendars = listOf<CalendarEntry>()
+
+    val projection = arrayOf(
+        Calendars._ID,
+        Calendars.CALENDAR_DISPLAY_NAME
+    )
+
+    val projectionIdIndex = 0
+    val projectionDisplayNameIndex = 1
+
+    val cursor: Cursor? = contentResolver.query(Calendars.CONTENT_URI, projection, null, null, null)
+
+    cursor?.use {
+        while (it.moveToNext()) {
+            val calendarId = it.getLong(projectionIdIndex)
+            val calendarDisplayName = it.getString(projectionDisplayNameIndex)
+
+            calendars = calendars.plus(CalendarEntry(calendarId, calendarDisplayName))
+        }
+    }
+
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        var isExpanded by remember { mutableStateOf(false) }
+        ExposedDropdownMenuBox(
+            expanded = isExpanded,
+            onExpandedChange = { isExpanded = !isExpanded },
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextField(
+                    value = settingsViewModel.selectedCalendar.displayName,
+                    onValueChange = { },
+                    readOnly = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
+                    }
+                )
+            }
+
+            ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
+                calendars.forEach { calendar ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(calendar.displayName)
+                            }
+                        },
+                        onClick = {
+                            settingsViewModel.updateSelectedCalendar(calendar)
+                        }
+                    )
                 }
             }
         }

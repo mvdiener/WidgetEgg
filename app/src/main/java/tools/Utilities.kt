@@ -1,8 +1,17 @@
 package tools
 
+import android.content.ContentValues
+import android.content.Context
+import android.content.pm.PackageManager
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.net.Uri
+import android.provider.CalendarContract
+import android.provider.CalendarContract.Calendars
+import android.provider.CalendarContract.Reminders
+import androidx.core.content.ContextCompat
 import data.ALL_SHIPS
 import data.FuelLevelInfo
 import data.MissionData
@@ -12,8 +21,10 @@ import data.TankInfo
 import ei.Ei.Egg
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.TimeZone
 
 fun getMissionPercentComplete(
     missionDuration: Double,
@@ -69,10 +80,29 @@ fun getMissionDurationRemaining(
     }
 }
 
-fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
+fun getMissionEndTimeMilliseconds(mission: MissionInfoEntry): Long {
+    val newTimeRemaining = mission.secondsRemaining - (Instant.now().epochSecond - mission.date)
+    if (newTimeRemaining <= 0) {
+        return LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+    }
+
+    val currentTime = LocalDateTime.now()
+    val endingTime = currentTime.plusSeconds(newTimeRemaining.toLong())
+    return endingTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+}
+
+fun formatMissionData(
+    missionInfo: MissionData,
+    existingMissionData: List<MissionInfoEntry>
+): List<MissionInfoEntry> {
     var formattedMissions: List<MissionInfoEntry> = emptyList()
 
     missionInfo.missions.forEach { mission ->
+        // In the case where we are replacing existing mission data with updated numbers
+        // we need to check if we have already scheduled an event for that mission
+        val existingMission =
+            existingMissionData.firstOrNull { it.identifier == mission.identifier }
+
         formattedMissions = formattedMissions.plus(
             MissionInfoEntry(
                 secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
@@ -83,7 +113,8 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
                 shipLevel = mission.level,
                 targetArtifact = mission.targetArtifact.number,
                 durationType = mission.durationType.number,
-                identifier = mission.identifier
+                identifier = mission.identifier,
+                eventScheduled = existingMission?.eventScheduled ?: false
             )
         )
     }
@@ -131,7 +162,8 @@ fun getMissionsWithFuelTank(missions: List<MissionInfoEntry>): List<MissionInfoE
         shipLevel = 0,
         targetArtifact = 0,
         durationType = 0,
-        identifier = "fuelTankMission"
+        identifier = "fuelTankMission",
+        eventScheduled = true
     )
 
     missionsCopy.forEach { mission ->
@@ -160,7 +192,8 @@ fun getMissionsWithBlankMission(missions: List<MissionInfoEntry>): List<MissionI
         shipLevel = 0,
         targetArtifact = 0,
         durationType = 0,
-        identifier = "blankMission"
+        identifier = "blankMission",
+        eventScheduled = true
     )
 
     return missions + blankMission
@@ -315,4 +348,67 @@ fun getFuelAmount(fuelQuantity: Double): String {
     }
 
     return "$formatted$unit"
+}
+
+fun hasCalendarPermissions(context: Context): Boolean {
+    return ContextCompat.checkSelfPermission(
+        context,
+        android.Manifest.permission.READ_CALENDAR
+    ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
+        context,
+        android.Manifest.permission.WRITE_CALENDAR
+    ) == PackageManager.PERMISSION_GRANTED
+}
+
+fun scheduleCalendarEvents(
+    context: Context,
+    missions: List<MissionInfoEntry>,
+    eiUserName: String
+): List<MissionInfoEntry> {
+    if (hasCalendarPermissions(context)) {
+        missions.map { mission ->
+            if (!mission.eventScheduled && mission.identifier.isNotBlank()) {
+                val missionEndTime = getMissionEndTimeMilliseconds(mission)
+                val eventValues = ContentValues().apply {
+                    put(CalendarContract.Events.DTSTART, missionEndTime)
+                    put(CalendarContract.Events.DTEND, missionEndTime)
+                    put(CalendarContract.Events.TITLE, "Ship returning for $eiUserName")
+                    put(CalendarContract.Events.DESCRIPTION, "Ship returning for $eiUserName")
+                    put(CalendarContract.Events.CALENDAR_ID, 3)
+                    put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
+                }
+                val eventUri: Uri? =
+                    context.contentResolver.insert(
+                        CalendarContract.Events.CONTENT_URI,
+                        eventValues
+                    )
+                val eventID: Long = eventUri?.lastPathSegment!!.toLong()
+
+                // Get rid of any default reminders that are automatically added with events
+                removeDefaultReminders(context, eventID)
+
+                // Add our own reminder at the time of the event
+                val reminderValues = ContentValues().apply {
+                    put(Reminders.MINUTES, 0)
+                    put(Reminders.EVENT_ID, eventID)
+                    put(Reminders.METHOD, Reminders.METHOD_ALERT)
+                }
+                context.contentResolver.insert(
+                    Reminders.CONTENT_URI,
+                    reminderValues
+                )
+
+                mission.eventScheduled = true
+            }
+        }
+    }
+
+    return missions
+}
+
+private fun removeDefaultReminders(context: Context, eventId: Long) {
+    val selection = "${Reminders.EVENT_ID} = ?"
+    val selectionArgs = arrayOf(eventId.toString())
+
+    context.contentResolver.delete(Reminders.CONTENT_URI, selection, selectionArgs)
 }
