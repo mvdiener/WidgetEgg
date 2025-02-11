@@ -368,9 +368,10 @@ fun scheduleCalendarEvents(
                     missionEndTime
                 )
             ) {
+                val missionEndTimePlusMinute = missionEndTime + (60 * 1000)
                 val eventValues = ContentValues().apply {
                     put(CalendarContract.Events.DTSTART, missionEndTime)
-                    put(CalendarContract.Events.DTEND, missionEndTime)
+                    put(CalendarContract.Events.DTEND, missionEndTimePlusMinute)
                     put(CalendarContract.Events.TITLE, "Ship returning for $eiUserName")
                     put(CalendarContract.Events.DESCRIPTION, mission.identifier)
                     put(CalendarContract.Events.CALENDAR_ID, selectedCalendar.id)
@@ -415,8 +416,9 @@ private fun hasEvent(context: Context, identifier: String, eventTime: Long): Boo
         CalendarContract.Events._ID
     )
 
-    val startTime = eventTime - 5000
-    val endTime = eventTime + 5000
+    // Look for events within +/- 5 min of event time to reduce query scope
+    val startTime = eventTime - (5 * 60 * 1000)
+    val endTime = eventTime + (5 * 60 * 1000)
 
     val selection =
         "${CalendarContract.Events.DESCRIPTION} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ?"
