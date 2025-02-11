@@ -14,6 +14,7 @@ import android.provider.CalendarContract.Calendars
 import android.provider.CalendarContract.Reminders
 import androidx.core.content.ContextCompat
 import data.ALL_SHIPS
+import data.CalendarEntry
 import data.FuelLevelInfo
 import data.MissionData
 import data.MissionInfoEntry
@@ -353,12 +354,13 @@ fun hasCalendarPermissions(context: Context): Boolean {
 fun scheduleCalendarEvents(
     context: Context,
     missions: List<MissionInfoEntry>,
-    eiUserName: String
+    eiUserName: String,
+    selectedCalendar: CalendarEntry
 ) {
     if (hasCalendarPermissions(context)) {
         missions.map { mission ->
             val missionEndTime = getMissionEndTimeMilliseconds(mission)
-            if (mission.identifier.isNotBlank() && !hasEvent(
+            if (mission.identifier.isNotBlank() && selectedCalendar.id.toInt() != -1 && !hasEvent(
                     context,
                     mission.identifier,
                     missionEndTime
@@ -369,7 +371,7 @@ fun scheduleCalendarEvents(
                     put(CalendarContract.Events.DTEND, missionEndTime)
                     put(CalendarContract.Events.TITLE, "Ship returning for $eiUserName")
                     put(CalendarContract.Events.DESCRIPTION, mission.identifier)
-                    put(CalendarContract.Events.CALENDAR_ID, 3)
+                    put(CalendarContract.Events.CALENDAR_ID, selectedCalendar.id)
                     put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
                 }
                 val eventUri: Uri? =

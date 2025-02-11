@@ -1,12 +1,9 @@
 package com.widgetegg.widgeteggapp.settings
 
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.database.Cursor
 import android.net.Uri
 import android.os.PowerManager
-import android.provider.CalendarContract.Calendars
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,19 +18,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +51,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
-import data.CalendarEntry
 import kotlinx.coroutines.runBlocking
 import tools.hasCalendarPermissions
 import user.preferences.PreferencesDatastore
@@ -90,6 +84,10 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
     settingsViewModel.updateHasScheduleEventPermissions(hasScheduleEventPermissions)
     if (!hasScheduleEventPermissions) {
         settingsViewModel.updateScheduleEvents(false)
+    }
+
+    if (hasScheduleEventPermissions && settingsViewModel.scheduleEvents) {
+        settingsViewModel.getCalendars(context)
     }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
@@ -241,7 +239,7 @@ fun AllWidgetsGroup(
         OpenEggIncRow(settingsViewModel)
         ScheduleEventsRow(settingsViewModel, packageName, context, activity)
         if (settingsViewModel.scheduleEvents) {
-            CalendarsDropdownRow(settingsViewModel, context)
+            CalendarsDropdownRow(settingsViewModel)
         }
     }
 }
@@ -357,7 +355,7 @@ fun AbsoluteTimePlusDayRow(settingsViewModel: SettingsViewModel) {
                     .padding(start = 5.dp)
                     .size(15.dp)
                     .clickable {
-                        settingsViewModel.updateAbsoluteTimePlusDayDialog(true)
+                        settingsViewModel.updateShowAbsoluteTimePlusDayDialog(true)
                     }
             )
             AbsoluteTimePlusDayDialog(settingsViewModel)
@@ -378,7 +376,7 @@ fun AbsoluteTimePlusDayDialog(settingsViewModel: SettingsViewModel) {
     if (settingsViewModel.showAbsoluteTimePlusDayDialog) {
         Dialog(
             onDismissRequest = {
-                settingsViewModel.updateAbsoluteTimePlusDayDialog(false)
+                settingsViewModel.updateShowAbsoluteTimePlusDayDialog(false)
             }
         ) {
             Column(
@@ -499,6 +497,9 @@ fun ScheduleEventsRow(
             checked = settingsViewModel.scheduleEvents,
             onCheckedChange = {
                 if (settingsViewModel.hasScheduleEventPermissions) {
+                    if (!settingsViewModel.scheduleEvents) {
+                        settingsViewModel.getCalendars(context)
+                    }
                     settingsViewModel.updateScheduleEvents(!settingsViewModel.scheduleEvents)
                 } else {
                     ActivityCompat.requestPermissions(
@@ -562,74 +563,45 @@ fun ScheduleEventsDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel, context: Context) {
-    val contentResolver: ContentResolver = context.contentResolver
-    var calendars = listOf<CalendarEntry>()
-
-    val projection = arrayOf(
-        Calendars._ID,
-        Calendars.CALENDAR_DISPLAY_NAME
-    )
-
-    val projectionIdIndex = 0
-    val projectionDisplayNameIndex = 1
-
-    val cursor: Cursor? = contentResolver.query(Calendars.CONTENT_URI, projection, null, null, null)
-
-    cursor?.use {
-        while (it.moveToNext()) {
-            val calendarId = it.getLong(projectionIdIndex)
-            val calendarDisplayName = it.getString(projectionDisplayNameIndex)
-
-            calendars = calendars.plus(CalendarEntry(calendarId, calendarDisplayName))
-        }
+fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel) {
+    var isDropDownExpanded by remember {
+        mutableStateOf(false)
     }
-
-    cursor?.close()
 
     Row(
         modifier = Modifier.settingsRowModifier(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        var isExpanded by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(
-            expanded = isExpanded,
-            onExpandedChange = { isExpanded = !isExpanded },
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextField(
-                    value = settingsViewModel.selectedCalendar.displayName,
-                    onValueChange = { },
-                    readOnly = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
-                    }
-                )
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.clickable {
+                isDropDownExpanded = true
             }
-
-            ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
-                calendars.forEach { calendar ->
-                    DropdownMenuItem(
-                        text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(calendar.displayName)
-                            }
-                        },
+        ) {
+            Text(settingsViewModel.selectedCalendar.displayName)
+            Icon(
+                Icons.Rounded.ArrowDropDown,
+                contentDescription = "Calendar dropdown",
+            )
+            DropdownMenu(
+                expanded = isDropDownExpanded,
+                onDismissRequest = {
+                    isDropDownExpanded = false
+                }) {
+                settingsViewModel.userCalendars.forEach { calendar ->
+                    DropdownMenuItem(text = {
+                        Text(text = calendar.displayName)
+                    },
                         onClick = {
                             settingsViewModel.updateSelectedCalendar(calendar)
-                        }
-                    )
+                            isDropDownExpanded = false
+                        })
                 }
             }
         }
+
     }
 }
 

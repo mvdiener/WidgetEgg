@@ -32,6 +32,7 @@ class MissionWidgetUpdater {
             val prefShowTankLevels = preferences.getShowTankLevels()
             val prefUseSliderCapacity = preferences.getUseSliderCapacity()
             val prefScheduleEvents = preferences.getScheduleEvents()
+            val prefSelectedCalendar = preferences.getSelectedCalendar()
 
             try {
                 if (prefEid.isNotBlank()) {
@@ -42,7 +43,12 @@ class MissionWidgetUpdater {
                     }
 
                     if (prefScheduleEvents) {
-                        scheduleCalendarEvents(context, preferencesMissionData, prefEiUserName)
+                        scheduleCalendarEvents(
+                            context,
+                            preferencesMissionData,
+                            prefEiUserName,
+                            prefSelectedCalendar
+                        )
                     }
 
                     // Mission data and tank fuels need to get saved back to preferences because they are changing regularly
