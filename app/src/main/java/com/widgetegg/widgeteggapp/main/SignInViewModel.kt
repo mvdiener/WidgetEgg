@@ -104,7 +104,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 val prefEid = preferences.getEid()
                 if (prefEid.isNotBlank()) {
                     val missionResult = fetchData(prefEid)
-                    val formattedMissionData = formatMissionData(missionResult, listOf())
+                    val formattedMissionData = formatMissionData(missionResult)
                     val formattedTankInfo = formatTankInfo(missionResult)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveTankInfo(formattedTankInfo)

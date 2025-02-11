@@ -539,7 +539,7 @@ fun ScheduleEventsDialog(
                 Text(
                     text =
                     """
-                        The app will attempt to schedule a calendar event and reminder at the time of return for any in-flight ship.
+                        The app will schedule a calendar event and reminder at the time of return for any in-flight ship.
                         
                         If you have previously denied calendar permissions, you will need to manually enable it within app settings.
                     """.trimIndent()
@@ -586,6 +586,8 @@ fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel, context: Context)
             calendars = calendars.plus(CalendarEntry(calendarId, calendarDisplayName))
         }
     }
+
+    cursor?.close()
 
     Row(
         modifier = Modifier.settingsRowModifier(),

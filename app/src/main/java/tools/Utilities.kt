@@ -1,5 +1,6 @@
 package tools
 
+import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
@@ -91,18 +92,10 @@ fun getMissionEndTimeMilliseconds(mission: MissionInfoEntry): Long {
     return endingTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 }
 
-fun formatMissionData(
-    missionInfo: MissionData,
-    existingMissionData: List<MissionInfoEntry>
-): List<MissionInfoEntry> {
+fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
     var formattedMissions: List<MissionInfoEntry> = emptyList()
 
     missionInfo.missions.forEach { mission ->
-        // In the case where we are replacing existing mission data with updated numbers
-        // we need to check if we have already scheduled an event for that mission
-        val existingMission =
-            existingMissionData.firstOrNull { it.identifier == mission.identifier }
-
         formattedMissions = formattedMissions.plus(
             MissionInfoEntry(
                 secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
@@ -113,8 +106,7 @@ fun formatMissionData(
                 shipLevel = mission.level,
                 targetArtifact = mission.targetArtifact.number,
                 durationType = mission.durationType.number,
-                identifier = mission.identifier,
-                eventScheduled = existingMission?.eventScheduled ?: false
+                identifier = mission.identifier
             )
         )
     }
@@ -162,8 +154,7 @@ fun getMissionsWithFuelTank(missions: List<MissionInfoEntry>): List<MissionInfoE
         shipLevel = 0,
         targetArtifact = 0,
         durationType = 0,
-        identifier = "fuelTankMission",
-        eventScheduled = true
+        identifier = "fuelTankMission"
     )
 
     missionsCopy.forEach { mission ->
@@ -192,8 +183,7 @@ fun getMissionsWithBlankMission(missions: List<MissionInfoEntry>): List<MissionI
         shipLevel = 0,
         targetArtifact = 0,
         durationType = 0,
-        identifier = "blankMission",
-        eventScheduled = true
+        identifier = "blankMission"
     )
 
     return missions + blankMission
@@ -364,16 +354,21 @@ fun scheduleCalendarEvents(
     context: Context,
     missions: List<MissionInfoEntry>,
     eiUserName: String
-): List<MissionInfoEntry> {
+) {
     if (hasCalendarPermissions(context)) {
         missions.map { mission ->
-            if (!mission.eventScheduled && mission.identifier.isNotBlank()) {
-                val missionEndTime = getMissionEndTimeMilliseconds(mission)
+            val missionEndTime = getMissionEndTimeMilliseconds(mission)
+            if (mission.identifier.isNotBlank() && !hasEvent(
+                    context,
+                    mission.identifier,
+                    missionEndTime
+                )
+            ) {
                 val eventValues = ContentValues().apply {
                     put(CalendarContract.Events.DTSTART, missionEndTime)
                     put(CalendarContract.Events.DTEND, missionEndTime)
                     put(CalendarContract.Events.TITLE, "Ship returning for $eiUserName")
-                    put(CalendarContract.Events.DESCRIPTION, "Ship returning for $eiUserName")
+                    put(CalendarContract.Events.DESCRIPTION, mission.identifier)
                     put(CalendarContract.Events.CALENDAR_ID, 3)
                     put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
                 }
@@ -397,13 +392,9 @@ fun scheduleCalendarEvents(
                     Reminders.CONTENT_URI,
                     reminderValues
                 )
-
-                mission.eventScheduled = true
             }
         }
     }
-
-    return missions
 }
 
 private fun removeDefaultReminders(context: Context, eventId: Long) {
@@ -411,4 +402,34 @@ private fun removeDefaultReminders(context: Context, eventId: Long) {
     val selectionArgs = arrayOf(eventId.toString())
 
     context.contentResolver.delete(Reminders.CONTENT_URI, selection, selectionArgs)
+}
+
+private fun hasEvent(context: Context, identifier: String, eventTime: Long): Boolean {
+    val uri = CalendarContract.Events.CONTENT_URI
+
+    val projection = arrayOf(
+        CalendarContract.Events._ID
+    )
+
+    val startTime = eventTime - 5000
+    val endTime = eventTime + 5000
+
+    val selection =
+        "${CalendarContract.Events.DESCRIPTION} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ?"
+    val selectionArgs = arrayOf(identifier, startTime.toString(), endTime.toString())
+
+    val contentResolver: ContentResolver = context.contentResolver
+
+    val cursor = contentResolver.query(
+        uri,
+        projection,
+        selection,
+        selectionArgs,
+        null
+    )
+
+    val hasEvent = cursor?.moveToFirst() == true
+
+    cursor?.close()
+    return hasEvent
 }

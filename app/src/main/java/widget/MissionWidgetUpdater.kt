@@ -10,6 +10,7 @@ import tools.formatTankInfo
 import tools.scheduleCalendarEvents
 import user.preferences.PreferencesDatastore
 import widget.large.MissionWidgetLarge
+import widget.minimal.MissionWidgetMinimal
 import widget.normal.MissionWidgetNormal
 import java.time.Instant
 
@@ -36,14 +37,12 @@ class MissionWidgetUpdater {
                 if (prefEid.isNotBlank()) {
                     if (shouldMakeApiCall(context, preferencesMissionData, prefShowFuelingShip)) {
                         val missionInfo = fetchData(prefEid)
-                        preferencesMissionData =
-                            formatMissionData(missionInfo, preferencesMissionData)
+                        preferencesMissionData = formatMissionData(missionInfo)
                         preferencesTankInfo = formatTankInfo(missionInfo)
                     }
 
                     if (prefScheduleEvents) {
-                        preferencesMissionData =
-                            scheduleCalendarEvents(context, preferencesMissionData, prefEiUserName)
+                        scheduleCalendarEvents(context, preferencesMissionData, prefEiUserName)
                     }
 
                     // Mission data and tank fuels need to get saved back to preferences because they are changing regularly
@@ -102,6 +101,7 @@ class MissionWidgetUpdater {
         // preferencesMissionData has complete missions, meaning we need to fetch new active missions
         // preferencesShowFuelingShip is enabled for the normal widget, meaning we want fresh data every time
         // the user has any large widgets, as this widget either needs up-to-date fueling ship or fuel tank info
+        // the user has any minimal widgets, as this needs up-to-date fueling ship info
         return if (numOfActiveMissions(preferencesMissionData) < 3
             || anyMissionsComplete(
                 preferencesMissionData
@@ -115,6 +115,8 @@ class MissionWidgetUpdater {
             true
         } else if (GlanceAppWidgetManager(context).getGlanceIds(
                 MissionWidgetLarge::class.java
+            ).isNotEmpty() || GlanceAppWidgetManager(context).getGlanceIds(
+                MissionWidgetMinimal::class.java
             ).isNotEmpty()
         ) {
             true
