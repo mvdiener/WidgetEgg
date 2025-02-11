@@ -85,7 +85,9 @@ fun getMissionDurationRemaining(
 fun getMissionEndTimeMilliseconds(mission: MissionInfoEntry): Long {
     val newTimeRemaining = mission.secondsRemaining - (Instant.now().epochSecond - mission.date)
     if (newTimeRemaining <= 0) {
-        return LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        // If the end time is in the past, don't bother returning an actual end time because
+        // we won't schedule events in the past
+        return 0
     }
 
     val currentTime = LocalDateTime.now()
@@ -360,7 +362,7 @@ fun scheduleCalendarEvents(
     if (hasCalendarPermissions(context)) {
         missions.map { mission ->
             val missionEndTime = getMissionEndTimeMilliseconds(mission)
-            if (mission.identifier.isNotBlank() && selectedCalendar.id.toInt() != -1 && !hasEvent(
+            if (missionEndTime > 0 && mission.identifier.isNotBlank() && selectedCalendar.id.toInt() != -1 && !hasEvent(
                     context,
                     mission.identifier,
                     missionEndTime
