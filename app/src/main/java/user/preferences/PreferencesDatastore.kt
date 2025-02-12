@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import data.CalendarEntry
 import data.MissionInfoEntry
 import data.TankInfo
 import kotlinx.coroutines.flow.first
@@ -34,6 +35,8 @@ class PreferencesDatastore(context: Context) {
         private val SHOW_TANK_LEVELS = booleanPreferencesKey("showTankLevels")
         private val USE_SLIDER_CAPACITY = booleanPreferencesKey("useSliderCapacity")
         private val OPEN_EGG_INC = booleanPreferencesKey("openEggInc")
+        private val SCHEDULE_EVENTS = booleanPreferencesKey("scheduleEvents")
+        private val SELECTED_CALENDAR = stringPreferencesKey("selectedCalendar")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
@@ -46,7 +49,9 @@ class PreferencesDatastore(context: Context) {
             SHOW_FUELING_SHIP,
             SHOW_TANK_LEVELS,
             USE_SLIDER_CAPACITY,
-            OPEN_EGG_INC
+            OPEN_EGG_INC,
+            SCHEDULE_EVENTS,
+            SELECTED_CALENDAR
         )
     }
 
@@ -183,6 +188,34 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveOpenEggInc(openEggInc: Boolean) {
         dataStore.edit {
             it[OPEN_EGG_INC] = openEggInc
+        }
+    }
+
+    suspend fun getScheduleEvents() = dataStore.data.map {
+        it[SCHEDULE_EVENTS] ?: false
+    }.first()
+
+    suspend fun saveScheduleEvents(scheduleEvents: Boolean) {
+        dataStore.edit {
+            it[SCHEDULE_EVENTS] = scheduleEvents
+        }
+    }
+
+    suspend fun getSelectedCalendar(): CalendarEntry {
+        return dataStore.data.map {
+            it[SELECTED_CALENDAR]?.let { calendarJson ->
+                try {
+                    Json.decodeFromString<CalendarEntry>(calendarJson)
+                } catch (e: Exception) {
+                    CalendarEntry()
+                }
+            } ?: CalendarEntry()
+        }.first()
+    }
+
+    suspend fun saveSelectedCalendar(selectedCalendar: CalendarEntry) {
+        dataStore.edit {
+            it[SELECTED_CALENDAR] = Json.encodeToString(selectedCalendar)
         }
     }
 

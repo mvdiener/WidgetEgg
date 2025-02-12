@@ -18,6 +18,7 @@ import com.widgetegg.widgeteggapp.ui.theme.WidgetEggTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val activity = this
         enableEdgeToEdge()
         setContent {
             WidgetEggTheme {
@@ -31,7 +32,7 @@ class MainActivity : ComponentActivity() {
                                 MainScreen(navController)
                             }
                             composable(Routes.settingsScreen) {
-                                SettingsScreen(navController)
+                                SettingsScreen(navController, activity)
                             }
                         },
                         modifier = Modifier.semantics { contentDescription = "WidgetEgg" })

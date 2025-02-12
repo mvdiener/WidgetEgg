@@ -324,7 +324,7 @@ fun WhatNextDialog(signInViewModel: SignInViewModel) {
             val instructions = listOf(
                 "1. Long press on your home screen to begin editing.",
                 """2. Select the "Widgets" option.""",
-                """3. Search for "WidgetEgg", select a widget and press the "Add" button.""",
+                """3. Search for "WidgetEgg", long press a widget and drag to the desired location.""",
                 "4. Once added, the widget will automatically update every 15 minutes.",
                 "5. Check the settings gear at the top right of the app to configure your widgets."
             )

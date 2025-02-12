@@ -18,15 +18,22 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,16 +44,19 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
+import tools.hasCalendarPermissions
 import user.preferences.PreferencesDatastore
 
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen(navController: NavController, activity: MainActivity) {
     val settingsViewModel = viewModel<SettingsViewModel>()
 
     val context = LocalContext.current
@@ -60,6 +70,8 @@ fun SettingsScreen(navController: NavController) {
         settingsViewModel.updateShowTankLevels(preferences.getShowTankLevels())
         settingsViewModel.updateUseSliderCapacity(preferences.getUseSliderCapacity())
         settingsViewModel.updateUseAbsoluteTimePlusDay(preferences.getUseAbsoluteTimePlusDay())
+        settingsViewModel.updateScheduleEvents(preferences.getScheduleEvents())
+        settingsViewModel.updateSelectedCalendar(preferences.getSelectedCalendar())
     }
 
     val packageName = context.packageName
@@ -67,8 +79,27 @@ fun SettingsScreen(navController: NavController) {
         context.getSystemService(Context.POWER_SERVICE) as PowerManager
     settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
 
+    val hasScheduleEventPermissions = hasCalendarPermissions(context)
+
+    settingsViewModel.updateHasScheduleEventPermissions(hasScheduleEventPermissions)
+    if (!hasScheduleEventPermissions) {
+        settingsViewModel.updateScheduleEvents(false)
+    }
+
+    if (hasScheduleEventPermissions && settingsViewModel.scheduleEvents) {
+        settingsViewModel.getCalendars(context)
+    }
+
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
+        val onResumeScheduleEventPermissions = hasCalendarPermissions(context)
+
+        settingsViewModel.updateHasScheduleEventPermissions(
+            onResumeScheduleEventPermissions
+        )
+        if (!onResumeScheduleEventPermissions) {
+            settingsViewModel.updateScheduleEvents(false)
+        }
     }
 
     Column(
@@ -101,7 +132,7 @@ fun SettingsScreen(navController: NavController) {
             BatteryPermissionsContent(settingsViewModel, packageName, context)
         }
 
-        AllWidgetsGroup(settingsViewModel)
+        AllWidgetsGroup(settingsViewModel, packageName, context, activity)
         NormalWidgetGroup(settingsViewModel)
         LargeWidgetGroup(settingsViewModel)
     }
@@ -191,7 +222,12 @@ fun BatteryPermissionsDialog(
 }
 
 @Composable
-fun AllWidgetsGroup(settingsViewModel: SettingsViewModel) {
+fun AllWidgetsGroup(
+    settingsViewModel: SettingsViewModel,
+    packageName: String,
+    context: Context,
+    activity: MainActivity
+) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
         horizontalAlignment = Alignment.Start,
@@ -201,6 +237,10 @@ fun AllWidgetsGroup(settingsViewModel: SettingsViewModel) {
         AbsoluteTimeRow(settingsViewModel)
         AbsoluteTimePlusDayRow(settingsViewModel)
         OpenEggIncRow(settingsViewModel)
+        ScheduleEventsRow(settingsViewModel, packageName, context, activity)
+        if (settingsViewModel.scheduleEvents) {
+            CalendarsDropdownRow(settingsViewModel)
+        }
     }
 }
 
@@ -315,7 +355,7 @@ fun AbsoluteTimePlusDayRow(settingsViewModel: SettingsViewModel) {
                     .padding(start = 5.dp)
                     .size(15.dp)
                     .clickable {
-                        settingsViewModel.updateAbsoluteTimePlusDayDialog(true)
+                        settingsViewModel.updateShowAbsoluteTimePlusDayDialog(true)
                     }
             )
             AbsoluteTimePlusDayDialog(settingsViewModel)
@@ -336,7 +376,7 @@ fun AbsoluteTimePlusDayDialog(settingsViewModel: SettingsViewModel) {
     if (settingsViewModel.showAbsoluteTimePlusDayDialog) {
         Dialog(
             onDismissRequest = {
-                settingsViewModel.updateAbsoluteTimePlusDayDialog(false)
+                settingsViewModel.updateShowAbsoluteTimePlusDayDialog(false)
             }
         ) {
             Column(
@@ -421,6 +461,147 @@ fun OpenEggIncDialog(settingsViewModel: SettingsViewModel) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun ScheduleEventsRow(
+    settingsViewModel: SettingsViewModel,
+    packageName: String,
+    context: Context,
+    activity: MainActivity
+) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Schedule calendar events")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Schedule events info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowScheduleEventsDialog(true)
+                    }
+            )
+            ScheduleEventsDialog(settingsViewModel, packageName, context)
+        }
+
+        Switch(
+            checked = settingsViewModel.scheduleEvents,
+            onCheckedChange = {
+                if (settingsViewModel.hasScheduleEventPermissions) {
+                    if (!settingsViewModel.scheduleEvents) {
+                        settingsViewModel.getCalendars(context)
+                    }
+                    settingsViewModel.updateScheduleEvents(!settingsViewModel.scheduleEvents)
+                } else {
+                    ActivityCompat.requestPermissions(
+                        activity,
+                        arrayOf(
+                            android.Manifest.permission.READ_CALENDAR,
+                            android.Manifest.permission.WRITE_CALENDAR
+                        ),
+                        101
+                    )
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ScheduleEventsDialog(
+    settingsViewModel: SettingsViewModel,
+    packageName: String,
+    context: Context
+) {
+    if (settingsViewModel.showScheduleEventsDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowScheduleEventsDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                    """
+                        The app will schedule a calendar event and reminder at the time of return for any in-flight ship.
+                        
+                        If you have previously denied calendar permissions, you will need to manually enable it within app settings.
+                    """.trimIndent()
+                )
+                Button(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 5.dp),
+                    onClick = {
+                        settingsViewModel.updateShowScheduleEventsDialog(false)
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = Uri.parse("package:$packageName")
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text(text = "App Settings")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel) {
+    var isDropDownExpanded by remember {
+        mutableStateOf(false)
+    }
+
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.clickable {
+                isDropDownExpanded = true
+            }
+        ) {
+            Text(settingsViewModel.selectedCalendar.displayName)
+            Icon(
+                Icons.Rounded.ArrowDropDown,
+                contentDescription = "Calendar dropdown",
+            )
+            DropdownMenu(
+                expanded = isDropDownExpanded,
+                onDismissRequest = {
+                    isDropDownExpanded = false
+                }) {
+                settingsViewModel.userCalendars.forEach { calendar ->
+                    DropdownMenuItem(text = {
+                        Text(text = calendar.displayName)
+                    },
+                        onClick = {
+                            settingsViewModel.updateSelectedCalendar(calendar)
+                            isDropDownExpanded = false
+                        })
+                }
+            }
+        }
+
     }
 }
 

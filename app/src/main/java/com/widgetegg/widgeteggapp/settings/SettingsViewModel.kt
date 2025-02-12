@@ -1,11 +1,16 @@
 package com.widgetegg.widgeteggapp.settings
 
 import android.app.Application
+import android.content.ContentResolver
+import android.content.Context
+import android.database.Cursor
+import android.provider.CalendarContract.Calendars
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import data.CalendarEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -60,7 +65,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var showAbsoluteTimePlusDayDialog by mutableStateOf(false)
         private set
 
-    fun updateAbsoluteTimePlusDayDialog(input: Boolean) {
+    fun updateShowAbsoluteTimePlusDayDialog(input: Boolean) {
         showAbsoluteTimePlusDayDialog = input
     }
 
@@ -187,5 +192,89 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateShowSliderCapacityDialog(input: Boolean) {
         showSliderCapacityDialog = input
+    }
+
+    var hasScheduleEventPermissions by mutableStateOf(false)
+        private set
+
+    fun updateHasScheduleEventPermissions(input: Boolean) {
+        hasScheduleEventPermissions = input
+    }
+
+    var scheduleEvents by mutableStateOf(false)
+        private set
+
+    fun updateScheduleEvents(input: Boolean) {
+        scheduleEvents = input
+        runBlocking {
+            preferences.saveScheduleEvents(input)
+            if (!scheduleEvents) {
+                preferences.saveSelectedCalendar(CalendarEntry())
+            }
+        }
+    }
+
+    var showScheduleEventsDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowScheduleEventsDialog(input: Boolean) {
+        showScheduleEventsDialog = input
+    }
+
+    var selectedCalendar by mutableStateOf(CalendarEntry())
+        private set
+
+    fun updateSelectedCalendar(input: CalendarEntry) {
+        selectedCalendar = input
+        runBlocking {
+            preferences.saveSelectedCalendar(input)
+        }
+    }
+
+    var userCalendars by mutableStateOf(listOf(CalendarEntry()))
+        private set
+
+    private fun updateUserCalendars(input: List<CalendarEntry>) {
+        userCalendars = input
+    }
+
+    fun getCalendars(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val contentResolver: ContentResolver = context.contentResolver
+            var calendars = listOf<CalendarEntry>()
+
+            val projection = arrayOf(
+                Calendars._ID,
+                Calendars.CALENDAR_DISPLAY_NAME
+            )
+
+            val selection =
+                "${Calendars.CALENDAR_ACCESS_LEVEL} = ?"
+            val selectionArgs = arrayOf(Calendars.CAL_ACCESS_OWNER.toString())
+
+            val projectionIdIndex = 0
+            val projectionDisplayNameIndex = 1
+
+            val cursor: Cursor? =
+                contentResolver.query(
+                    Calendars.CONTENT_URI,
+                    projection,
+                    selection,
+                    selectionArgs,
+                    null
+                )
+
+            cursor?.use {
+                while (it.moveToNext()) {
+                    val calendarId = it.getLong(projectionIdIndex)
+                    val calendarDisplayName = it.getString(projectionDisplayNameIndex)
+
+                    calendars = calendars.plus(CalendarEntry(calendarId, calendarDisplayName))
+                }
+            }
+
+            cursor?.close()
+            updateUserCalendars(calendars)
+        }
     }
 }

@@ -1,12 +1,17 @@
 package widget
 
 import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import api.fetchData
 import data.MissionInfoEntry
 import kotlinx.coroutines.runBlocking
 import tools.formatMissionData
 import tools.formatTankInfo
+import tools.scheduleCalendarEvents
 import user.preferences.PreferencesDatastore
+import widget.large.MissionWidgetLarge
+import widget.minimal.MissionWidgetMinimal
+import widget.normal.MissionWidgetNormal
 import java.time.Instant
 
 class MissionWidgetUpdater {
@@ -17,6 +22,7 @@ class MissionWidgetUpdater {
             var preferencesTankInfo = preferences.getTankInfo()
 
             val prefEid = preferences.getEid()
+            val prefEiUserName = preferences.getEiUserName()
             val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
             val prefUseAbsoluteTimePlusDay = preferences.getUseAbsoluteTimePlusDay()
             val prefTargetArtifactNormalWidget = preferences.getTargetArtifactNormalWidget()
@@ -25,20 +31,24 @@ class MissionWidgetUpdater {
             val prefOpenEggInc = preferences.getOpenEggInc()
             val prefShowTankLevels = preferences.getShowTankLevels()
             val prefUseSliderCapacity = preferences.getUseSliderCapacity()
+            val prefScheduleEvents = preferences.getScheduleEvents()
+            val prefSelectedCalendar = preferences.getSelectedCalendar()
 
             try {
                 if (prefEid.isNotBlank()) {
-                    // Only make an api call if:
-                    // preferencesMissionData is has less than 3 active missions, meaning all active missions haven't been saved
-                    // preferencesMissionData has complete missions, meaning we need to fetch new active missions
-                    // preferencesShowFuelingShip is enabled, meaning we want fresh data every time
-                    if (numOfActiveMissions(preferencesMissionData) < 3 || anyMissionsComplete(
-                            preferencesMissionData
-                        ) || prefShowFuelingShip || prefShowTankLevels
-                    ) {
+                    if (shouldMakeApiCall(context, preferencesMissionData, prefShowFuelingShip)) {
                         val missionInfo = fetchData(prefEid)
                         preferencesMissionData = formatMissionData(missionInfo)
                         preferencesTankInfo = formatTankInfo(missionInfo)
+                    }
+
+                    if (prefScheduleEvents) {
+                        scheduleCalendarEvents(
+                            context,
+                            preferencesMissionData,
+                            prefEiUserName,
+                            prefSelectedCalendar
+                        )
                     }
 
                     // Mission data and tank fuels need to get saved back to preferences because they are changing regularly
@@ -84,6 +94,40 @@ class MissionWidgetUpdater {
     private fun anyMissionsComplete(missions: List<MissionInfoEntry>): Boolean {
         return missions.any { mission ->
             mission.identifier.isNotBlank() && mission.secondsRemaining - (Instant.now().epochSecond - mission.date) <= 0
+        }
+    }
+
+    private suspend fun shouldMakeApiCall(
+        context: Context,
+        preferencesMissionData: List<MissionInfoEntry>,
+        prefShowFuelingShip: Boolean
+    ): Boolean {
+        // Only make an api call if:
+        // preferencesMissionData has less than 3 active missions, meaning all active missions haven't been saved
+        // preferencesMissionData has complete missions, meaning we need to fetch new active missions
+        // preferencesShowFuelingShip is enabled for the normal widget, meaning we want fresh data every time
+        // the user has any large widgets, as this widget either needs up-to-date fueling ship or fuel tank info
+        // the user has any minimal widgets, as this needs up-to-date fueling ship info
+        return if (numOfActiveMissions(preferencesMissionData) < 3
+            || anyMissionsComplete(
+                preferencesMissionData
+            )
+        ) {
+            true
+        } else if (prefShowFuelingShip && GlanceAppWidgetManager(context).getGlanceIds(
+                MissionWidgetNormal::class.java
+            ).isNotEmpty()
+        ) {
+            true
+        } else if (GlanceAppWidgetManager(context).getGlanceIds(
+                MissionWidgetLarge::class.java
+            ).isNotEmpty() || GlanceAppWidgetManager(context).getGlanceIds(
+                MissionWidgetMinimal::class.java
+            ).isNotEmpty()
+        ) {
+            true
+        } else {
+            false
         }
     }
 }
