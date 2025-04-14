@@ -3,6 +3,8 @@ package data
 const val MISSION_ENDPOINT = "https://www.auxbrain.com/ei_afx/get_active_missions"
 const val BACKUP_ENDPOINT = "https://www.auxbrain.com/ei/bot_first_contact"
 
+const val CURRENT_CLIENT_VERSION = 69
+
 val ALL_SHIPS = arrayOf(
     "afx_ship_chicken_1",
     "afx_ship_chicken_9",

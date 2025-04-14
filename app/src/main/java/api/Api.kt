@@ -1,6 +1,8 @@
 package api
 
 import data.BACKUP_ENDPOINT
+import data.CURRENT_CLIENT_VERSION
+import data.ContractData
 import data.MISSION_ENDPOINT
 import data.MissionData
 import ei.Ei.AuthenticatedMessage
@@ -82,7 +84,7 @@ suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
     }
 }
 
-suspend fun fetchData(eid: String): MissionData {
+suspend fun fetchMissionData(eid: String): MissionData {
     val basicRequestInfo = getBasicRequestInfo(eid)
     var activeMissions = fetchActiveMissions(basicRequestInfo)
     val backup = fetchBackup(basicRequestInfo)
@@ -98,10 +100,16 @@ suspend fun fetchData(eid: String): MissionData {
     return MissionData(activeMissions, backup.artifacts)
 }
 
+suspend fun fetchContractData(eid: String): ContractData {
+    val basicRequestInfo = getBasicRequestInfo(eid)
+    val backup = fetchBackup(basicRequestInfo)
+    return ContractData(backup.contracts.contractsList)
+}
+
 fun getBasicRequestInfo(eid: String): BasicRequestInfo {
     return BasicRequestInfo.newBuilder()
         .setEiUserId(eid)
-        .setClientVersion(127)
+        .setClientVersion(CURRENT_CLIENT_VERSION)
         .setPlatform("DROID")
         .build()
 }

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.CalendarEntry
+import data.ContractInfoEntry
 import data.MissionInfoEntry
 import data.TankInfo
 import kotlinx.coroutines.flow.first
@@ -37,6 +38,7 @@ class PreferencesDatastore(context: Context) {
         private val OPEN_EGG_INC = booleanPreferencesKey("openEggInc")
         private val SCHEDULE_EVENTS = booleanPreferencesKey("scheduleEvents")
         private val SELECTED_CALENDAR = stringPreferencesKey("selectedCalendar")
+        private val CONTRACT_INFO = stringPreferencesKey("contractInfo")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
@@ -51,7 +53,8 @@ class PreferencesDatastore(context: Context) {
             USE_SLIDER_CAPACITY,
             OPEN_EGG_INC,
             SCHEDULE_EVENTS,
-            SELECTED_CALENDAR
+            SELECTED_CALENDAR,
+            CONTRACT_INFO
         )
     }
 
@@ -216,6 +219,24 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveSelectedCalendar(selectedCalendar: CalendarEntry) {
         dataStore.edit {
             it[SELECTED_CALENDAR] = Json.encodeToString(selectedCalendar)
+        }
+    }
+
+    suspend fun getContractInfo(): List<ContractInfoEntry> {
+        return dataStore.data.map {
+            it[CONTRACT_INFO]?.let { contractJson ->
+                try {
+                    Json.decodeFromString<List<ContractInfoEntry>>(contractJson)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList()
+        }.first()
+    }
+
+    suspend fun saveContractInfo(contractInfo: List<ContractInfoEntry>) {
+        dataStore.edit {
+            it[CONTRACT_INFO] = Json.encodeToString(contractInfo)
         }
     }
 

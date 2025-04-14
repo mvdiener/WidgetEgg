@@ -14,6 +14,8 @@ import android.provider.CalendarContract.Reminders
 import androidx.core.content.ContextCompat
 import data.ALL_SHIPS
 import data.CalendarEntry
+import data.ContractData
+import data.ContractInfoEntry
 import data.FuelLevelInfo
 import data.MissionData
 import data.MissionInfoEntry
@@ -115,6 +117,22 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
     }
 
     return formattedMissions
+}
+
+fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
+    var formattedContracts: List<ContractInfoEntry> = emptyList()
+
+    contractInfo.contracts.forEach { contract ->
+        formattedContracts = formattedContracts.plus(
+            ContractInfoEntry(
+                eggId = contract.contract.egg.number,
+                customEggId = contract.contract.customEggId,
+                contractName = contract.contract.name
+            )
+        )
+    }
+
+    return formattedContracts
 }
 
 fun getTankCapacity(tankLevel: Int): Long {

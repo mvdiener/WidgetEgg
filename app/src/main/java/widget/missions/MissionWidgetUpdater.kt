@@ -2,7 +2,7 @@ package widget.missions
 
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import api.fetchData
+import api.fetchMissionData
 import data.MissionInfoEntry
 import kotlinx.coroutines.runBlocking
 import tools.formatMissionData
@@ -18,8 +18,9 @@ class MissionWidgetUpdater {
     fun updateMissions(context: Context) {
         runBlocking {
             val preferences = PreferencesDatastore(context)
-            var preferencesMissionData = preferences.getMissionInfo()
-            var preferencesTankInfo = preferences.getTankInfo()
+
+            var prefMissionInfo = preferences.getMissionInfo()
+            var prefTankInfo = preferences.getTankInfo()
 
             val prefEid = preferences.getEid()
             val prefEiUserName = preferences.getEiUserName()
@@ -36,16 +37,16 @@ class MissionWidgetUpdater {
 
             try {
                 if (prefEid.isNotBlank()) {
-                    if (shouldMakeApiCall(context, preferencesMissionData, prefShowFuelingShip)) {
-                        val missionInfo = fetchData(prefEid)
-                        preferencesMissionData = formatMissionData(missionInfo)
-                        preferencesTankInfo = formatTankInfo(missionInfo)
+                    if (shouldMakeApiCall(context, prefMissionInfo, prefShowFuelingShip)) {
+                        val missionInfo = fetchMissionData(prefEid)
+                        prefMissionInfo = formatMissionData(missionInfo)
+                        prefTankInfo = formatTankInfo(missionInfo)
                     }
 
                     if (prefScheduleEvents) {
                         scheduleCalendarEvents(
                             context,
-                            preferencesMissionData,
+                            prefMissionInfo,
                             prefEiUserName,
                             prefSelectedCalendar
                         )
@@ -55,10 +56,10 @@ class MissionWidgetUpdater {
                     // When a widget is initialized it needs to pull data from preferences before it can save into local widget state
                     // If these items aren't updated in preferences, then a new widget will display old/outdated info
                     // Figuring out how to get all widgets and preferences to read from the same data store might fix this
-                    preferences.saveMissionInfo(preferencesMissionData)
-                    preferences.saveTankInfo(preferencesTankInfo)
-                    MissionWidgetDataStore().setMissionInfo(context, preferencesMissionData)
-                    MissionWidgetDataStore().setTankInfo(context, preferencesTankInfo)
+                    preferences.saveMissionInfo(prefMissionInfo)
+                    preferences.saveTankInfo(prefTankInfo)
+                    MissionWidgetDataStore().setMissionInfo(context, prefMissionInfo)
+                    MissionWidgetDataStore().setTankInfo(context, prefTankInfo)
 
                     MissionWidgetDataStore().setEid(context, prefEid)
                     MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
