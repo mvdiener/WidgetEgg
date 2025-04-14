@@ -42,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
+import tools.getAsset
 import user.preferences.PreferencesDatastore
 
 @Composable
@@ -76,7 +77,7 @@ fun MainScreen(navController: NavController) {
     ) {
         val assetManager = LocalContext.current.assets
         val bitmapImage =
-            BitmapFactory.decodeStream(assetManager.open("icons/$logoString.png"))
+            BitmapFactory.decodeStream(getAsset(assetManager, "icons/$logoString.png"))
                 .asImageBitmap()
 
         Image(

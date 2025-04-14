@@ -1,4 +1,4 @@
-package widget
+package widget.missions
 
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -9,9 +9,9 @@ import tools.formatMissionData
 import tools.formatTankInfo
 import tools.scheduleCalendarEvents
 import user.preferences.PreferencesDatastore
-import widget.large.MissionWidgetLarge
-import widget.minimal.MissionWidgetMinimal
-import widget.normal.MissionWidgetNormal
+import widget.missions.large.MissionWidgetLarge
+import widget.missions.minimal.MissionWidgetMinimal
+import widget.missions.normal.MissionWidgetNormal
 import java.time.Instant
 
 class MissionWidgetUpdater {

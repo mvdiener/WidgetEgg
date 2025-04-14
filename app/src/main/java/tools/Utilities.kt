@@ -4,13 +4,12 @@ import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
-import android.database.Cursor
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.net.Uri
 import android.provider.CalendarContract
-import android.provider.CalendarContract.Calendars
 import android.provider.CalendarContract.Reminders
 import androidx.core.content.ContextCompat
 import data.ALL_SHIPS
@@ -21,6 +20,7 @@ import data.MissionInfoEntry
 import data.TANK_SIZES
 import data.TankInfo
 import ei.Ei.Egg
+import java.io.InputStream
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -250,6 +250,14 @@ fun getEggName(eggId: Int): String {
         "egg_unknown"
     } else {
         "egg_$eggName"
+    }
+}
+
+fun getAsset(assetManager: AssetManager, path: String): InputStream {
+    return try {
+        assetManager.open(path)
+    } catch (_: Exception) {
+        assetManager.open("eggs/egg_unknown.png")
     }
 }
 

@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import tools.formatMissionData
 import tools.formatTankInfo
 import user.preferences.PreferencesDatastore
-import widget.MissionWidgetDataStore
+import widget.missions.MissionWidgetDataStore
 
 class SignInViewModel(application: Application) : AndroidViewModel(application) {
 

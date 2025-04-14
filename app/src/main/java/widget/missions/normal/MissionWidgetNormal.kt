@@ -1,4 +1,4 @@
-package widget.normal
+package widget.missions.normal
 
 import android.content.Context
 import android.content.Intent
@@ -42,12 +42,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.bitmapResize
 import tools.createCircularProgressBarBitmap
+import tools.getAsset
 import tools.getMissionDurationRemaining
 import tools.getMissionPercentComplete
 import tools.getShipName
-import widget.MissionWidgetDataStore
-import widget.MissionWidgetDataStorePreferencesKeys
-import widget.MissionWidgetUpdater
+import widget.missions.MissionWidgetDataStore
+import widget.missions.MissionWidgetDataStorePreferencesKeys
+import widget.missions.MissionWidgetUpdater
 
 class MissionWidgetNormal : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -138,7 +139,7 @@ class MissionWidgetNormal : GlanceAppWidget() {
 @Composable
 fun LogoContent(assetManager: AssetManager) {
     val bitmapImage =
-        BitmapFactory.decodeStream(assetManager.open("icons/logo-dark-mode.png"))
+        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
 
     Image(
         provider = ImageProvider(bitmapImage),
@@ -206,7 +207,8 @@ fun MissionProgress(
             )
 
             val shipName = getShipName(mission.shipId)
-            val shipBitmap = BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+            val shipBitmap =
+                BitmapFactory.decodeStream(getAsset(assetManager, "ships/$shipName.png"))
 
             Image(
                 provider = ImageProvider(shipBitmap),
@@ -222,7 +224,12 @@ fun MissionProgress(
             val artifactName = getImageFromAfxId(mission.targetArtifact)
             if (showTargetArtifact && artifactName.isNotBlank()) {
                 val artifactBitmap = bitmapResize(
-                    BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            "artifacts/$artifactName.png"
+                        )
+                    )
                 )
                 Image(
                     provider = ImageProvider(artifactBitmap),
@@ -240,22 +247,22 @@ fun MissionProgress(
     ) {
         Text(
             text =
-            if (isFueling) {
-                "Fueling"
-            } else {
-                val (timeText, plusDay) = getMissionDurationRemaining(
-                    mission.secondsRemaining,
-                    mission.date,
-                    useAbsoluteTime,
-                    useAbsoluteTimePlusDay,
-                    use24HrFormat
-                )
-                if (useAbsoluteTimePlusDay && plusDay) {
-                    "$timeText⁺¹"
+                if (isFueling) {
+                    "Fueling"
                 } else {
-                    timeText
-                }
-            },
+                    val (timeText, plusDay) = getMissionDurationRemaining(
+                        mission.secondsRemaining,
+                        mission.date,
+                        useAbsoluteTime,
+                        useAbsoluteTimePlusDay,
+                        use24HrFormat
+                    )
+                    if (useAbsoluteTimePlusDay && plusDay) {
+                        "$timeText⁺¹"
+                    } else {
+                        timeText
+                    }
+                },
             style = TextStyle(
                 color = ColorProvider(Color.White),
                 fontSize = TextUnit(13f, TextUnitType.Sp)

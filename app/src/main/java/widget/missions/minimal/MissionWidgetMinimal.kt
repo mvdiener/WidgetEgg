@@ -1,4 +1,4 @@
-package widget.minimal
+package widget.missions.minimal
 
 import android.content.Context
 import android.content.Intent
@@ -35,11 +35,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.createCircularProgressBarBitmap
+import tools.getAsset
 import tools.getMissionPercentComplete
 import tools.getShipName
-import widget.MissionWidgetDataStore
-import widget.MissionWidgetDataStorePreferencesKeys
-import widget.MissionWidgetUpdater
+import widget.missions.MissionWidgetDataStore
+import widget.missions.MissionWidgetDataStorePreferencesKeys
+import widget.missions.MissionWidgetUpdater
 
 class MissionWidgetMinimal : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -111,7 +112,7 @@ class MissionWidgetMinimal : GlanceAppWidget() {
 @Composable
 fun LogoContentMinimal(assetManager: AssetManager) {
     val bitmapImage =
-        BitmapFactory.decodeStream(assetManager.open("icons/logo-dark-mode.png"))
+        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
 
     Image(
         provider = ImageProvider(bitmapImage),
@@ -172,7 +173,7 @@ fun MissionProgressMinimal(
         )
 
         val shipName = getShipName(mission.shipId)
-        val shipBitmap = BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+        val shipBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "ships/$shipName.png"))
 
         Image(
             provider = ImageProvider(shipBitmap),

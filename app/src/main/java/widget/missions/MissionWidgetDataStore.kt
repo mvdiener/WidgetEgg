@@ -1,4 +1,4 @@
-package widget
+package widget.missions
 
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -10,9 +10,9 @@ import data.MissionInfoEntry
 import data.TankInfo
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import widget.large.MissionWidgetLarge
-import widget.minimal.MissionWidgetMinimal
-import widget.normal.MissionWidgetNormal
+import widget.missions.large.MissionWidgetLarge
+import widget.missions.minimal.MissionWidgetMinimal
+import widget.missions.normal.MissionWidgetNormal
 
 data object MissionWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")

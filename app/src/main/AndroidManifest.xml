@@ -28,7 +28,7 @@
         </activity>
 
         <receiver
-            android:name="widget.MissionWidgetReceiver"
+            android:name="widget.missions.MissionWidgetReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -40,7 +40,7 @@
         </receiver>
 
         <receiver
-            android:name="widget.minimal.MissionWidgetMinimalReceiver"
+            android:name="widget.missions.minimal.MissionWidgetMinimalReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -52,7 +52,7 @@
         </receiver>
 
         <receiver
-            android:name="widget.large.MissionWidgetLargeReceiver"
+            android:name="widget.missions.large.MissionWidgetLargeReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

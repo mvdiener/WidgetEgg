@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
-import widget.MissionWidgetDataStore
+import widget.missions.MissionWidgetDataStore
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences: PreferencesDatastore

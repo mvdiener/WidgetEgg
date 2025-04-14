@@ -1,4 +1,4 @@
-package widget.large
+package widget.missions.large
 
 import android.content.Context
 import android.content.Intent
@@ -43,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.bitmapResize
 import tools.createCircularProgressBarBitmap
+import tools.getAsset
 import tools.getMissionsWithBlankMission
 import tools.getEggName
 import tools.getFuelAmount
@@ -52,9 +53,9 @@ import tools.getMissionPercentComplete
 import tools.getMissionsWithFuelTank
 import tools.getShipName
 import tools.getTankCapacity
-import widget.MissionWidgetDataStore
-import widget.MissionWidgetDataStorePreferencesKeys
-import widget.MissionWidgetUpdater
+import widget.missions.MissionWidgetDataStore
+import widget.missions.MissionWidgetDataStorePreferencesKeys
+import widget.missions.MissionWidgetUpdater
 
 class MissionWidgetLarge : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -182,7 +183,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
 @Composable
 fun LogoContentLarge(assetManager: AssetManager) {
     val bitmapImage =
-        BitmapFactory.decodeStream(assetManager.open("icons/logo-dark-mode.png"))
+        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
 
     Image(
         provider = ImageProvider(bitmapImage),
@@ -246,7 +247,7 @@ fun MissionProgressLarge(
         )
 
         val shipName = getShipName(mission.shipId)
-        val shipBitmap = BitmapFactory.decodeStream(assetManager.open("ships/$shipName.png"))
+        val shipBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "ships/$shipName.png"))
         Image(
             provider = ImageProvider(shipBitmap),
             contentDescription = "Ship Icon",
@@ -286,22 +287,22 @@ fun TimeRemainingContent(
 ) {
     Text(
         text =
-        if (isFueling) {
-            "Fueling"
-        } else {
-            val (timeText, plusDay) = getMissionDurationRemaining(
-                mission.secondsRemaining,
-                mission.date,
-                useAbsoluteTime,
-                useAbsoluteTimePlusDay,
-                use24HrFormat
-            )
-            if (useAbsoluteTimePlusDay && plusDay) {
-                "$timeText⁺¹"
+            if (isFueling) {
+                "Fueling"
             } else {
-                timeText
-            }
-        },
+                val (timeText, plusDay) = getMissionDurationRemaining(
+                    mission.secondsRemaining,
+                    mission.date,
+                    useAbsoluteTime,
+                    useAbsoluteTimePlusDay,
+                    use24HrFormat
+                )
+                if (useAbsoluteTimePlusDay && plusDay) {
+                    "$timeText⁺¹"
+                } else {
+                    timeText
+                }
+            },
         style = TextStyle(
             color = ColorProvider(Color.White),
         )
@@ -327,7 +328,7 @@ fun MissionLevelContent(mission: MissionInfoEntry) {
 @Composable
 fun CapacityContent(mission: MissionInfoEntry, assetManager: AssetManager) {
     val crateBitmap =
-        BitmapFactory.decodeStream(assetManager.open("other/icon_afx_chest_3.png"))
+        BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_afx_chest_3.png"))
 
     Row(
         verticalAlignment = Alignment.CenterVertically
@@ -347,7 +348,7 @@ fun CapacityContent(mission: MissionInfoEntry, assetManager: AssetManager) {
 @Composable
 fun TargetArtifactContent(artifactName: String, assetManager: AssetManager) {
     val artifactBitmap = bitmapResize(
-        BitmapFactory.decodeStream(assetManager.open("artifacts/$artifactName.png"))
+        BitmapFactory.decodeStream(getAsset(assetManager, "artifacts/$artifactName.png"))
     )
 
     Row(
@@ -377,7 +378,7 @@ fun TankInfoContent(tankInfo: TankInfo, useSliderCapacity: Boolean, assetManager
             tankInfo.fuelLevels.forEach { fuel ->
                 val eggName = getEggName(fuel.eggId)
                 val eggBitmap = bitmapResize(
-                    BitmapFactory.decodeStream(assetManager.open("eggs/$eggName.png"))
+                    BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
                 )
                 val adjustedCapacity =
                     if (useSliderCapacity) {
