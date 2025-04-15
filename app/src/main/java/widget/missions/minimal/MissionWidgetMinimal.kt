@@ -34,7 +34,7 @@ import data.MissionInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import tools.createCircularProgressBarBitmap
+import tools.createMissionCircularProgressBarBitmap
 import tools.getAsset
 import tools.getMissionPercentComplete
 import tools.getShipName
@@ -159,7 +159,7 @@ fun MissionProgressMinimal(
         modifier = GlanceModifier.padding(2.dp),
         contentAlignment = Alignment.Center
     ) {
-        val bitmap = createCircularProgressBarBitmap(
+        val bitmap = createMissionCircularProgressBarBitmap(
             percentRemaining,
             mission.durationType,
             100,

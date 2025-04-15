@@ -42,7 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.bitmapResize
-import tools.createCircularProgressBarBitmap
+import tools.createMissionCircularProgressBarBitmap
 import tools.getAsset
 import tools.getMissionsWithBlankMission
 import tools.getEggName
@@ -233,7 +233,7 @@ fun MissionProgressLarge(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        val bitmap = createCircularProgressBarBitmap(
+        val bitmap = createMissionCircularProgressBarBitmap(
             percentRemaining,
             mission.durationType,
             150,

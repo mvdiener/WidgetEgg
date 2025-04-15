@@ -29,6 +29,9 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
+import androidx.core.graphics.toColorInt
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 fun getMissionPercentComplete(
     missionDuration: Double,
@@ -210,26 +213,44 @@ fun getMissionsWithBlankMission(missions: List<MissionInfoEntry>): List<MissionI
     return missions + blankMission
 }
 
-fun createCircularProgressBarBitmap(
+fun createMissionCircularProgressBarBitmap(
     progress: Float,
     durationType: Int,
     size: Int,
     isFueling: Boolean
 ): Bitmap {
-    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val color = getMissionColor(durationType, isFueling)
+    return createCircularProgressBarBitmap(progress, color, size, 8f)
+}
+
+fun createContractCircularProgressBarBitmap(
+    progress: Float,
+    size: Int
+): Bitmap {
+    val color = "#16ac00".toColorInt()
+    return createCircularProgressBarBitmap(progress, color, size, 4f)
+}
+
+private fun createCircularProgressBarBitmap(
+    progress: Float,
+    color: Int,
+    size: Int,
+    width: Float
+): Bitmap {
+    val bitmap = createBitmap(size, size)
     val canvas = Canvas(bitmap)
     val paint = Paint().apply {
         isAntiAlias = true
-        strokeWidth = 8f
+        strokeWidth = width
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
 
-    paint.color = android.graphics.Color.parseColor("#464646")
+    paint.color = "#464646".toColorInt()
     val radius = size / 2f - paint.strokeWidth / 2
     canvas.drawCircle(size / 2f, size / 2f, radius, paint)
 
-    paint.color = getMissionColor(durationType, isFueling)
+    paint.color = color
     val sweepAngle = 360 * progress
     canvas.drawArc(
         paint.strokeWidth / 2,
@@ -252,7 +273,7 @@ fun bitmapResize(image: Bitmap): Bitmap {
     val newWidth = 100
     return if (width > newWidth) {
         val newHeight = newWidth * aspectRatio
-        Bitmap.createScaledBitmap(image, newWidth, newHeight, false)
+        image.scale(newWidth, newHeight, false)
     } else {
         image
     }
