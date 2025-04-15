@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
@@ -33,7 +35,9 @@ import data.ContractInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.createContractCircularProgressBarBitmap
 import tools.getAsset
+import tools.getContractGoalPercentComplete
 import tools.getEggName
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
@@ -83,7 +87,8 @@ class ContractWidgetNormal : GlanceAppWidget() {
                         2 -> {
                             contractData.forEach { contract ->
                                 Row(
-                                    modifier = GlanceModifier.fillMaxWidth().defaultWeight(),
+                                    modifier = GlanceModifier.fillMaxWidth().defaultWeight()
+                                        .padding(5.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -120,11 +125,41 @@ fun ContractDouble(assetManager: AssetManager, contract: ContractInfoEntry) {
             "egg_${contract.customEggId}"
         }
 
+        contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
+            val percentRemaining =
+                getContractGoalPercentComplete(contract.eggsDelivered, goal.amount)
+            val bitmap = createContractCircularProgressBarBitmap(
+                percentRemaining,
+                150,
+            )
+
+            Image(
+                provider = ImageProvider(bitmap),
+                contentDescription = "Circular Progress",
+                modifier = GlanceModifier.size(((index + 6) * 10).dp)
+            )
+        }
+
+
         val eggBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
         Image(
             provider = ImageProvider(eggBitmap),
             contentDescription = "Egg Icon",
-            modifier = GlanceModifier.size(55.dp)
+            modifier = GlanceModifier.size(45.dp)
+        )
+    }
+
+    Column(
+        modifier = GlanceModifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.Top
+    ) {
+        Text(
+            text = contract.contractName,
+            style = TextStyle(
+                color = ColorProvider(Color.White),
+                fontSize = TextUnit(13f, TextUnitType.Sp)
+            )
         )
     }
 }

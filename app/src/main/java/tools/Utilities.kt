@@ -17,6 +17,7 @@ import data.CalendarEntry
 import data.ContractData
 import data.ContractInfoEntry
 import data.FuelLevelInfo
+import data.GoalInfoEntry
 import data.MissionData
 import data.MissionInfoEntry
 import data.TANK_SIZES
@@ -41,6 +42,17 @@ fun getMissionPercentComplete(
     var newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
     if (newTimeRemaining <= 0) newTimeRemaining = 0.0
     return ((missionDuration - newTimeRemaining) / missionDuration).toFloat()
+}
+
+fun getContractGoalPercentComplete(
+    delivered: Double,
+    goal: Double
+): Float {
+    return if (delivered > goal) {
+        100F
+    } else {
+        (delivered / goal).toFloat()
+    }
 }
 
 fun getMissionDurationRemaining(
@@ -126,11 +138,21 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
     var formattedContracts: List<ContractInfoEntry> = emptyList()
 
     contractInfo.contracts.forEach { contract ->
+        var formattedGoals: List<GoalInfoEntry> = emptyList()
+        val gradeSpecsList = contract.contract.gradeSpecsList
+        val gradeSpecs = gradeSpecsList.find { gradeSpec -> gradeSpec.grade == contract.grade }
+
+        gradeSpecs?.goalsList?.forEach { goal ->
+            formattedGoals = formattedGoals.plus(GoalInfoEntry(amount = goal.targetAmount))
+        }
+
         formattedContracts = formattedContracts.plus(
             ContractInfoEntry(
                 eggId = contract.contract.egg.number,
                 customEggId = contract.contract.customEggId,
-                contractName = contract.contract.name
+                contractName = contract.contract.name,
+                eggsDelivered = contract.coopLastUploadedContribution,
+                goals = formattedGoals
             )
         )
     }
