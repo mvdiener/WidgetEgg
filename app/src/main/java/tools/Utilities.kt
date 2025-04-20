@@ -33,6 +33,7 @@ import java.util.TimeZone
 import androidx.core.graphics.toColorInt
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
+import data.ContributorInfoEntry
 
 fun getMissionPercentComplete(
     missionDuration: Double,
@@ -146,13 +147,31 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
             formattedGoals = formattedGoals.plus(GoalInfoEntry(amount = goal.targetAmount))
         }
 
+        val status =
+            contractInfo.contractStatuses.find { contractStatus ->
+                contractStatus.contractIdentifier == contract.contract.identifier
+            }
+
+        var formattedContributors: List<ContributorInfoEntry> = emptyList()
+        status?.contributorsList?.forEach { contributor ->
+            formattedContributors = formattedContributors.plus(
+                ContributorInfoEntry(
+                    eggsDelivered = contributor.contributionAmount,
+                    eggRate = contributor.contributionRate,
+                    offlineTime = contributor.farmInfo.timestamp
+                )
+            )
+        }
+
         formattedContracts = formattedContracts.plus(
             ContractInfoEntry(
                 eggId = contract.contract.egg.number,
                 customEggId = contract.contract.customEggId,
-                contractName = contract.contract.name,
+                name = contract.contract.name,
                 eggsDelivered = contract.coopLastUploadedContribution,
-                goals = formattedGoals
+                timeRemaining = status?.secondsRemaining ?: 0.0,
+                goals = formattedGoals,
+                contributors = formattedContributors
             )
         )
     }

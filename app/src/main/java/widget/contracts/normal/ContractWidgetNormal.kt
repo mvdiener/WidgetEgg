@@ -111,7 +111,13 @@ class ContractWidgetNormal : GlanceAppWidget() {
 
 @Composable
 fun ContractSingle(contract: ContractInfoEntry) {
-
+    Text(
+        text = "Hello World 1 Contract",
+        style = TextStyle(
+            color = ColorProvider(Color.White),
+            fontSize = TextUnit(13f, TextUnitType.Sp)
+        )
+    )
 }
 
 @Composable
@@ -150,12 +156,12 @@ fun ContractDouble(assetManager: AssetManager, contract: ContractInfoEntry) {
     }
 
     Column(
-        modifier = GlanceModifier.fillMaxWidth(),
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.Top
     ) {
         Text(
-            text = contract.contractName,
+            text = contract.name,
             style = TextStyle(
                 color = ColorProvider(Color.White),
                 fontSize = TextUnit(13f, TextUnitType.Sp)
@@ -166,7 +172,13 @@ fun ContractDouble(assetManager: AssetManager, contract: ContractInfoEntry) {
 
 @Composable
 fun ContractAll(contract: ContractInfoEntry) {
-
+    Text(
+        text = "Hello World 4 Contracts",
+        style = TextStyle(
+            color = ColorProvider(Color.White),
+            fontSize = TextUnit(13f, TextUnitType.Sp)
+        )
+    )
 }
 
 @Composable

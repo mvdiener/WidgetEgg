@@ -103,7 +103,7 @@ suspend fun fetchMissionData(eid: String): MissionData {
 suspend fun fetchContractData(eid: String): ContractData {
     val basicRequestInfo = getBasicRequestInfo(eid)
     val backup = fetchBackup(basicRequestInfo)
-    return ContractData(backup.contracts.contractsList)
+    return ContractData(backup.contracts.contractsList, backup.contracts.currentCoopStatusesList)
 }
 
 fun getBasicRequestInfo(eid: String): BasicRequestInfo {

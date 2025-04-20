@@ -7,12 +7,21 @@ import kotlinx.serialization.Serializable
 data class ContractInfoEntry(
     var eggId: Int,
     var customEggId: String?,
-    var contractName: String,
+    var name: String,
     var eggsDelivered: Double,
-    var goals: List<GoalInfoEntry>
+    var timeRemaining: Double,
+    var goals: List<GoalInfoEntry>,
+    var contributors: List<ContributorInfoEntry>
 )
 
 @Serializable
 data class GoalInfoEntry(
     var amount: Double
+)
+
+@Serializable
+data class ContributorInfoEntry(
+    var eggsDelivered: Double,
+    var eggRate: Double,
+    var offlineTime: Double
 )
