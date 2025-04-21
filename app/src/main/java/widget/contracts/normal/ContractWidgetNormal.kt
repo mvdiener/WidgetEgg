@@ -81,7 +81,7 @@ class ContractWidgetNormal : GlanceAppWidget() {
                 } else {
                     when (contractData.size) {
                         1 -> {
-                            ContractSingle(contractData.first())
+                            ContractSingle(assetManager, contractData.first())
                         }
 
                         2 -> {
@@ -110,9 +110,16 @@ class ContractWidgetNormal : GlanceAppWidget() {
 }
 
 @Composable
-fun ContractSingle(contract: ContractInfoEntry) {
+fun ContractSingle(assetManager: AssetManager, contract: ContractInfoEntry) {
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+        EggAndProgressBars(assetManager, contract, 75, 10)
+    }
+
     Text(
-        text = "Hello World 1 Contract",
+        modifier = GlanceModifier.padding(top = 5.dp),
+        text = contract.name,
         style = TextStyle(
             color = ColorProvider(Color.White),
             fontSize = TextUnit(13f, TextUnitType.Sp)
@@ -125,34 +132,7 @@ fun ContractDouble(assetManager: AssetManager, contract: ContractInfoEntry) {
     Box(
         contentAlignment = Alignment.Center
     ) {
-        val eggName = if (contract.customEggId.isNullOrBlank()) {
-            getEggName(contract.eggId)
-        } else {
-            "egg_${contract.customEggId}"
-        }
-
-        contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
-            val percentRemaining =
-                getContractGoalPercentComplete(contract.eggsDelivered, goal.amount)
-            val bitmap = createContractCircularProgressBarBitmap(
-                percentRemaining,
-                150,
-            )
-
-            Image(
-                provider = ImageProvider(bitmap),
-                contentDescription = "Circular Progress",
-                modifier = GlanceModifier.size(((index + 6) * 10).dp)
-            )
-        }
-
-
-        val eggBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
-        Image(
-            provider = ImageProvider(eggBitmap),
-            contentDescription = "Egg Icon",
-            modifier = GlanceModifier.size(45.dp)
-        )
+        EggAndProgressBars(assetManager, contract, 45, 6)
     }
 
     Column(
@@ -207,4 +187,41 @@ fun NoContractsContent(assetManager: AssetManager) {
             modifier = GlanceModifier.padding(top = 5.dp)
         )
     }
+}
+
+@Composable
+fun EggAndProgressBars(
+    assetManager: AssetManager,
+    contract: ContractInfoEntry,
+    eggSize: Int,
+    progressSize: Int
+) {
+    val eggName = if (contract.customEggId.isNullOrBlank()) {
+        getEggName(contract.eggId)
+    } else {
+        "egg_${contract.customEggId}"
+    }
+
+    contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
+        val percentComplete =
+            getContractGoalPercentComplete(contract.eggsDelivered, goal.amount)
+        val bitmap = createContractCircularProgressBarBitmap(
+            percentComplete,
+            150,
+        )
+
+        Image(
+            provider = ImageProvider(bitmap),
+            contentDescription = "Circular Progress",
+            modifier = GlanceModifier.size(((index + progressSize) * 10).dp)
+        )
+    }
+
+
+    val eggBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
+    Image(
+        provider = ImageProvider(eggBitmap),
+        contentDescription = "Egg Icon",
+        modifier = GlanceModifier.size(eggSize.dp)
+    )
 }

@@ -144,7 +144,7 @@ fun MissionProgressMinimal(
 ) {
     val isFueling = mission.identifier.isBlank()
 
-    val percentRemaining =
+    val percentComplete =
         if (isFueling) {
             1f
         } else {
@@ -160,7 +160,7 @@ fun MissionProgressMinimal(
         contentAlignment = Alignment.Center
     ) {
         val bitmap = createMissionCircularProgressBarBitmap(
-            percentRemaining,
+            percentComplete,
             mission.durationType,
             100,
             isFueling

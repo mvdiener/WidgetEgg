@@ -10,6 +10,8 @@ data class ContractInfoEntry(
     var name: String,
     var eggsDelivered: Double,
     var timeRemaining: Double,
+    var allGoalsAchieved: Boolean,
+    var clearedForExit: Boolean,
     var goals: List<GoalInfoEntry>,
     var contributors: List<ContributorInfoEntry>
 )

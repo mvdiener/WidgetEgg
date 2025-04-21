@@ -1,6 +1,7 @@
 package api
 
 import data.BACKUP_ENDPOINT
+import data.CONTRACT_ENDPOINT
 import data.CURRENT_CLIENT_VERSION
 import data.ContractData
 import data.MISSION_ENDPOINT
@@ -8,6 +9,8 @@ import data.MissionData
 import ei.Ei.AuthenticatedMessage
 import ei.Ei.Backup
 import ei.Ei.BasicRequestInfo
+import ei.Ei.ContractCoopStatusRequest
+import ei.Ei.ContractCoopStatusResponse
 import ei.Ei.EggIncFirstContactRequest
 import ei.Ei.EggIncFirstContactResponse
 import ei.Ei.GetActiveMissionsResponse
@@ -47,6 +50,43 @@ suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<Missio
                 val activeMissionsResponse =
                     GetActiveMissionsResponse.parseFrom(authMessageResponse)
                 return activeMissionsResponse.activeMissionsList
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+
+        else -> throw Exception("Error retrieving data")
+    }
+}
+
+suspend fun fetchContractStatus(
+    basicRequestInfo: BasicRequestInfo,
+    contractId: String,
+    coopId: String
+): ContractCoopStatusResponse {
+    val url = CONTRACT_ENDPOINT
+
+    val contractRequest = ContractCoopStatusRequest.newBuilder()
+        .setRinfo(basicRequestInfo)
+        .setUserId(basicRequestInfo.eiUserId)
+        .setContractIdentifier(contractId)
+        .setCoopIdentifier(coopId)
+        .build()
+
+    val encodedRequest = contractRequest.toByteArray().encodeBase64()
+    val client = createHttpClient()
+    val response = makeRequest(client, url, encodedRequest)
+
+    when (response.status.value) {
+        in 200..299 -> {
+            try {
+                val authMessageResponse =
+                    AuthenticatedMessage.parseFrom(
+                        response.bodyAsText().decodeBase64Bytes()
+                    ).message
+                val contractResponse =
+                    ContractCoopStatusResponse.parseFrom(authMessageResponse)
+                return contractResponse
             } catch (e: Exception) {
                 throw e
             }
@@ -103,7 +143,14 @@ suspend fun fetchMissionData(eid: String): MissionData {
 suspend fun fetchContractData(eid: String): ContractData {
     val basicRequestInfo = getBasicRequestInfo(eid)
     val backup = fetchBackup(basicRequestInfo)
-    return ContractData(backup.contracts.contractsList, backup.contracts.currentCoopStatusesList)
+    val statuses = backup.contracts.contractsList.map { contract ->
+        fetchContractStatus(
+            basicRequestInfo,
+            contract.contract.identifier,
+            contract.coopIdentifier
+        )
+    }
+    return ContractData(backup.contracts.contractsList, statuses)
 }
 
 fun getBasicRequestInfo(eid: String): BasicRequestInfo {

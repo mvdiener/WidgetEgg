@@ -168,8 +168,10 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
                 eggId = contract.contract.egg.number,
                 customEggId = contract.contract.customEggId,
                 name = contract.contract.name,
-                eggsDelivered = contract.coopLastUploadedContribution,
+                eggsDelivered = status?.totalAmount ?: 0.0,
                 timeRemaining = status?.secondsRemaining ?: 0.0,
+                allGoalsAchieved = status?.allGoalsAchieved ?: false,
+                clearedForExit = status?.clearedForExit ?: false,
                 goals = formattedGoals,
                 contributors = formattedContributors
             )

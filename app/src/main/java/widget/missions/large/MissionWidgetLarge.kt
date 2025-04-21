@@ -219,7 +219,7 @@ fun MissionProgressLarge(
 ) {
     val isFueling = mission.identifier.isBlank()
 
-    val percentRemaining =
+    val percentComplete =
         if (isFueling) {
             1f
         } else {
@@ -234,7 +234,7 @@ fun MissionProgressLarge(
         contentAlignment = Alignment.Center
     ) {
         val bitmap = createMissionCircularProgressBarBitmap(
-            percentRemaining,
+            percentComplete,
             mission.durationType,
             150,
             isFueling

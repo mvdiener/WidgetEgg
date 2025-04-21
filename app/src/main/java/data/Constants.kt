@@ -2,6 +2,7 @@ package data
 
 const val MISSION_ENDPOINT = "https://www.auxbrain.com/ei_afx/get_active_missions"
 const val BACKUP_ENDPOINT = "https://www.auxbrain.com/ei/bot_first_contact"
+const val CONTRACT_ENDPOINT = "https://www.auxbrain.com/ei/coop_status"
 
 const val CURRENT_CLIENT_VERSION = 69
 
