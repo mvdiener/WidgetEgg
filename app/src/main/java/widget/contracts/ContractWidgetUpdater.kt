@@ -3,7 +3,7 @@ package widget.contracts
 import android.content.Context
 import api.fetchContractData
 import kotlinx.coroutines.runBlocking
-import tools.formatContractData
+import tools.utilities.formatContractData
 import user.preferences.PreferencesDatastore
 
 class ContractWidgetUpdater {

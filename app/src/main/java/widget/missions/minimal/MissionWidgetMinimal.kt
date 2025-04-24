@@ -34,10 +34,10 @@ import data.MissionInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import tools.createMissionCircularProgressBarBitmap
-import tools.getAsset
-import tools.getMissionPercentComplete
-import tools.getShipName
+import tools.utilities.createMissionCircularProgressBarBitmap
+import tools.utilities.getAsset
+import tools.utilities.getMissionPercentComplete
+import tools.utilities.getShipName
 import widget.missions.MissionWidgetDataStore
 import widget.missions.MissionWidgetDataStorePreferencesKeys
 import widget.missions.MissionWidgetUpdater

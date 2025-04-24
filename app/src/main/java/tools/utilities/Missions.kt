@@ -1,39 +1,18 @@
-package tools
+package tools.utilities
 
-import android.content.ContentResolver
-import android.content.ContentValues
-import android.content.Context
-import android.content.pm.PackageManager
-import android.content.res.AssetManager
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.net.Uri
-import android.provider.CalendarContract
-import android.provider.CalendarContract.Reminders
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.createBitmap
-import androidx.core.graphics.scale
-import androidx.core.graphics.toColorInt
 import data.ALL_SHIPS
-import data.CalendarEntry
-import data.ContractData
-import data.ContractInfoEntry
-import data.ContributorInfoEntry
 import data.FuelLevelInfo
-import data.GoalInfoEntry
 import data.MissionData
 import data.MissionInfoEntry
 import data.TANK_SIZES
 import data.TankInfo
 import ei.Ei.Egg
-import java.io.InputStream
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import java.util.TimeZone
 
 fun getMissionPercentComplete(
     missionDuration: Double,
@@ -43,17 +22,6 @@ fun getMissionPercentComplete(
     var newTimeRemaining = timeRemaining - (Instant.now().epochSecond - savedTime)
     if (newTimeRemaining <= 0) newTimeRemaining = 0.0
     return ((missionDuration - newTimeRemaining) / missionDuration).toFloat()
-}
-
-fun getContractGoalPercentComplete(
-    delivered: Double,
-    goal: Double
-): Float {
-    return if (delivered > goal) {
-        100F
-    } else {
-        (delivered / goal).toFloat()
-    }
 }
 
 fun getMissionDurationRemaining(
@@ -133,55 +101,6 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
     }
 
     return formattedMissions
-}
-
-fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
-    var formattedContracts: List<ContractInfoEntry> = emptyList()
-
-    contractInfo.contracts.forEach { contract ->
-        var formattedGoals: List<GoalInfoEntry> = emptyList()
-        val gradeSpecsList = contract.contract.gradeSpecsList
-        val gradeSpecs = gradeSpecsList.find { gradeSpec -> gradeSpec.grade == contract.grade }
-
-        gradeSpecs?.goalsList?.forEach { goal ->
-            formattedGoals = formattedGoals.plus(GoalInfoEntry(amount = goal.targetAmount))
-        }
-
-        val status =
-            contractInfo.contractStatuses.find { contractStatus ->
-                contractStatus.contractIdentifier == contract.contract.identifier
-            }
-
-        var formattedContributors: List<ContributorInfoEntry> = emptyList()
-        status?.contributorsList?.filterNot { contributor ->
-            // Remove any [departed] users stuck from contract creation
-            contributor.userName == "[departed]" && contributor.contributionAmount == 0.0 && contributor.contributionRate == 0.0 && contributor.uuid.isNullOrEmpty()
-        }?.forEach { contributor ->
-            formattedContributors = formattedContributors.plus(
-                ContributorInfoEntry(
-                    eggsDelivered = contributor.contributionAmount,
-                    eggRate = contributor.contributionRate,
-                    offlineTime = contributor.farmInfo?.timestamp ?: 0.0
-                )
-            )
-        }
-
-        formattedContracts = formattedContracts.plus(
-            ContractInfoEntry(
-                eggId = contract.contract.egg.number,
-                customEggId = contract.contract.customEggId,
-                name = contract.contract.name,
-                eggsDelivered = status?.totalAmount ?: 0.0,
-                timeRemaining = status?.secondsRemaining ?: 0.0,
-                allGoalsAchieved = status?.allGoalsAchieved ?: false,
-                clearedForExit = status?.clearedForExit ?: false,
-                goals = formattedGoals,
-                contributors = formattedContributors
-            )
-        )
-    }
-
-    return formattedContracts
 }
 
 fun getTankCapacity(tankLevel: Int): Long {
@@ -269,62 +188,6 @@ fun createMissionCircularProgressBarBitmap(
     return createCircularProgressBarBitmap(progress, color, size, 8f)
 }
 
-fun createContractCircularProgressBarBitmap(
-    progress: Float,
-    size: Int
-): Bitmap {
-    val color = "#16ac00".toColorInt()
-    return createCircularProgressBarBitmap(progress, color, size, 4f)
-}
-
-private fun createCircularProgressBarBitmap(
-    progress: Float,
-    color: Int,
-    size: Int,
-    width: Float
-): Bitmap {
-    val bitmap = createBitmap(size, size)
-    val canvas = Canvas(bitmap)
-    val paint = Paint().apply {
-        isAntiAlias = true
-        strokeWidth = width
-        style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
-    }
-
-    paint.color = "#464646".toColorInt()
-    val radius = size / 2f - paint.strokeWidth / 2
-    canvas.drawCircle(size / 2f, size / 2f, radius, paint)
-
-    paint.color = color
-    val sweepAngle = 360 * progress
-    canvas.drawArc(
-        paint.strokeWidth / 2,
-        paint.strokeWidth / 2,
-        size - paint.strokeWidth / 2,
-        size - paint.strokeWidth / 2,
-        90f,
-        sweepAngle,
-        false,
-        paint
-    )
-
-    return bitmap
-}
-
-fun bitmapResize(image: Bitmap): Bitmap {
-    val width = image.width
-    val height = image.height
-    val aspectRatio = width / height
-    val newWidth = 100
-    return if (width > newWidth) {
-        val newHeight = newWidth * aspectRatio
-        image.scale(newWidth, newHeight, false)
-    } else {
-        image
-    }
-}
-
 fun getShipName(shipId: Int): String {
     return ALL_SHIPS[shipId]
 }
@@ -335,14 +198,6 @@ fun getEggName(eggId: Int): String {
         "egg_unknown"
     } else {
         "egg_$eggName"
-    }
-}
-
-fun getAsset(assetManager: AssetManager, path: String): InputStream {
-    return try {
-        assetManager.open(path)
-    } catch (_: Exception) {
-        assetManager.open("eggs/egg_unknown.png")
     }
 }
 
@@ -434,101 +289,4 @@ fun getFuelAmount(fuelQuantity: Double): String {
     }
 
     return "$formatted$unit"
-}
-
-fun hasCalendarPermissions(context: Context): Boolean {
-    return ContextCompat.checkSelfPermission(
-        context,
-        android.Manifest.permission.READ_CALENDAR
-    ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-        context,
-        android.Manifest.permission.WRITE_CALENDAR
-    ) == PackageManager.PERMISSION_GRANTED
-}
-
-fun scheduleCalendarEvents(
-    context: Context,
-    missions: List<MissionInfoEntry>,
-    eiUserName: String,
-    selectedCalendar: CalendarEntry
-) {
-    if (hasCalendarPermissions(context)) {
-        missions.map { mission ->
-            val missionEndTime = getMissionEndTimeMilliseconds(mission)
-            if (missionEndTime > 0 && mission.identifier.isNotBlank() && selectedCalendar.id.toInt() != -1 && !hasEvent(
-                    context,
-                    mission.identifier,
-                    missionEndTime
-                )
-            ) {
-                val missionEndTimePlusMinute = missionEndTime + (60 * 1000)
-                val eventValues = ContentValues().apply {
-                    put(CalendarContract.Events.DTSTART, missionEndTime)
-                    put(CalendarContract.Events.DTEND, missionEndTimePlusMinute)
-                    put(CalendarContract.Events.TITLE, "Ship returning for $eiUserName")
-                    put(CalendarContract.Events.DESCRIPTION, mission.identifier)
-                    put(CalendarContract.Events.CALENDAR_ID, selectedCalendar.id)
-                    put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)
-                }
-                val eventUri: Uri? =
-                    context.contentResolver.insert(
-                        CalendarContract.Events.CONTENT_URI,
-                        eventValues
-                    )
-                val eventID: Long = eventUri?.lastPathSegment!!.toLong()
-
-                // Get rid of any default reminders that are automatically added with events
-                removeDefaultReminders(context, eventID)
-
-                // Add our own reminder at the time of the event
-                val reminderValues = ContentValues().apply {
-                    put(Reminders.MINUTES, 0)
-                    put(Reminders.EVENT_ID, eventID)
-                    put(Reminders.METHOD, Reminders.METHOD_ALERT)
-                }
-                context.contentResolver.insert(
-                    Reminders.CONTENT_URI,
-                    reminderValues
-                )
-            }
-        }
-    }
-}
-
-private fun removeDefaultReminders(context: Context, eventId: Long) {
-    val selection = "${Reminders.EVENT_ID} = ?"
-    val selectionArgs = arrayOf(eventId.toString())
-
-    context.contentResolver.delete(Reminders.CONTENT_URI, selection, selectionArgs)
-}
-
-private fun hasEvent(context: Context, identifier: String, eventTime: Long): Boolean {
-    val uri = CalendarContract.Events.CONTENT_URI
-
-    val projection = arrayOf(
-        CalendarContract.Events._ID
-    )
-
-    // Look for events within +/- 5 min of event time to reduce query scope
-    val startTime = eventTime - (5 * 60 * 1000)
-    val endTime = eventTime + (5 * 60 * 1000)
-
-    val selection =
-        "${CalendarContract.Events.DESCRIPTION} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ?"
-    val selectionArgs = arrayOf(identifier, startTime.toString(), endTime.toString())
-
-    val contentResolver: ContentResolver = context.contentResolver
-
-    val cursor = contentResolver.query(
-        uri,
-        projection,
-        selection,
-        selectionArgs,
-        null
-    )
-
-    val hasEvent = cursor?.moveToFirst() == true
-
-    cursor?.close()
-    return hasEvent
 }

@@ -5,9 +5,9 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import api.fetchMissionData
 import data.MissionInfoEntry
 import kotlinx.coroutines.runBlocking
-import tools.formatMissionData
-import tools.formatTankInfo
-import tools.scheduleCalendarEvents
+import tools.utilities.formatMissionData
+import tools.utilities.formatTankInfo
+import tools.utilities.scheduleCalendarEvents
 import user.preferences.PreferencesDatastore
 import widget.missions.large.MissionWidgetLarge
 import widget.missions.minimal.MissionWidgetMinimal

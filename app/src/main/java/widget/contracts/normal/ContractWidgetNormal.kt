@@ -35,10 +35,10 @@ import data.ContractInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import tools.createContractCircularProgressBarBitmap
-import tools.getAsset
-import tools.getContractGoalPercentComplete
-import tools.getEggName
+import tools.utilities.createContractCircularProgressBarBitmap
+import tools.utilities.getAsset
+import tools.utilities.getContractGoalPercentComplete
+import tools.utilities.getEggName
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
 import widget.contracts.ContractWidgetUpdater

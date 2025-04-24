@@ -52,7 +52,7 @@ import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
-import tools.hasCalendarPermissions
+import tools.utilities.hasCalendarPermissions
 import user.preferences.PreferencesDatastore
 
 @Composable
@@ -197,7 +197,7 @@ fun BatteryPermissionsDialog(
             ) {
                 Text(
                     text =
-                    """
+                        """
                         The widgets attempt to update automatically in the background every 15 minutes. In order to do this, they run background processes to fetch mission data.     
                         
                         Battery optimization can prevent these processes from running. If you notice issues with widget updates, it is recommended that you turn off battery optimization for this app.
@@ -326,7 +326,7 @@ fun AbsoluteTimeDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         If a ship has less than 24 hours left, show the time of return instead of the time remaining.
                         
                         Only applies to widgets that show a time.
@@ -390,7 +390,7 @@ fun AbsoluteTimePlusDayDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         Show the time of return even if there are more than 24 hours left.
                         
                         Show absolute time must be enabled for this to take effect. Only applies to widgets that show a time.
@@ -453,7 +453,7 @@ fun OpenEggIncDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         Tapping any widget will open Egg, Inc. instead of manually refreshing the displayed missions.
                         
                         Automatic widget updates every 15 minutes will still happen independent of this setting.
@@ -539,7 +539,7 @@ fun ScheduleEventsDialog(
             ) {
                 Text(
                     text =
-                    """
+                        """
                         The app will schedule a calendar event and reminder at the time of return for any in-flight ship.
                         
                         If you have previously denied calendar permissions, you will need to manually enable it within app settings.
@@ -591,9 +591,10 @@ fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel) {
                     isDropDownExpanded = false
                 }) {
                 settingsViewModel.userCalendars.forEach { calendar ->
-                    DropdownMenuItem(text = {
-                        Text(text = calendar.displayName)
-                    },
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = calendar.displayName)
+                        },
                         onClick = {
                             settingsViewModel.updateSelectedCalendar(calendar)
                             isDropDownExpanded = false
@@ -711,7 +712,7 @@ fun ShowTankLevelsDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         Show the fuel tank levels in the last slot of the widget. Will take the place of the fueling ship if it exists.
                     """.trimIndent()
                 )
@@ -773,7 +774,7 @@ fun ShowSliderCapacityDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         The fuel bar percentage filled is based on the tank slider for that individual fuel, instead of the overall tank capacity.
                         
                         Show tank levels must be enabled for this to take effect.

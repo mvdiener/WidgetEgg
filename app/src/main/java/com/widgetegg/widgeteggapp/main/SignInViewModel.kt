@@ -10,9 +10,9 @@ import api.fetchContractData
 import api.fetchMissionData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import tools.formatContractData
-import tools.formatMissionData
-import tools.formatTankInfo
+import tools.utilities.formatContractData
+import tools.utilities.formatMissionData
+import tools.utilities.formatTankInfo
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
 import widget.missions.MissionWidgetDataStore

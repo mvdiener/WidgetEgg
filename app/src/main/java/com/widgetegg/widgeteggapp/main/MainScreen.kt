@@ -42,7 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
-import tools.getAsset
+import tools.utilities.getAsset
 import user.preferences.PreferencesDatastore
 
 @Composable
