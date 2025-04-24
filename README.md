@@ -32,7 +32,7 @@ value.
 ## Contributing
 
 If you are interested in contributing or making feature requests, feel free to open a PR and/or come
-find me on the [Egg Inc Discord](https://discord.gg/tzZCWAF).
+find me on the [Egg Inc Discord](https://discord.gg/egginc).
 
 ## Disclaimer
 
