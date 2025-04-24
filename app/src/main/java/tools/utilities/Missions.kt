@@ -24,6 +24,7 @@ fun getMissionPercentComplete(
     return ((missionDuration - newTimeRemaining) / missionDuration).toFloat()
 }
 
+// Returns Pair<timeText, isMoreThanOneDay>
 fun getMissionDurationRemaining(
     timeRemaining: Double,
     savedTime: Long,

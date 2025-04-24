@@ -37,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.createContractCircularProgressBarBitmap
 import tools.utilities.getAsset
+import tools.utilities.getContractDurationRemaining
 import tools.utilities.getContractGoalPercentComplete
 import tools.utilities.getEggName
 import widget.contracts.ContractWidgetDataStore
@@ -120,6 +121,17 @@ fun ContractSingle(assetManager: AssetManager, contract: ContractInfoEntry) {
     Text(
         modifier = GlanceModifier.padding(top = 5.dp),
         text = contract.name,
+        style = TextStyle(
+            color = ColorProvider(Color.White),
+            fontSize = TextUnit(13f, TextUnitType.Sp)
+        )
+    )
+
+    val (timeText, isOnTrack) = getContractDurationRemaining(contract)
+
+    Text(
+        modifier = GlanceModifier.padding(top = 5.dp),
+        text = timeText,
         style = TextStyle(
             color = ColorProvider(Color.White),
             fontSize = TextUnit(13f, TextUnitType.Sp)

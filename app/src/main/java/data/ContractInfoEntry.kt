@@ -9,7 +9,7 @@ data class ContractInfoEntry(
     var customEggId: String?,
     var name: String,
     var eggsDelivered: Double,
-    var timeRemaining: Double,
+    var timeRemainingSeconds: Double,
     var allGoalsAchieved: Boolean,
     var clearedForExit: Boolean,
     var goals: List<GoalInfoEntry>,
@@ -24,6 +24,6 @@ data class GoalInfoEntry(
 @Serializable
 data class ContributorInfoEntry(
     var eggsDelivered: Double,
-    var eggRate: Double,
-    var offlineTime: Double
+    var eggRatePerSecond: Double,
+    var offlineTimeSeconds: Double
 )
