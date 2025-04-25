@@ -39,7 +39,9 @@ import tools.utilities.createContractCircularProgressBarBitmap
 import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
 import tools.utilities.getContractGoalPercentComplete
+import tools.utilities.getContractTimeTextColor
 import tools.utilities.getEggName
+import tools.utilities.getScrollName
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
 import widget.contracts.ContractWidgetUpdater
@@ -129,14 +131,29 @@ fun ContractSingle(assetManager: AssetManager, contract: ContractInfoEntry) {
 
     val (timeText, isOnTrack) = getContractDurationRemaining(contract)
 
-    Text(
-        modifier = GlanceModifier.padding(top = 5.dp),
-        text = timeText,
-        style = TextStyle(
-            color = ColorProvider(Color.White),
-            fontSize = TextUnit(13f, TextUnitType.Sp)
+    Row(
+        modifier = GlanceModifier.padding(top = 5.dp)
+    ) {
+        Text(
+            text = timeText,
+            style = TextStyle(
+                color = ColorProvider(Color(getContractTimeTextColor(contract, isOnTrack)))
+            )
         )
-    )
+
+        val scrollName = getScrollName(contract, timeText)
+        if (scrollName.isNotEmpty()) {
+            val scrollBitmap =
+                BitmapFactory.decodeStream(getAsset(assetManager, "other/$scrollName.png"))
+
+            Image(
+                provider = ImageProvider(scrollBitmap),
+                contentDescription = "Contract Scroll",
+                modifier = GlanceModifier.size(20.dp)
+            )
+        }
+    }
+
 }
 
 @Composable

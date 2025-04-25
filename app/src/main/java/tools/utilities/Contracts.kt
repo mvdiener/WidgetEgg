@@ -1,23 +1,14 @@
 package tools.utilities
 
 import android.graphics.Bitmap
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import data.ContractData
 import data.ContractInfoEntry
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
 import kotlin.math.abs
-
-fun getContractGoalPercentComplete(
-    delivered: Double,
-    goal: Double
-): Float {
-    return if (delivered > goal) {
-        100F
-    } else {
-        (delivered / goal).toFloat()
-    }
-}
 
 fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
     var formattedContracts: List<ContractInfoEntry> = emptyList()
@@ -68,6 +59,17 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
     return formattedContracts
 }
 
+fun getContractGoalPercentComplete(
+    delivered: Double,
+    goal: Double
+): Float {
+    return if (delivered > goal) {
+        100F
+    } else {
+        (delivered / goal).toFloat()
+    }
+}
+
 fun createContractCircularProgressBarBitmap(
     progress: Float,
     size: Int
@@ -97,6 +99,10 @@ fun getContractDurationRemaining(contract: ContractInfoEntry): Pair<String, Bool
     val timeRemainingSeconds = remainingEggsNeeded / totalEggRatePerSecond
     if (timeRemainingSeconds > contract.timeRemainingSeconds) {
         isOnTrack = false
+
+        if (contract.timeRemainingSeconds <= 0.0 && remainingEggsNeeded > 0.0) {
+            return Pair("Out of time!", isOnTrack)
+        }
     }
 
     val timeText = formatTimeText(timeRemainingSeconds)
@@ -104,8 +110,37 @@ fun getContractDurationRemaining(contract: ContractInfoEntry): Pair<String, Bool
     return Pair(timeText, isOnTrack)
 }
 
+fun getScrollName(contract: ContractInfoEntry, timeText: String): String {
+    return if (contract.allGoalsAchieved && contract.clearedForExit) {
+        "green_scroll"
+    } else if (contract.allGoalsAchieved) {
+        "yellow_scroll"
+    } else if (contract.timeRemainingSeconds <= 0.0 && timeText == "Out of time!") {
+        "red_scroll"
+    } else {
+        ""
+    }
+}
+
+fun getContractTimeTextColor(contract: ContractInfoEntry, isOnTrack: Boolean): Int {
+    return if (contract.timeRemainingSeconds <= 0.0 && !isOnTrack) {
+        Color.Red.toArgb()
+    } else if (!isOnTrack) {
+        android.graphics.Color.argb(255, 255, 165, 0) //orange
+    } else {
+        Color.White.toArgb()
+    }
+}
+
 private fun formatTimeText(timeRemainingSeconds: Double): String {
+    if (timeRemainingSeconds.isInfinite()) {
+        return ">1y"
+    }
+
     val years = (timeRemainingSeconds / 31536000).toInt()
+    if (years >= 1) {
+        return ">1y"
+    }
     val remainingSecondsAfterYears = timeRemainingSeconds % 31536000
 
     val days = (remainingSecondsAfterYears / 86400).toInt()
@@ -118,7 +153,6 @@ private fun formatTimeText(timeRemainingSeconds: Double): String {
 
     val timeText = mutableListOf<String>()
 
-    if (years > 0) timeText += "${years}y"
     if (days > 0) timeText += "${days}d"
     if (hours > 0) timeText += "${hours}h"
     if (minutes > 0) timeText += "${minutes}m"
