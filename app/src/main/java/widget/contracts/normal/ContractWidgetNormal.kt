@@ -40,6 +40,7 @@ import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
 import tools.utilities.getContractGoalPercentComplete
 import tools.utilities.getContractTimeTextColor
+import tools.utilities.getContractsWithBlankContract
 import tools.utilities.getEggName
 import tools.utilities.getScrollName
 import widget.contracts.ContractWidgetDataStore
@@ -101,8 +102,24 @@ class ContractWidgetNormal : GlanceAppWidget() {
                         }
 
                         else -> {
-                            contractData.forEach { contract ->
-                                ContractAll(contract)
+                            val contractsChunked = contractData.chunked(2)
+                            contractsChunked.forEach { contractGroup ->
+                                Row(
+                                    modifier = GlanceModifier.fillMaxWidth().defaultWeight()
+                                        .padding(5.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    contractGroup.forEach { contract ->
+                                        Column(
+                                            modifier = GlanceModifier.defaultWeight(),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            ContractAll(assetManager, contract)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -123,37 +140,10 @@ fun ContractSingle(assetManager: AssetManager, contract: ContractInfoEntry) {
     Text(
         modifier = GlanceModifier.padding(top = 5.dp),
         text = contract.name,
-        style = TextStyle(
-            color = ColorProvider(Color.White),
-            fontSize = TextUnit(13f, TextUnitType.Sp)
-        )
+        style = TextStyle(color = ColorProvider(Color.White))
     )
 
-    val (timeText, isOnTrack) = getContractDurationRemaining(contract)
-
-    Row(
-        modifier = GlanceModifier.padding(top = 5.dp)
-    ) {
-        Text(
-            text = timeText,
-            style = TextStyle(
-                color = ColorProvider(Color(getContractTimeTextColor(contract, isOnTrack)))
-            )
-        )
-
-        val scrollName = getScrollName(contract, timeText)
-        if (scrollName.isNotEmpty()) {
-            val scrollBitmap =
-                BitmapFactory.decodeStream(getAsset(assetManager, "other/$scrollName.png"))
-
-            Image(
-                provider = ImageProvider(scrollBitmap),
-                contentDescription = "Contract Scroll",
-                modifier = GlanceModifier.size(20.dp)
-            )
-        }
-    }
-
+    TimeTextAndScroll(assetManager, contract)
 }
 
 @Composable
@@ -166,7 +156,7 @@ fun ContractDouble(assetManager: AssetManager, contract: ContractInfoEntry) {
 
     Column(
         modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
         verticalAlignment = Alignment.Top
     ) {
         Text(
@@ -176,18 +166,29 @@ fun ContractDouble(assetManager: AssetManager, contract: ContractInfoEntry) {
                 fontSize = TextUnit(13f, TextUnitType.Sp)
             )
         )
+
+        TimeTextAndScroll(assetManager, contract, 13f, 15)
     }
 }
 
 @Composable
-fun ContractAll(contract: ContractInfoEntry) {
+fun ContractAll(assetManager: AssetManager, contract: ContractInfoEntry) {
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+        EggAndProgressBars(assetManager, contract, 35, 5)
+    }
+
     Text(
-        text = "Hello World 4 Contracts",
+        modifier = GlanceModifier.padding(top = 5.dp),
+        text = contract.name,
         style = TextStyle(
             color = ColorProvider(Color.White),
-            fontSize = TextUnit(13f, TextUnitType.Sp)
+            fontSize = TextUnit(11f, TextUnitType.Sp)
         )
     )
+
+    TimeTextAndScroll(assetManager, contract, 11f, 12)
 }
 
 @Composable
@@ -253,4 +254,36 @@ fun EggAndProgressBars(
         contentDescription = "Egg Icon",
         modifier = GlanceModifier.size(eggSize.dp)
     )
+}
+
+@Composable
+fun TimeTextAndScroll(
+    assetManager: AssetManager,
+    contract: ContractInfoEntry,
+    textSize: Float = 14f,
+    scrollSize: Int = 20
+) {
+    val (timeText, isOnTrack) = getContractDurationRemaining(contract)
+
+    Row {
+        Text(
+            text = timeText,
+            style = TextStyle(
+                color = ColorProvider(Color(getContractTimeTextColor(contract, isOnTrack))),
+                fontSize = TextUnit(textSize, TextUnitType.Sp)
+            )
+        )
+
+        val scrollName = getScrollName(contract, timeText)
+        if (scrollName.isNotEmpty()) {
+            val scrollBitmap =
+                BitmapFactory.decodeStream(getAsset(assetManager, "other/$scrollName.png"))
+
+            Image(
+                provider = ImageProvider(scrollBitmap),
+                contentDescription = "Contract Scroll",
+                modifier = GlanceModifier.size(scrollSize.dp)
+            )
+        }
+    }
 }

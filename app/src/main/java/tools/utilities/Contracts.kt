@@ -59,12 +59,28 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
     return formattedContracts
 }
 
+fun getContractsWithBlankContract(contracts: List<ContractInfoEntry>): List<ContractInfoEntry> {
+    val blankContract = ContractInfoEntry(
+        eggId = 0,
+        customEggId = "",
+        name = "blankContract",
+        eggsDelivered = 0.0,
+        timeRemainingSeconds = 0.0,
+        allGoalsAchieved = false,
+        clearedForExit = false,
+        goals = listOf(),
+        contributors = listOf(),
+    )
+
+    return contracts + blankContract
+}
+
 fun getContractGoalPercentComplete(
     delivered: Double,
     goal: Double
 ): Float {
-    return if (delivered > goal) {
-        100F
+    return if (delivered >= goal) {
+        1F
     } else {
         (delivered / goal).toFloat()
     }
@@ -151,11 +167,17 @@ private fun formatTimeText(timeRemainingSeconds: Double): String {
 
     val minutes = (remainingSecondsAfterHours / 60).toInt()
 
-    val timeText = mutableListOf<String>()
-
-    if (days > 0) timeText += "${days}d"
-    if (hours > 0) timeText += "${hours}h"
-    if (minutes > 0) timeText += "${minutes}m"
-
-    return if (timeText.isEmpty()) "Finished!" else timeText.joinToString("")
+    return if (days > 1) {
+        if (hours == 0) {
+            "${days}d"
+        } else {
+            "${days}d ${hours}h"
+        }
+    } else {
+        if (hours == 0) {
+            "${minutes}m"
+        } else {
+            "${hours}h ${minutes}m"
+        }
+    }
 }

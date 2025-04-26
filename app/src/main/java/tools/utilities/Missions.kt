@@ -36,7 +36,7 @@ fun getMissionDurationRemaining(
     return if (newTimeRemaining <= 0) {
         Pair("Finished", false)
     } else {
-        val days = newTimeRemaining / 86400
+        val days = (newTimeRemaining / 86400).toInt()
         val timeText = if (useAbsoluteTime && (useAbsoluteTimePlusDay || days < 1)) {
             val currentTime = LocalDateTime.now()
             val endingTime = currentTime.plusSeconds(newTimeRemaining.toLong())
@@ -46,21 +46,21 @@ fun getMissionDurationRemaining(
                 endingTime.format(DateTimeFormatter.ofPattern("h:mm a"))
             }
         } else {
-            val hoursMinusDays = (newTimeRemaining % 86400) / 3600
-            val hours = newTimeRemaining / 3600
-            val minutes = (newTimeRemaining % 3600) / 60
+            val hoursMinusDays = ((newTimeRemaining % 86400) / 3600).toInt()
+            val hours = (newTimeRemaining / 3600).toInt()
+            val minutes = ((newTimeRemaining % 3600) / 60).toInt()
 
             if (days > 1) {
-                if (hoursMinusDays.toInt() == 0) {
-                    "${days.toInt()}d"
+                if (hoursMinusDays == 0) {
+                    "${days}d"
                 } else {
-                    "${days.toInt()}d ${hoursMinusDays.toInt()}h"
+                    "${days}d ${hoursMinusDays}h"
                 }
             } else {
-                if (hours.toInt() == 0) {
-                    "${minutes.toInt()}m"
+                if (hours == 0) {
+                    "${minutes}m"
                 } else {
-                    "${hours.toInt()}h ${minutes.toInt()}m"
+                    "${hours}h ${minutes}m"
                 }
             }
         }
