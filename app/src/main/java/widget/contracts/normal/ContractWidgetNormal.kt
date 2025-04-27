@@ -212,7 +212,7 @@ fun NoContractsContent(assetManager: AssetManager) {
     ) {
         LogoContentContracts(assetManager)
         Text(
-            text = "Waiting for contract data...",
+            text = "No active contracts...",
             style = TextStyle(color = ColorProvider(Color.White)),
             modifier = GlanceModifier.padding(top = 5.dp)
         )

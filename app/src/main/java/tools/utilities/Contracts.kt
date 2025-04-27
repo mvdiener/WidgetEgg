@@ -153,31 +153,31 @@ private fun formatTimeText(timeRemainingSeconds: Double): String {
         return ">1y"
     }
 
-    val years = (timeRemainingSeconds / 31536000).toInt()
+    val years = timeRemainingSeconds / 31536000
     if (years >= 1) {
         return ">1y"
     }
     val remainingSecondsAfterYears = timeRemainingSeconds % 31536000
 
-    val days = (remainingSecondsAfterYears / 86400).toInt()
+    val days = remainingSecondsAfterYears / 86400
     val remainingSecondsAfterDays = remainingSecondsAfterYears % 86400
 
-    val hours = (remainingSecondsAfterDays / 3600).toInt()
+    val hours = remainingSecondsAfterDays / 3600
     val remainingSecondsAfterHours = remainingSecondsAfterDays % 3600
 
-    val minutes = (remainingSecondsAfterHours / 60).toInt()
+    val minutes = remainingSecondsAfterHours / 60
 
     return if (days > 1) {
-        if (hours == 0) {
-            "${days}d"
+        if (hours.toInt() == 0) {
+            "${days.toInt()}d"
         } else {
-            "${days}d ${hours}h"
+            "${days.toInt()}d ${hours.toInt()}h"
         }
     } else {
-        if (hours == 0) {
-            "${minutes}m"
+        if (hours.toInt() == 0) {
+            "${minutes.toInt()}m"
         } else {
-            "${hours}h ${minutes}m"
+            "${hours.toInt()}h ${minutes.toInt()}m"
         }
     }
 }
