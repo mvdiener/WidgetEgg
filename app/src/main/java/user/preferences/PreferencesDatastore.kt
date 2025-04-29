@@ -39,6 +39,9 @@ class PreferencesDatastore(context: Context) {
         private val SCHEDULE_EVENTS = booleanPreferencesKey("scheduleEvents")
         private val SELECTED_CALENDAR = stringPreferencesKey("selectedCalendar")
         private val CONTRACT_INFO = stringPreferencesKey("contractInfo")
+        private val USE_ABSOLUTE_TIME_CONTRACT = booleanPreferencesKey("useAbsoluteTimeContract")
+        private val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
+        private val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
@@ -54,7 +57,10 @@ class PreferencesDatastore(context: Context) {
             OPEN_EGG_INC,
             SCHEDULE_EVENTS,
             SELECTED_CALENDAR,
-            CONTRACT_INFO
+            CONTRACT_INFO,
+            USE_ABSOLUTE_TIME_CONTRACT,
+            USE_OFFLINE_TIME,
+            OPEN_WASMEGG_DASHBOARD
         )
     }
 
@@ -114,13 +120,13 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
-    suspend fun getUseAbsoluteTime() = dataStore.data.map {
+    suspend fun getUseAbsoluteTimeMission() = dataStore.data.map {
         it[USE_ABSOLUTE_TIME] ?: false
     }.first()
 
-    suspend fun saveUseAbsoluteTime(useAbsoluteTime: Boolean) {
+    suspend fun saveUseAbsoluteTimeMission(useAbsoluteTimeMission: Boolean) {
         dataStore.edit {
-            it[USE_ABSOLUTE_TIME] = useAbsoluteTime
+            it[USE_ABSOLUTE_TIME] = useAbsoluteTimeMission
         }
     }
 
@@ -237,6 +243,36 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveContractInfo(contractInfo: List<ContractInfoEntry>) {
         dataStore.edit {
             it[CONTRACT_INFO] = Json.encodeToString(contractInfo)
+        }
+    }
+
+    suspend fun getUseAbsoluteTimeContract() = dataStore.data.map {
+        it[USE_ABSOLUTE_TIME_CONTRACT] ?: false
+    }.first()
+
+    suspend fun saveUseAbsoluteTimeContract(useAbsoluteTimeContract: Boolean) {
+        dataStore.edit {
+            it[USE_ABSOLUTE_TIME_CONTRACT] = useAbsoluteTimeContract
+        }
+    }
+
+    suspend fun getUseOfflineTime() = dataStore.data.map {
+        it[USE_OFFLINE_TIME] ?: false
+    }.first()
+
+    suspend fun saveUseOfflineTime(useOfflineTime: Boolean) {
+        dataStore.edit {
+            it[USE_OFFLINE_TIME] = useOfflineTime
+        }
+    }
+
+    suspend fun getOpenWasmeggDashboard() = dataStore.data.map {
+        it[OPEN_WASMEGG_DASHBOARD] ?: false
+    }.first()
+
+    suspend fun saveOpenWasmeggDashboard(openWasmeggDashboard: Boolean) {
+        dataStore.edit {
+            it[OPEN_WASMEGG_DASHBOARD] = openWasmeggDashboard
         }
     }
 

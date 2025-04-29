@@ -24,7 +24,7 @@ class MissionWidgetUpdater {
 
             val prefEid = preferences.getEid()
             val prefEiUserName = preferences.getEiUserName()
-            val prefUseAbsoluteTime = preferences.getUseAbsoluteTime()
+            val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeMission()
             val prefUseAbsoluteTimePlusDay = preferences.getUseAbsoluteTimePlusDay()
             val prefTargetArtifactNormalWidget = preferences.getTargetArtifactNormalWidget()
             val prefTargetArtifactLargeWidget = preferences.getTargetArtifactLargeWidget()

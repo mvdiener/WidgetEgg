@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
+import widget.contracts.ContractWidgetDataStore
 import widget.missions.MissionWidgetDataStore
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,13 +26,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferences = PreferencesDatastore(context)
     }
 
-    var useAbsoluteTime by mutableStateOf(false)
+    var useAbsoluteTimeMission by mutableStateOf(false)
         private set
 
-    fun updateUseAbsoluteTime(input: Boolean) {
-        useAbsoluteTime = input
+    fun updateUseAbsoluteTimeMission(input: Boolean) {
+        useAbsoluteTimeMission = input
         runBlocking {
-            preferences.saveUseAbsoluteTime(input)
+            preferences.saveUseAbsoluteTimeMission(input)
         }
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -40,11 +41,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    var showAbsoluteTimeDialog by mutableStateOf(false)
+    var showAbsoluteTimeMissionDialog by mutableStateOf(false)
         private set
 
-    fun updateShowAbsoluteTimeDialog(input: Boolean) {
-        showAbsoluteTimeDialog = input
+    fun updateShowAbsoluteTimeMissionDialog(input: Boolean) {
+        showAbsoluteTimeMissionDialog = input
     }
 
     var useAbsoluteTimePlusDay by mutableStateOf(false)
@@ -276,5 +277,71 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             cursor?.close()
             updateUserCalendars(calendars)
         }
+    }
+
+    var useAbsoluteTimeContract by mutableStateOf(false)
+        private set
+
+    fun updateUseAbsoluteTimeContract(input: Boolean) {
+        useAbsoluteTimeContract = input
+        runBlocking {
+            preferences.saveUseAbsoluteTimeContract(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            ContractWidgetDataStore().setUseAbsoluteTime(context, input)
+        }
+    }
+
+    var showAbsoluteTimeContractDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowAbsoluteTimeContractDialog(input: Boolean) {
+        showAbsoluteTimeContractDialog = input
+    }
+
+    var useOfflineTime by mutableStateOf(false)
+        private set
+
+    fun updateUseOfflineTime(input: Boolean) {
+        useOfflineTime = input
+        runBlocking {
+            preferences.saveUseOfflineTime(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            ContractWidgetDataStore().setUseOfflineTime(context, input)
+        }
+    }
+
+    var showOfflineTimeDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowOfflineTimeDialog(input: Boolean) {
+        showOfflineTimeDialog = input
+    }
+
+    var openWasmeggDashboard by mutableStateOf(false)
+        private set
+
+    fun updateOpenWasmeggDashboard(input: Boolean) {
+        openWasmeggDashboard = input
+        runBlocking {
+            preferences.saveOpenWasmeggDashboard(input)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>().applicationContext
+            ContractWidgetDataStore().setOpenWasmeggDashboard(context, input)
+        }
+    }
+
+    var showOpenWasmeggDashboardDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowOpenWasmeggDashboardDialog(input: Boolean) {
+        showOpenWasmeggDashboardDialog = input
     }
 }
