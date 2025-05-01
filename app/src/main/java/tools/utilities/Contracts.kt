@@ -59,22 +59,6 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
     return formattedContracts
 }
 
-fun getContractsWithBlankContract(contracts: List<ContractInfoEntry>): List<ContractInfoEntry> {
-    val blankContract = ContractInfoEntry(
-        eggId = 0,
-        customEggId = "",
-        name = "blankContract",
-        eggsDelivered = 0.0,
-        timeRemainingSeconds = 0.0,
-        allGoalsAchieved = false,
-        clearedForExit = false,
-        goals = listOf(),
-        contributors = listOf(),
-    )
-
-    return contracts + blankContract
-}
-
 fun getContractGoalPercentComplete(
     delivered: Double,
     goal: Double
@@ -112,7 +96,8 @@ fun getContractDurationRemaining(contract: ContractInfoEntry): Pair<String, Bool
     val totalEggRatePerSecond =
         contract.contributors.sumOf { contributor -> contributor.eggRatePerSecond }
 
-    val timeRemainingSeconds = remainingEggsNeeded / totalEggRatePerSecond
+    val timeRemainingSeconds =
+        if (remainingEggsNeeded > 0.0) remainingEggsNeeded else 0.0 / totalEggRatePerSecond
     if (timeRemainingSeconds > contract.timeRemainingSeconds) {
         isOnTrack = false
 
@@ -157,6 +142,7 @@ private fun formatTimeText(timeRemainingSeconds: Double): String {
     if (years >= 1) {
         return ">1y"
     }
+
     val remainingSecondsAfterYears = timeRemainingSeconds % 31536000
 
     val days = remainingSecondsAfterYears / 86400
