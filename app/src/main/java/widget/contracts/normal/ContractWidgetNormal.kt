@@ -1,6 +1,8 @@
 package widget.contracts.normal
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
@@ -40,12 +42,12 @@ import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
 import tools.utilities.getContractGoalPercentComplete
 import tools.utilities.getContractTimeTextColor
-import tools.utilities.getContractsWithBlankContract
 import tools.utilities.getEggName
 import tools.utilities.getScrollName
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
 import widget.contracts.ContractWidgetUpdater
+import androidx.core.net.toUri
 
 class ContractWidgetNormal : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -58,6 +60,12 @@ class ContractWidgetNormal : GlanceAppWidget() {
                 ContractWidgetDataStore().decodeContractInfo(
                     state[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] ?: ""
                 )
+            val useAbsoluteTime =
+                state[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
+            val useOfflineTime =
+                state[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] ?: false
+            val openWasmeggDashboard =
+                state[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] ?: false
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
@@ -76,7 +84,23 @@ class ContractWidgetNormal : GlanceAppWidget() {
                     .fillMaxSize()
                     .background(Color(0xff181818))
                     .clickable {
-                        ContractWidgetUpdater().updateContracts(context)
+                        if (openWasmeggDashboard) {
+                            val packageManager: PackageManager = context.packageManager
+                            val browserPackage: String? = packageManager.resolveActivity(
+                                Intent(Intent.ACTION_VIEW, "https://www.example.com".toUri()),
+                                PackageManager.MATCH_DEFAULT_ONLY
+                            )?.activityInfo?.packageName
+
+                            if (browserPackage != null) {
+                                val launchIntent: Intent? =
+                                    packageManager.getLaunchIntentForPackage(browserPackage)
+                                launchIntent?.data =
+                                    "https://eicoop-carpet.netlify.app/u/$eid/".toUri()
+                                context.startActivity(launchIntent)
+                            }
+                        } else {
+                            ContractWidgetUpdater().updateContracts(context)
+                        }
                     }
             ) {
                 val assetManager = context.assets
