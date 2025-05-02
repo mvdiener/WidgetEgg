@@ -8,6 +8,8 @@ import data.ContractData
 import data.ContractInfoEntry
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
 fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
@@ -78,9 +80,13 @@ fun createContractCircularProgressBarBitmap(
     return createCircularProgressBarBitmap(progress, color, size, 4f)
 }
 
-// Estimated duration remaining based on offline contributions
 // Returns Pair<timeText, isOnTrack>
-fun getContractDurationRemaining(contract: ContractInfoEntry): Pair<String, Boolean> {
+fun getContractDurationRemaining(
+    contract: ContractInfoEntry,
+    useAbsoluteTime: Boolean,
+    use24HrFormat: Boolean,
+    useOfflineTime: Boolean,
+): Pair<String, Boolean> {
     var isOnTrack = true
     if (contract.allGoalsAchieved) {
         return Pair("Finished!", isOnTrack)
@@ -88,8 +94,12 @@ fun getContractDurationRemaining(contract: ContractInfoEntry): Pair<String, Bool
 
     val totalEggsNeeded = contract.goals.maxOf { goal -> goal.amount }
     val totalEggsDelivered = contract.eggsDelivered
-    val offlineEggsDelivered = contract.contributors.sumOf { contributor ->
-        contributor.offlineTimeSeconds * contributor.eggRatePerSecond
+    var offlineEggsDelivered = 0.0
+
+    if (useOfflineTime) {
+        offlineEggsDelivered = contract.contributors.sumOf { contributor ->
+            contributor.offlineTimeSeconds * contributor.eggRatePerSecond
+        }
     }
 
     val remainingEggsNeeded = totalEggsNeeded - totalEggsDelivered - offlineEggsDelivered
@@ -106,7 +116,7 @@ fun getContractDurationRemaining(contract: ContractInfoEntry): Pair<String, Bool
         }
     }
 
-    val timeText = formatTimeText(timeRemainingSeconds)
+    val timeText = formatTimeText(timeRemainingSeconds, useAbsoluteTime, use24HrFormat)
 
     return Pair(timeText, isOnTrack)
 }
@@ -133,20 +143,37 @@ fun getContractTimeTextColor(contract: ContractInfoEntry, isOnTrack: Boolean): I
     }
 }
 
-private fun formatTimeText(timeRemainingSeconds: Double): String {
-    if (timeRemainingSeconds.isInfinite()) {
+private fun formatTimeText(
+    timeRemainingSeconds: Double,
+    useAbsoluteTime: Boolean,
+    use24HrFormat: Boolean
+): String {
+    if (timeRemainingSeconds.isInfinite() || (timeRemainingSeconds / 31536000) >= 1) {
         return ">1y"
     }
 
-    val years = timeRemainingSeconds / 31536000
-    if (years >= 1) {
-        return ">1y"
+    val days = timeRemainingSeconds / 86400
+
+    if (useAbsoluteTime) {
+        val currentTime = LocalDateTime.now()
+        val endingTime = currentTime.plusSeconds(timeRemainingSeconds.toLong())
+        return if (days > 1) {
+            if (use24HrFormat) {
+                endingTime.format(DateTimeFormatter.ofPattern("MMM d, HH:mm"))
+            } else {
+                endingTime.format(DateTimeFormatter.ofPattern("MMM d, h:mm a"))
+            }
+        } else {
+            if (use24HrFormat) {
+                endingTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+            } else {
+                endingTime.format(DateTimeFormatter.ofPattern("h:mm a"))
+            }
+        }
+
     }
 
-    val remainingSecondsAfterYears = timeRemainingSeconds % 31536000
-
-    val days = remainingSecondsAfterYears / 86400
-    val remainingSecondsAfterDays = remainingSecondsAfterYears % 86400
+    val remainingSecondsAfterDays = timeRemainingSeconds % 86400
 
     val hours = remainingSecondsAfterDays / 3600
     val remainingSecondsAfterHours = remainingSecondsAfterDays % 3600

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
+import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
@@ -109,7 +110,13 @@ class ContractWidgetNormal : GlanceAppWidget() {
                 } else {
                     when (contractData.size) {
                         1 -> {
-                            ContractSingle(assetManager, contractData.first())
+                            ContractSingle(
+                                assetManager,
+                                context,
+                                contractData.first(),
+                                useAbsoluteTime,
+                                useOfflineTime
+                            )
                         }
 
                         2 -> {
@@ -120,7 +127,13 @@ class ContractWidgetNormal : GlanceAppWidget() {
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    ContractDouble(assetManager, contract)
+                                    ContractDouble(
+                                        assetManager,
+                                        context,
+                                        contract,
+                                        useAbsoluteTime,
+                                        useOfflineTime
+                                    )
                                 }
                             }
                         }
@@ -140,7 +153,13 @@ class ContractWidgetNormal : GlanceAppWidget() {
                                             horizontalAlignment = Alignment.CenterHorizontally,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            ContractAll(assetManager, contract)
+                                            ContractAll(
+                                                assetManager,
+                                                context,
+                                                contract,
+                                                useAbsoluteTime,
+                                                useOfflineTime
+                                            )
                                         }
                                     }
                                 }
@@ -154,7 +173,13 @@ class ContractWidgetNormal : GlanceAppWidget() {
 }
 
 @Composable
-fun ContractSingle(assetManager: AssetManager, contract: ContractInfoEntry) {
+fun ContractSingle(
+    assetManager: AssetManager,
+    context: Context,
+    contract: ContractInfoEntry,
+    useAbsoluteTime: Boolean,
+    useOfflineTime: Boolean,
+) {
     Box(
         contentAlignment = Alignment.Center
     ) {
@@ -167,11 +192,17 @@ fun ContractSingle(assetManager: AssetManager, contract: ContractInfoEntry) {
         style = TextStyle(color = ColorProvider(Color.White))
     )
 
-    TimeTextAndScroll(assetManager, contract)
+    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime)
 }
 
 @Composable
-fun ContractDouble(assetManager: AssetManager, contract: ContractInfoEntry) {
+fun ContractDouble(
+    assetManager: AssetManager,
+    context: Context,
+    contract: ContractInfoEntry,
+    useAbsoluteTime: Boolean,
+    useOfflineTime: Boolean,
+) {
     Box(
         contentAlignment = Alignment.Center
     ) {
@@ -191,12 +222,18 @@ fun ContractDouble(assetManager: AssetManager, contract: ContractInfoEntry) {
             )
         )
 
-        TimeTextAndScroll(assetManager, contract, 13f, 15)
+        TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 13f, 15)
     }
 }
 
 @Composable
-fun ContractAll(assetManager: AssetManager, contract: ContractInfoEntry) {
+fun ContractAll(
+    assetManager: AssetManager,
+    context: Context,
+    contract: ContractInfoEntry,
+    useAbsoluteTime: Boolean,
+    useOfflineTime: Boolean,
+) {
     Box(
         contentAlignment = Alignment.Center
     ) {
@@ -212,7 +249,7 @@ fun ContractAll(assetManager: AssetManager, contract: ContractInfoEntry) {
         )
     )
 
-    TimeTextAndScroll(assetManager, contract, 11f, 12)
+    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 11f, 12)
 }
 
 @Composable
@@ -283,11 +320,20 @@ fun EggAndProgressBars(
 @Composable
 fun TimeTextAndScroll(
     assetManager: AssetManager,
+    context: Context,
     contract: ContractInfoEntry,
+    useAbsoluteTime: Boolean,
+    useOfflineTime: Boolean,
     textSize: Float = 14f,
     scrollSize: Int = 20
 ) {
-    val (timeText, isOnTrack) = getContractDurationRemaining(contract)
+    val use24HrFormat = DateFormat.is24HourFormat(context)
+    val (timeText, isOnTrack) = getContractDurationRemaining(
+        contract,
+        useAbsoluteTime,
+        use24HrFormat,
+        useOfflineTime
+    )
 
     Row {
         Text(
@@ -306,7 +352,7 @@ fun TimeTextAndScroll(
             Image(
                 provider = ImageProvider(scrollBitmap),
                 contentDescription = "Contract Scroll",
-                modifier = GlanceModifier.size(scrollSize.dp)
+                modifier = GlanceModifier.size(scrollSize.dp).padding(start = 1.dp)
             )
         }
     }
