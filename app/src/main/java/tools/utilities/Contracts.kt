@@ -107,7 +107,7 @@ fun getContractDurationRemaining(
         contract.contributors.sumOf { contributor -> contributor.eggRatePerSecond }
 
     val timeRemainingSeconds =
-        if (remainingEggsNeeded > 0.0) remainingEggsNeeded else 0.0 / totalEggRatePerSecond
+        (if (remainingEggsNeeded > 0.0) remainingEggsNeeded else 0.0) / totalEggRatePerSecond
     if (timeRemainingSeconds > contract.timeRemainingSeconds) {
         isOnTrack = false
 
