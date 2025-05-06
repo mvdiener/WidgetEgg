@@ -72,7 +72,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/contract_widget_normal" />
+                android:resource="@xml/contract_widget_active" />
         </receiver>
     </application>
 

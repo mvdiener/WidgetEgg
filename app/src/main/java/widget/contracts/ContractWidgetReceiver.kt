@@ -8,11 +8,11 @@ import androidx.work.BackoffPolicy
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import widget.contracts.normal.ContractWidgetNormal
+import widget.contracts.active.ContractWidgetActive
 import java.util.concurrent.TimeUnit
 
 open class ContractWidgetReceiver : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = ContractWidgetNormal()
+    override val glanceAppWidget: GlanceAppWidget = ContractWidgetActive()
 
     override fun onUpdate(
         context: Context,

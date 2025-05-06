@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:description="@string/contract_widget_normal"
+    android:description="@string/contract_widget_active"
     android:minWidth="150dp"
     android:minHeight="100dp"
     android:minResizeWidth="200dp"

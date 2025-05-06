@@ -9,7 +9,7 @@ import androidx.glance.appwidget.updateAll
 import data.ContractInfoEntry
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import widget.contracts.normal.ContractWidgetNormal
+import widget.contracts.active.ContractWidgetActive
 
 data object ContractWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")
@@ -21,9 +21,9 @@ data object ContractWidgetDataStorePreferencesKeys {
 
 class ContractWidgetDataStore {
     suspend fun setEid(context: Context, eid: String) {
-        val contractWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetNormal::class.java)
-        (contractWidgetNormalIds)
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        (contractWidgetActiveIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.EID] = eid
@@ -35,9 +35,9 @@ class ContractWidgetDataStore {
 
     suspend fun setContractInfo(context: Context, contractInfo: List<ContractInfoEntry>) {
         val contractString = Json.encodeToString(contractInfo)
-        val contractWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetNormal::class.java)
-        (contractWidgetNormalIds)
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        (contractWidgetActiveIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] = contractString
@@ -56,9 +56,9 @@ class ContractWidgetDataStore {
     }
 
     suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
-        val contractWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetNormal::class.java)
-        (contractWidgetNormalIds)
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        (contractWidgetActiveIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] =
@@ -70,9 +70,9 @@ class ContractWidgetDataStore {
     }
 
     suspend fun setUseOfflineTime(context: Context, useOfflineTime: Boolean) {
-        val contractWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetNormal::class.java)
-        (contractWidgetNormalIds)
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        (contractWidgetActiveIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] =
@@ -84,9 +84,9 @@ class ContractWidgetDataStore {
     }
 
     suspend fun setOpenWasmeggDashboard(context: Context, openWasmeggDashboard: Boolean) {
-        val contractWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetNormal::class.java)
-        (contractWidgetNormalIds)
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        (contractWidgetActiveIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] =
@@ -98,9 +98,9 @@ class ContractWidgetDataStore {
     }
 
     suspend fun clearAllData(context: Context) {
-        val contractWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetNormal::class.java)
-        (contractWidgetNormalIds)
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        (contractWidgetActiveIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs.clear()
@@ -111,6 +111,6 @@ class ContractWidgetDataStore {
     }
 
     private suspend fun updateAllWidgets(context: Context) {
-        ContractWidgetNormal().updateAll(context)
+        ContractWidgetActive().updateAll(context)
     }
 }

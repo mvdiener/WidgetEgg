@@ -1,4 +1,4 @@
-package widget.contracts.normal
+package widget.contracts.active
 
 import android.content.Context
 import android.content.Intent
@@ -50,7 +50,7 @@ import widget.contracts.ContractWidgetDataStorePreferencesKeys
 import widget.contracts.ContractWidgetUpdater
 import androidx.core.net.toUri
 
-class ContractWidgetNormal : GlanceAppWidget() {
+class ContractWidgetActive : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -86,13 +86,20 @@ class ContractWidgetNormal : GlanceAppWidget() {
                     .background(Color(0xff181818))
                     .clickable {
                         if (openWasmeggDashboard) {
+                            val problematicBrowsers =
+                                listOf("org.mozilla.firefox", "com.duckduckgo.mobile.android")
                             val packageManager: PackageManager = context.packageManager
-                            val browserPackage: String? = packageManager.resolveActivity(
+                            var browserPackage: String? = packageManager.resolveActivity(
                                 Intent(Intent.ACTION_VIEW, "https://www.example.com".toUri()),
                                 PackageManager.MATCH_DEFAULT_ONLY
                             )?.activityInfo?.packageName
 
                             if (browserPackage != null) {
+                                // Not all browsers play nicely with opening a link from a widget
+                                // If using any of these browsers, attempt to use chrome instead
+                                if (browserPackage in problematicBrowsers) {
+                                    browserPackage = "com.android.chrome"
+                                }
                                 val launchIntent: Intent? =
                                     packageManager.getLaunchIntentForPackage(browserPackage)
                                 launchIntent?.data =
