@@ -3,13 +3,16 @@ package tools.utilities
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.capitalize
 import androidx.core.graphics.toColorInt
 import data.ContractData
 import data.ContractInfoEntry
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
+import ei.Ei
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.abs
 
 fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
@@ -19,9 +22,13 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
         var formattedGoals: List<GoalInfoEntry> = emptyList()
         val gradeSpecsList = contract.contract.gradeSpecsList
         val gradeSpecs = gradeSpecsList.find { gradeSpec -> gradeSpec.grade == contract.grade }
+        var hasProphecyEgg = false
 
         gradeSpecs?.goalsList?.forEach { goal ->
             formattedGoals = formattedGoals.plus(GoalInfoEntry(amount = goal.targetAmount))
+            if (goal.rewardType == Ei.RewardType.EGGS_OF_PROPHECY) {
+                hasProphecyEgg = true
+            }
         }
 
         val status =
@@ -48,6 +55,9 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
                 eggId = contract.contract.egg.number,
                 customEggId = contract.contract.customEggId,
                 name = contract.contract.name,
+                seasonName = formatSeasonName(contract.contract.seasonId),
+                isLegacy = contract.contract.leggacy,
+                hasProphecyEgg = hasProphecyEgg,
                 eggsDelivered = status?.totalAmount ?: 0.0,
                 timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
                 allGoalsAchieved = status?.allGoalsAchieved ?: false,
@@ -191,6 +201,16 @@ private fun formatTimeText(
             "${minutes.toInt()}m"
         } else {
             "${hours.toInt()}h ${minutes.toInt()}m"
+        }
+    }
+}
+
+private fun formatSeasonName(seasonId: String): String {
+    return seasonId.split("-", "_").joinToString(" ") { part ->
+        part.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(
+                Locale.ROOT
+            ) else it.toString()
         }
     }
 }

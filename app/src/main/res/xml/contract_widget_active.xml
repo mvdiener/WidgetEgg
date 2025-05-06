@@ -3,7 +3,7 @@
     android:description="@string/contract_widget_active"
     android:minWidth="150dp"
     android:minHeight="100dp"
-    android:minResizeWidth="200dp"
+    android:minResizeWidth="100dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen" />

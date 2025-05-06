@@ -131,8 +131,7 @@ class ContractWidgetActive : GlanceAppWidget() {
                                 Row(
                                     modifier = GlanceModifier.fillMaxWidth().defaultWeight()
                                         .padding(5.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     ContractDouble(
                                         assetManager,
@@ -200,6 +199,7 @@ fun ContractSingle(
     )
 
     TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime)
+    SeasonAndRewardInfo(assetManager, contract)
 }
 
 @Composable
@@ -211,15 +211,15 @@ fun ContractDouble(
     useOfflineTime: Boolean,
 ) {
     Box(
+        modifier = GlanceModifier.padding(start = 5.dp),
         contentAlignment = Alignment.Center
     ) {
         EggAndProgressBars(assetManager, contract, 45, 6)
     }
 
     Column(
-        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalAlignment = Alignment.Top
+        modifier = GlanceModifier.padding(start = 5.dp),
+        horizontalAlignment = Alignment.Start
     ) {
         Text(
             text = contract.name,
@@ -230,6 +230,7 @@ fun ContractDouble(
         )
 
         TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 13f, 15)
+        SeasonAndRewardInfo(assetManager, contract, 13f, 15)
     }
 }
 
@@ -362,5 +363,44 @@ fun TimeTextAndScroll(
                 modifier = GlanceModifier.size(scrollSize.dp).padding(start = 1.dp)
             )
         }
+    }
+}
+
+@Composable
+fun SeasonAndRewardInfo(
+    assetManager: AssetManager,
+    contract: ContractInfoEntry,
+    textSize: Float = 14f,
+    eggSize: Int = 20
+) {
+    if (!contract.seasonName.isNullOrBlank()) {
+        Text(
+            text = contract.seasonName!!,
+            style = TextStyle(
+                color = ColorProvider(Color(0xFF03D0A8.toInt())),
+                fontSize = TextUnit(textSize, TextUnitType.Sp)
+            )
+        )
+    }
+
+    if (contract.isLegacy) {
+        Text(
+            text = "Leggacy",
+            style = TextStyle(
+                color = ColorProvider(Color(0xFFFE9B00.toInt())),
+                fontSize = TextUnit(textSize, TextUnitType.Sp)
+            )
+        )
+    }
+
+    if (contract.hasProphecyEgg) {
+        val eggBitmap =
+            BitmapFactory.decodeStream(getAsset(assetManager, "eggs/egg_of_prophecy.png"))
+
+        Image(
+            provider = ImageProvider(eggBitmap),
+            contentDescription = "Contract Scroll",
+            modifier = GlanceModifier.size(eggSize.dp).padding(start = 1.dp)
+        )
     }
 }
