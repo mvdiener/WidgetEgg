@@ -219,7 +219,7 @@ fun ContractDouble(
     }
 
     Column(
-        modifier = GlanceModifier.padding(start = 2.dp),
+        modifier = GlanceModifier.padding(start = 5.dp),
         horizontalAlignment = Alignment.Start
     ) {
         Text(
