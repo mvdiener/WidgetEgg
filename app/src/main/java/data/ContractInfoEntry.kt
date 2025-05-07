@@ -1,5 +1,6 @@
 package data
 
+import ei.Ei.RewardType
 import kotlinx.serialization.Serializable
 
 // Data class used to save contract information to preferences
@@ -10,7 +11,6 @@ data class ContractInfoEntry(
     var name: String,
     var seasonName: String?,
     var isLegacy: Boolean,
-    var hasProphecyEgg: Boolean,
     var eggsDelivered: Double,
     var timeRemainingSeconds: Double,
     var allGoalsAchieved: Boolean,
@@ -21,7 +21,9 @@ data class ContractInfoEntry(
 
 @Serializable
 data class GoalInfoEntry(
-    var amount: Double
+    var goalAmount: Double,
+    var reward: RewardType,
+    var rewardSubType: String
 )
 
 @Serializable

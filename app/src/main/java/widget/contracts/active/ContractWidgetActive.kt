@@ -49,6 +49,7 @@ import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
 import widget.contracts.ContractWidgetUpdater
 import androidx.core.net.toUri
+import tools.utilities.getRewardIconPath
 
 class ContractWidgetActive : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -218,7 +219,7 @@ fun ContractDouble(
     }
 
     Column(
-        modifier = GlanceModifier.padding(start = 5.dp),
+        modifier = GlanceModifier.padding(start = 2.dp),
         horizontalAlignment = Alignment.Start
     ) {
         Text(
@@ -230,7 +231,7 @@ fun ContractDouble(
         )
 
         TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 13f, 15)
-        SeasonAndRewardInfo(assetManager, contract, 13f, 15)
+        SeasonAndRewardInfo(assetManager, contract, 13f, 20)
     }
 }
 
@@ -245,7 +246,7 @@ fun ContractAll(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, 35, 5)
+        EggAndProgressBars(assetManager, contract, 30, 4)
     }
 
     Text(
@@ -253,11 +254,11 @@ fun ContractAll(
         text = contract.name,
         style = TextStyle(
             color = ColorProvider(Color.White),
-            fontSize = TextUnit(11f, TextUnitType.Sp)
+            fontSize = TextUnit(10f, TextUnitType.Sp)
         )
     )
 
-    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 11f, 12)
+    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 10f, 12)
 }
 
 @Composable
@@ -301,9 +302,9 @@ fun EggAndProgressBars(
         "egg_${contract.customEggId}"
     }
 
-    contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
+    contract.goals.sortedBy { goal -> goal.goalAmount }.forEachIndexed { index, goal ->
         val percentComplete =
-            getContractGoalPercentComplete(contract.eggsDelivered, goal.amount)
+            getContractGoalPercentComplete(contract.eggsDelivered, goal.goalAmount)
         val bitmap = createContractCircularProgressBarBitmap(
             percentComplete,
             150,
@@ -371,7 +372,7 @@ fun SeasonAndRewardInfo(
     assetManager: AssetManager,
     contract: ContractInfoEntry,
     textSize: Float = 14f,
-    eggSize: Int = 20
+    rewardSize: Int = 22
 ) {
     if (!contract.seasonName.isNullOrBlank()) {
         Text(
@@ -393,14 +394,16 @@ fun SeasonAndRewardInfo(
         )
     }
 
-    if (contract.hasProphecyEgg) {
-        val eggBitmap =
-            BitmapFactory.decodeStream(getAsset(assetManager, "eggs/egg_of_prophecy.png"))
+    Row {
+        contract.goals.forEachIndexed { index, goal ->
+            val rewardBitmap =
+                BitmapFactory.decodeStream(getAsset(assetManager, getRewardIconPath(goal)))
 
-        Image(
-            provider = ImageProvider(eggBitmap),
-            contentDescription = "Contract Scroll",
-            modifier = GlanceModifier.size(eggSize.dp).padding(start = 1.dp)
-        )
+            Image(
+                provider = ImageProvider(rewardBitmap),
+                contentDescription = "Reward Icon $index",
+                modifier = GlanceModifier.size(rewardSize.dp).padding(horizontal = 1.dp)
+            )
+        }
     }
 }

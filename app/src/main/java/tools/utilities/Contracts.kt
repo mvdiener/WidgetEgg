@@ -3,7 +3,6 @@ package tools.utilities
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.text.capitalize
 import androidx.core.graphics.toColorInt
 import data.ContractData
 import data.ContractInfoEntry
@@ -22,13 +21,15 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
         var formattedGoals: List<GoalInfoEntry> = emptyList()
         val gradeSpecsList = contract.contract.gradeSpecsList
         val gradeSpecs = gradeSpecsList.find { gradeSpec -> gradeSpec.grade == contract.grade }
-        var hasProphecyEgg = false
 
         gradeSpecs?.goalsList?.forEach { goal ->
-            formattedGoals = formattedGoals.plus(GoalInfoEntry(amount = goal.targetAmount))
-            if (goal.rewardType == Ei.RewardType.EGGS_OF_PROPHECY) {
-                hasProphecyEgg = true
-            }
+            formattedGoals = formattedGoals.plus(
+                GoalInfoEntry(
+                    goalAmount = goal.targetAmount,
+                    reward = goal.rewardType,
+                    rewardSubType = goal.rewardSubType
+                )
+            )
         }
 
         val status =
@@ -57,7 +58,6 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
                 name = contract.contract.name,
                 seasonName = formatSeasonName(contract.contract.seasonId),
                 isLegacy = contract.contract.leggacy,
-                hasProphecyEgg = hasProphecyEgg,
                 eggsDelivered = status?.totalAmount ?: 0.0,
                 timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
                 allGoalsAchieved = status?.allGoalsAchieved ?: false,
@@ -102,7 +102,7 @@ fun getContractDurationRemaining(
         return Pair("Finished!", isOnTrack)
     }
 
-    val totalEggsNeeded = contract.goals.maxOf { goal -> goal.amount }
+    val totalEggsNeeded = contract.goals.maxOf { goal -> goal.goalAmount }
     val totalEggsDelivered = contract.eggsDelivered
     var offlineEggsDelivered = 0.0
 
@@ -151,6 +151,38 @@ fun getContractTimeTextColor(contract: ContractInfoEntry, isOnTrack: Boolean): I
     } else {
         Color.White.toArgb()
     }
+}
+
+fun getRewardIconPath(goal: GoalInfoEntry): String {
+    return when (goal.reward) {
+        Ei.RewardType.GOLD -> "other/icon_golden_egg.png"
+        Ei.RewardType.SOUL_EGGS -> "eggs/egg_soul.png"
+        Ei.RewardType.EGGS_OF_PROPHECY -> "eggs/egg_of_prophecy.png"
+        Ei.RewardType.EPIC_RESEARCH_ITEM -> getEpicResearchImagePath(goal)
+        Ei.RewardType.PIGGY_FILL -> "other/icon_piggy_golden_egg.png"
+        Ei.RewardType.PIGGY_LEVEL_BUMP -> "other/icon_piggy_level_up.png"
+        Ei.RewardType.BOOST -> getBoostImagePath(goal)
+        Ei.RewardType.ARTIFACT_CASE -> "other/icon_afx_chest_3.png"
+        Ei.RewardType.SHELL_SCRIPT -> "other/icon_shell_script.png"
+        else -> "eggs/egg_unknown.png"
+    }
+}
+
+private fun getEpicResearchImagePath(goal: GoalInfoEntry): String {
+    return when (goal.rewardSubType) {
+        "epic_internal_incubators" -> "research/epic_internal_hatchery.png"
+        "cheaper_research" -> "research/lab_upgrade.png"
+        "int_hatch_sharing" -> "research/internal_hatchery_sharing.png"
+        "int_hatch_calm" -> "research/internal_hatchery_calm.png"
+        "soul_eggs" -> "research/soul_food.png"
+        "afx_mission_time" -> "research/afx_mission_duration.png"
+        else -> "eggs/egg_unknown.png"
+    }
+}
+
+private fun getBoostImagePath(goal: GoalInfoEntry): String {
+    val id = goal.rewardSubType.removeSuffix("_v2")
+    return "boosts/b_icon_$id.png"
 }
 
 private fun formatTimeText(
