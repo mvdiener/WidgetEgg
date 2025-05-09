@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">WidgetEgg</string>
-    <string name="normal_widget">Missions Normal View</string>
-    <string name="minimal_widget">Missions Minimal View</string>
-    <string name="large_widget">Mission Large View</string>
+    <string name="mission_widget_normal">Missions Normal View</string>
+    <string name="mission_widget_minimal">Missions Minimal View</string>
+    <string name="mission_widget_large">Mission Large View</string>
+    <string name="contract_widget_active">Contracts Active View</string>
 </resources>

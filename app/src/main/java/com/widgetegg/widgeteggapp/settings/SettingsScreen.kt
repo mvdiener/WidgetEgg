@@ -2,7 +2,6 @@ package com.widgetegg.widgeteggapp.settings
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.background
@@ -45,6 +44,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,7 +52,7 @@ import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
-import tools.hasCalendarPermissions
+import tools.utilities.hasCalendarPermissions
 import user.preferences.PreferencesDatastore
 
 @Composable
@@ -62,7 +62,7 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
     val context = LocalContext.current
     runBlocking {
         val preferences = PreferencesDatastore(context)
-        settingsViewModel.updateUseAbsoluteTime(preferences.getUseAbsoluteTime())
+        settingsViewModel.updateUseAbsoluteTimeMission(preferences.getUseAbsoluteTimeMission())
         settingsViewModel.updateOpenEggInc(preferences.getOpenEggInc())
         settingsViewModel.updateShowTargetArtifactNormalWidget(preferences.getTargetArtifactNormalWidget())
         settingsViewModel.updateShowFuelingShip(preferences.getShowFuelingShip())
@@ -72,6 +72,9 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
         settingsViewModel.updateUseAbsoluteTimePlusDay(preferences.getUseAbsoluteTimePlusDay())
         settingsViewModel.updateScheduleEvents(preferences.getScheduleEvents())
         settingsViewModel.updateSelectedCalendar(preferences.getSelectedCalendar())
+        settingsViewModel.updateUseAbsoluteTimeContract(preferences.getUseAbsoluteTimeContract())
+        settingsViewModel.updateUseOfflineTime(preferences.getUseOfflineTime())
+        settingsViewModel.updateOpenWasmeggDashboard(preferences.getOpenWasmeggDashboard())
     }
 
     val packageName = context.packageName
@@ -132,9 +135,10 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
             BatteryPermissionsContent(settingsViewModel, packageName, context)
         }
 
-        AllWidgetsGroup(settingsViewModel, packageName, context, activity)
-        NormalWidgetGroup(settingsViewModel)
-        LargeWidgetGroup(settingsViewModel)
+        MissionsGeneralGroup(settingsViewModel, packageName, context, activity)
+        ContractsGeneralGroup(settingsViewModel)
+        NormalMissionWidgetGroup(settingsViewModel)
+        LargeMissionWidgetGroup(settingsViewModel)
     }
 }
 
@@ -197,7 +201,7 @@ fun BatteryPermissionsDialog(
             ) {
                 Text(
                     text =
-                    """
+                        """
                         The widgets attempt to update automatically in the background every 15 minutes. In order to do this, they run background processes to fetch mission data.     
                         
                         Battery optimization can prevent these processes from running. If you notice issues with widget updates, it is recommended that you turn off battery optimization for this app.
@@ -210,7 +214,7 @@ fun BatteryPermissionsDialog(
                     onClick = {
                         settingsViewModel.updateShowBatteryOptimizationDialog(false)
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        intent.data = Uri.parse("package:$packageName")
+                        intent.data = "package:$packageName".toUri()
                         context.startActivity(intent)
                     }
                 ) {
@@ -222,7 +226,7 @@ fun BatteryPermissionsDialog(
 }
 
 @Composable
-fun AllWidgetsGroup(
+fun MissionsGeneralGroup(
     settingsViewModel: SettingsViewModel,
     packageName: String,
     context: Context,
@@ -233,8 +237,8 @@ fun AllWidgetsGroup(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(text = "General", fontSize = TextUnit(18f, TextUnitType.Sp))
-        AbsoluteTimeRow(settingsViewModel)
+        Text(text = "Missions General", fontSize = TextUnit(18f, TextUnitType.Sp))
+        AbsoluteTimeMissionRow(settingsViewModel)
         AbsoluteTimePlusDayRow(settingsViewModel)
         OpenEggIncRow(settingsViewModel)
         ScheduleEventsRow(settingsViewModel, packageName, context, activity)
@@ -245,26 +249,26 @@ fun AllWidgetsGroup(
 }
 
 @Composable
-fun NormalWidgetGroup(settingsViewModel: SettingsViewModel) {
+fun NormalMissionWidgetGroup(settingsViewModel: SettingsViewModel) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(text = "Normal Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
+        Text(text = "Normal Mission Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
         TargetArtifactNormalWidgetRow(settingsViewModel)
         ShowFuelingShipRow(settingsViewModel)
     }
 }
 
 @Composable
-fun LargeWidgetGroup(settingsViewModel: SettingsViewModel) {
+fun LargeMissionWidgetGroup(settingsViewModel: SettingsViewModel) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(text = "Large Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
+        Text(text = "Large Mission Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
         TargetArtifactLargeWidgetRow(settingsViewModel)
         ShowTankLevelsRow(settingsViewModel)
         UseSliderCapacityRow(settingsViewModel)
@@ -272,7 +276,7 @@ fun LargeWidgetGroup(settingsViewModel: SettingsViewModel) {
 }
 
 @Composable
-fun AbsoluteTimeRow(settingsViewModel: SettingsViewModel) {
+fun AbsoluteTimeMissionRow(settingsViewModel: SettingsViewModel) {
     Row(
         modifier = Modifier.settingsRowModifier(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -289,17 +293,17 @@ fun AbsoluteTimeRow(settingsViewModel: SettingsViewModel) {
                     .padding(start = 5.dp)
                     .size(15.dp)
                     .clickable {
-                        settingsViewModel.updateShowAbsoluteTimeDialog(true)
+                        settingsViewModel.updateShowAbsoluteTimeMissionDialog(true)
                     }
             )
-            AbsoluteTimeDialog(settingsViewModel)
+            AbsoluteTimeMissionDialog(settingsViewModel)
         }
 
         Switch(
-            checked = settingsViewModel.useAbsoluteTime,
+            checked = settingsViewModel.useAbsoluteTimeMission,
             onCheckedChange = {
-                settingsViewModel.updateUseAbsoluteTime(!settingsViewModel.useAbsoluteTime)
-                if (!settingsViewModel.useAbsoluteTime) {
+                settingsViewModel.updateUseAbsoluteTimeMission(!settingsViewModel.useAbsoluteTimeMission)
+                if (!settingsViewModel.useAbsoluteTimeMission) {
                     settingsViewModel.updateUseAbsoluteTimePlusDay(false)
                 }
             }
@@ -308,11 +312,11 @@ fun AbsoluteTimeRow(settingsViewModel: SettingsViewModel) {
 }
 
 @Composable
-fun AbsoluteTimeDialog(settingsViewModel: SettingsViewModel) {
-    if (settingsViewModel.showAbsoluteTimeDialog) {
+fun AbsoluteTimeMissionDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showAbsoluteTimeMissionDialog) {
         Dialog(
             onDismissRequest = {
-                settingsViewModel.updateShowAbsoluteTimeDialog(false)
+                settingsViewModel.updateShowAbsoluteTimeMissionDialog(false)
             }
         ) {
             Column(
@@ -326,7 +330,7 @@ fun AbsoluteTimeDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         If a ship has less than 24 hours left, show the time of return instead of the time remaining.
                         
                         Only applies to widgets that show a time.
@@ -366,7 +370,7 @@ fun AbsoluteTimePlusDayRow(settingsViewModel: SettingsViewModel) {
             onCheckedChange = {
                 settingsViewModel.updateUseAbsoluteTimePlusDay(!settingsViewModel.useAbsoluteTimePlusDay)
             },
-            enabled = settingsViewModel.useAbsoluteTime
+            enabled = settingsViewModel.useAbsoluteTimeMission
         )
     }
 }
@@ -390,7 +394,7 @@ fun AbsoluteTimePlusDayDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         Show the time of return even if there are more than 24 hours left.
                         
                         Show absolute time must be enabled for this to take effect. Only applies to widgets that show a time.
@@ -453,8 +457,8 @@ fun OpenEggIncDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
-                        Tapping any widget will open Egg, Inc. instead of manually refreshing the displayed missions.
+                        """
+                        Tapping any mission widget will open Egg, Inc. instead of manually refreshing the displayed missions.
                         
                         Automatic widget updates every 15 minutes will still happen independent of this setting.
                     """.trimIndent()
@@ -539,7 +543,7 @@ fun ScheduleEventsDialog(
             ) {
                 Text(
                     text =
-                    """
+                        """
                         The app will schedule a calendar event and reminder at the time of return for any in-flight ship.
                         
                         If you have previously denied calendar permissions, you will need to manually enable it within app settings.
@@ -552,7 +556,7 @@ fun ScheduleEventsDialog(
                     onClick = {
                         settingsViewModel.updateShowScheduleEventsDialog(false)
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        intent.data = Uri.parse("package:$packageName")
+                        intent.data = "package:$packageName".toUri()
                         context.startActivity(intent)
                     }
                 ) {
@@ -591,9 +595,10 @@ fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel) {
                     isDropDownExpanded = false
                 }) {
                 settingsViewModel.userCalendars.forEach { calendar ->
-                    DropdownMenuItem(text = {
-                        Text(text = calendar.displayName)
-                    },
+                    DropdownMenuItem(
+                        text = {
+                            Text(text = calendar.displayName)
+                        },
                         onClick = {
                             settingsViewModel.updateSelectedCalendar(calendar)
                             isDropDownExpanded = false
@@ -711,7 +716,7 @@ fun ShowTankLevelsDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         Show the fuel tank levels in the last slot of the widget. Will take the place of the fueling ship if it exists.
                     """.trimIndent()
                 )
@@ -773,10 +778,215 @@ fun ShowSliderCapacityDialog(settingsViewModel: SettingsViewModel) {
             ) {
                 Text(
                     text =
-                    """
+                        """
                         The fuel bar percentage filled is based on the tank slider for that individual fuel, instead of the overall tank capacity.
                         
                         Show tank levels must be enabled for this to take effect.
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+}
+
+// CONTRACTS
+
+@Composable
+fun ContractsGeneralGroup(
+    settingsViewModel: SettingsViewModel
+) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(text = "Contracts General", fontSize = TextUnit(18f, TextUnitType.Sp))
+        AbsoluteTimeContractRow(settingsViewModel)
+        OfflineTimeRow(settingsViewModel)
+        OpenWasmeggDashboardRow(settingsViewModel)
+    }
+}
+
+@Composable
+fun AbsoluteTimeContractRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Show absolute time")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Absolute time info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowAbsoluteTimeContractDialog(true)
+                    }
+            )
+            AbsoluteTimeContractDialog(settingsViewModel)
+        }
+
+        Switch(
+            checked = settingsViewModel.useAbsoluteTimeContract,
+            onCheckedChange = {
+                settingsViewModel.updateUseAbsoluteTimeContract(!settingsViewModel.useAbsoluteTimeContract)
+            }
+        )
+    }
+}
+
+@Composable
+fun AbsoluteTimeContractDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showAbsoluteTimeContractDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowAbsoluteTimeContractDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                        """
+                        Show the estimated completion time of a contract instead of the estimated time remaining.
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OfflineTimeRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Show offline completion time")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Offline time info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowOfflineTimeDialog(true)
+                    }
+            )
+            OfflineTimeDialog(settingsViewModel)
+        }
+
+        Switch(
+            checked = settingsViewModel.useOfflineTime,
+            onCheckedChange = {
+                settingsViewModel.updateUseOfflineTime(!settingsViewModel.useOfflineTime)
+            }
+        )
+    }
+}
+
+@Composable
+fun OfflineTimeDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showOfflineTimeDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowOfflineTimeDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                        """
+                        Show an estimated completion time that includes the offline contribution of all co-op members.
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OpenWasmeggDashboardRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Open eicoop dashboard")
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Open wasmegg dashboard info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowOpenWasmeggDashboardDialog(true)
+                    }
+            )
+            OpenWasmeggDashboardDialog(settingsViewModel)
+        }
+
+        Switch(
+            checked = settingsViewModel.openWasmeggDashboard,
+            onCheckedChange = {
+                settingsViewModel.updateOpenWasmeggDashboard(!settingsViewModel.openWasmeggDashboard)
+            }
+        )
+    }
+}
+
+@Composable
+fun OpenWasmeggDashboardDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showOpenWasmeggDashboardDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowOpenWasmeggDashboardDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                        """
+                        Tapping any contract widget will your open your eicoop dashboard in a browser, instead of manually refreshing the displayed contracts. Must have a default browser set.
+                        
+                        Please note that not all browsers handle links from a widget correctly. The widget will do its best to try and open the dashboard.
+                        
+                        Automatic widget updates every 15 minutes will still happen independent of this setting.
                     """.trimIndent()
                 )
             }

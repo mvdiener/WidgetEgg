@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:description="@string/large_widget"
+    android:description="@string/mission_widget_large"
     android:minWidth="300dp"
     android:minHeight="100dp"
     android:minResizeWidth="300dp"

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
@@ -28,7 +29,7 @@
         </activity>
 
         <receiver
-            android:name="widget.MissionWidgetReceiver"
+            android:name="widget.missions.MissionWidgetReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -40,7 +41,7 @@
         </receiver>
 
         <receiver
-            android:name="widget.minimal.MissionWidgetMinimalReceiver"
+            android:name="widget.missions.minimal.MissionWidgetMinimalReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -52,7 +53,7 @@
         </receiver>
 
         <receiver
-            android:name="widget.large.MissionWidgetLargeReceiver"
+            android:name="widget.missions.large.MissionWidgetLargeReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -62,10 +63,27 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/mission_widget_large" />
         </receiver>
+
+        <receiver
+            android:name="widget.contracts.ContractWidgetReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/contract_widget_active" />
+        </receiver>
     </application>
 
     <queries>
         <package android:name="com.auxbrain.egginc" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
     </queries>
 
 </manifest>

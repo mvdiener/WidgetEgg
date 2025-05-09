@@ -6,13 +6,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import api.fetchData
+import api.fetchContractData
+import api.fetchMissionData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import tools.formatMissionData
-import tools.formatTankInfo
+import tools.utilities.formatContractData
+import tools.utilities.formatMissionData
+import tools.utilities.formatTankInfo
 import user.preferences.PreferencesDatastore
-import widget.MissionWidgetDataStore
+import widget.contracts.ContractWidgetDataStore
+import widget.missions.MissionWidgetDataStore
 
 class SignInViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -100,16 +103,20 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
             }
 
             try {
-                //Attempt to get mission data ahead of time for any widgets
+                //Attempt to get data ahead of time for any widgets
                 val prefEid = preferences.getEid()
                 if (prefEid.isNotBlank()) {
-                    val missionResult = fetchData(prefEid)
+                    val missionResult = fetchMissionData(prefEid)
+                    val contractResult = fetchContractData(prefEid)
                     val formattedMissionData = formatMissionData(missionResult)
                     val formattedTankInfo = formatTankInfo(missionResult)
+                    val formattedContractInfo = formatContractData(contractResult)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveTankInfo(formattedTankInfo)
+                    preferences.saveContractInfo(formattedContractInfo)
                     MissionWidgetDataStore().setMissionInfo(context, formattedMissionData)
                     MissionWidgetDataStore().setTankInfo(context, formattedTankInfo)
+                    ContractWidgetDataStore().setContractInfo(context, formattedContractInfo)
                 }
             } catch (_: Exception) {
             }
@@ -120,6 +127,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>().applicationContext
             MissionWidgetDataStore().clearAllData(context)
+            ContractWidgetDataStore().clearAllData(context)
             preferences.clearPreferences()
             updateHasSubmitted(false)
             updateHasError(false)
