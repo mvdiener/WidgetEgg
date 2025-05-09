@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -44,12 +45,11 @@ import tools.utilities.getContractDurationRemaining
 import tools.utilities.getContractGoalPercentComplete
 import tools.utilities.getContractTimeTextColor
 import tools.utilities.getEggName
+import tools.utilities.getRewardIconPath
 import tools.utilities.getScrollName
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
 import widget.contracts.ContractWidgetUpdater
-import androidx.core.net.toUri
-import tools.utilities.getRewardIconPath
 
 class ContractWidgetActive : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition

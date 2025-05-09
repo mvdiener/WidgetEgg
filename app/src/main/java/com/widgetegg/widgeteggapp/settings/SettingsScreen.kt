@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,7 +54,6 @@ import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.runBlocking
 import tools.utilities.hasCalendarPermissions
 import user.preferences.PreferencesDatastore
-import androidx.core.net.toUri
 
 @Composable
 fun SettingsScreen(navController: NavController, activity: MainActivity) {

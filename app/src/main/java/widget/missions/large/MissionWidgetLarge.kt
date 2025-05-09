@@ -44,12 +44,12 @@ import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
 import tools.utilities.createMissionCircularProgressBarBitmap
 import tools.utilities.getAsset
-import tools.utilities.getMissionsWithBlankMission
 import tools.utilities.getEggName
 import tools.utilities.getFuelAmount
 import tools.utilities.getFuelPercentFilled
 import tools.utilities.getMissionDurationRemaining
 import tools.utilities.getMissionPercentComplete
+import tools.utilities.getMissionsWithBlankMission
 import tools.utilities.getMissionsWithFuelTank
 import tools.utilities.getShipName
 import tools.utilities.getTankCapacity
