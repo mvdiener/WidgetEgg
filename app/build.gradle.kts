@@ -4,6 +4,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
     id("com.google.protobuf")
     kotlin("plugin.serialization") version "2.0.20"
 }
@@ -16,8 +17,8 @@ android {
         applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
-        versionName = "2.0.0"
+        versionCode = 14
+        versionName = "2.0.1"
 
         ndk {
             debugSymbolLevel = "SYMBOL_TABLE"

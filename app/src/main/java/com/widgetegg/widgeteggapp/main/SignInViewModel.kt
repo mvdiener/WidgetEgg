@@ -94,6 +94,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 preferences.saveEiUserName(backupResult.userName)
                 preferences.saveEid(eid)
                 MissionWidgetDataStore().setEid(context, eid)
+                ContractWidgetDataStore().setEid(context, eid)
                 updateHasSubmitted(false)
                 updateEid("")
             } catch (e: Exception) {

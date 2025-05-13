@@ -9,6 +9,7 @@ import data.ContractInfoEntry
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
 import ei.Ei
+import ei.Ei.ContractCoopStatusResponse.ContributionInfo
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -46,7 +47,7 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
                 ContributorInfoEntry(
                     eggsDelivered = contributor.contributionAmount,
                     eggRatePerSecond = contributor.contributionRate,
-                    offlineTimeSeconds = abs(contributor.farmInfo?.timestamp ?: 0.0)
+                    offlineTimeSeconds = getOfflineTime(contributor)
                 )
             )
         }
@@ -183,6 +184,24 @@ private fun getEpicResearchImagePath(goal: GoalInfoEntry): String {
 private fun getBoostImagePath(goal: GoalInfoEntry): String {
     val id = goal.rewardSubType.removeSuffix("_v2")
     return "boosts/b_icon_$id.png"
+}
+
+private fun getOfflineTime(contributor: ContributionInfo): Double {
+    val currentOfflineTime = abs(contributor.farmInfo?.timestamp ?: 0.0)
+    if (currentOfflineTime == 0.0) return currentOfflineTime // farm is probably private
+
+    val baseSiloTimeSeconds = 3600.0
+    val siloResearchLevel =
+        contributor.farmInfo?.epicResearchList?.find { research -> research.id == "silo_capacity" }?.level
+            ?: 0
+    val silosBuilt = contributor.farmInfo?.silosOwned ?: 1
+    val maximumOfflineTimeSeconds = (baseSiloTimeSeconds + (siloResearchLevel * 360)) * silosBuilt
+
+    return if (currentOfflineTime > maximumOfflineTimeSeconds) {
+        maximumOfflineTimeSeconds
+    } else {
+        currentOfflineTime
+    }
 }
 
 private fun formatTimeText(

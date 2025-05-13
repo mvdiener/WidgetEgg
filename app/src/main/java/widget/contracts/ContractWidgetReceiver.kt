@@ -31,7 +31,7 @@ open class ContractWidgetReceiver : GlanceAppWidgetReceiver() {
             .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "contract_widget_worker",
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             workRequest
         )
     }
