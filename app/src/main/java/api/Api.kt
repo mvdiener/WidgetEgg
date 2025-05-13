@@ -26,6 +26,7 @@ import io.ktor.http.contentType
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.util.encodeBase64
 import tools.buildSecureAuthMessage
+import java.util.concurrent.TimeUnit
 
 suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<MissionInfo> {
     val url = MISSION_ENDPOINT
@@ -162,7 +163,15 @@ fun getBasicRequestInfo(eid: String): BasicRequestInfo {
 }
 
 private fun createHttpClient(): HttpClient {
-    return HttpClient(OkHttp)
+    return HttpClient(OkHttp) {
+        engine {
+            config {
+                connectTimeout(20, TimeUnit.SECONDS)
+                readTimeout(20, TimeUnit.SECONDS)
+                writeTimeout(20, TimeUnit.SECONDS)
+            }
+        }
+    }
 }
 
 private suspend fun makeRequest(
