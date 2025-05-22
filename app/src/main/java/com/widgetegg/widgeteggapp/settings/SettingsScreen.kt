@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import tools.utilities.hasCalendarPermissions
 import user.preferences.PreferencesDatastore
@@ -60,6 +62,9 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
     val settingsViewModel = viewModel<SettingsViewModel>()
 
     val context = LocalContext.current
+
+    // Forcibly load settings before everything else, to prevent weird UI issues with the switches
+    // Probably a better way to do this
     runBlocking {
         val preferences = PreferencesDatastore(context)
         settingsViewModel.updateUseAbsoluteTimeMission(preferences.getUseAbsoluteTimeMission())
@@ -299,12 +304,15 @@ fun AbsoluteTimeMissionRow(settingsViewModel: SettingsViewModel) {
             AbsoluteTimeMissionDialog(settingsViewModel)
         }
 
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.useAbsoluteTimeMission,
             onCheckedChange = {
-                settingsViewModel.updateUseAbsoluteTimeMission(!settingsViewModel.useAbsoluteTimeMission)
-                if (!settingsViewModel.useAbsoluteTimeMission) {
-                    settingsViewModel.updateUseAbsoluteTimePlusDay(false)
+                scope.launch {
+                    settingsViewModel.updateUseAbsoluteTimeMission(!settingsViewModel.useAbsoluteTimeMission)
+                    if (!settingsViewModel.useAbsoluteTimeMission) {
+                        settingsViewModel.updateUseAbsoluteTimePlusDay(false)
+                    }
                 }
             }
         )
@@ -365,10 +373,13 @@ fun AbsoluteTimePlusDayRow(settingsViewModel: SettingsViewModel) {
             AbsoluteTimePlusDayDialog(settingsViewModel)
         }
 
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.useAbsoluteTimePlusDay,
             onCheckedChange = {
-                settingsViewModel.updateUseAbsoluteTimePlusDay(!settingsViewModel.useAbsoluteTimePlusDay)
+                scope.launch {
+                    settingsViewModel.updateUseAbsoluteTimePlusDay(!settingsViewModel.useAbsoluteTimePlusDay)
+                }
             },
             enabled = settingsViewModel.useAbsoluteTimeMission
         )
@@ -429,10 +440,13 @@ fun OpenEggIncRow(settingsViewModel: SettingsViewModel) {
             OpenEggIncDialog(settingsViewModel)
         }
 
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.openEggInc,
             onCheckedChange = {
-                settingsViewModel.updateOpenEggInc(!settingsViewModel.openEggInc)
+                scope.launch {
+                    settingsViewModel.updateOpenEggInc(!settingsViewModel.openEggInc)
+                }
             }
         )
     }
@@ -589,6 +603,8 @@ fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel) {
                 Icons.Rounded.ArrowDropDown,
                 contentDescription = "Calendar dropdown",
             )
+
+            val scope = rememberCoroutineScope()
             DropdownMenu(
                 expanded = isDropDownExpanded,
                 onDismissRequest = {
@@ -600,7 +616,9 @@ fun CalendarsDropdownRow(settingsViewModel: SettingsViewModel) {
                             Text(text = calendar.displayName)
                         },
                         onClick = {
-                            settingsViewModel.updateSelectedCalendar(calendar)
+                            scope.launch {
+                                settingsViewModel.updateSelectedCalendar(calendar)
+                            }
                             isDropDownExpanded = false
                         })
                 }
@@ -618,10 +636,14 @@ fun TargetArtifactNormalWidgetRow(settingsViewModel: SettingsViewModel) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = "Show target artifact")
+
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.showTargetArtifactNormalWidget,
             onCheckedChange = {
-                settingsViewModel.updateShowTargetArtifactNormalWidget(!settingsViewModel.showTargetArtifactNormalWidget)
+                scope.launch {
+                    settingsViewModel.updateShowTargetArtifactNormalWidget(!settingsViewModel.showTargetArtifactNormalWidget)
+                }
             }
         )
     }
@@ -635,10 +657,14 @@ fun ShowFuelingShipRow(settingsViewModel: SettingsViewModel) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = "Show fueling ship")
+
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.showFuelingShip,
             onCheckedChange = {
-                settingsViewModel.updateShowFuelingShip(!settingsViewModel.showFuelingShip)
+                scope.launch {
+                    settingsViewModel.updateShowFuelingShip(!settingsViewModel.showFuelingShip)
+                }
             }
         )
     }
@@ -652,10 +678,14 @@ fun TargetArtifactLargeWidgetRow(settingsViewModel: SettingsViewModel) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = "Show target artifact")
+
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.showTargetArtifactLargeWidget,
             onCheckedChange = {
-                settingsViewModel.updateShowTargetArtifactLargeWidget(!settingsViewModel.showTargetArtifactLargeWidget)
+                scope.launch {
+                    settingsViewModel.updateShowTargetArtifactLargeWidget(!settingsViewModel.showTargetArtifactLargeWidget)
+                }
             }
         )
     }
@@ -685,12 +715,15 @@ fun ShowTankLevelsRow(settingsViewModel: SettingsViewModel) {
             ShowTankLevelsDialog(settingsViewModel)
         }
 
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.showTankLevels,
             onCheckedChange = {
-                settingsViewModel.updateShowTankLevels(!settingsViewModel.showTankLevels)
-                if (!settingsViewModel.showTankLevels) {
-                    settingsViewModel.updateUseSliderCapacity(false)
+                scope.launch {
+                    settingsViewModel.updateShowTankLevels(!settingsViewModel.showTankLevels)
+                    if (!settingsViewModel.showTankLevels) {
+                        settingsViewModel.updateUseSliderCapacity(false)
+                    }
                 }
             }
         )
@@ -749,10 +782,13 @@ fun UseSliderCapacityRow(settingsViewModel: SettingsViewModel) {
             ShowSliderCapacityDialog(settingsViewModel)
         }
 
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.useSliderCapacity,
             onCheckedChange = {
-                settingsViewModel.updateUseSliderCapacity(!settingsViewModel.useSliderCapacity)
+                scope.launch {
+                    settingsViewModel.updateUseSliderCapacity(!settingsViewModel.useSliderCapacity)
+                }
             },
             enabled = settingsViewModel.showTankLevels
         )
@@ -831,10 +867,13 @@ fun AbsoluteTimeContractRow(settingsViewModel: SettingsViewModel) {
             AbsoluteTimeContractDialog(settingsViewModel)
         }
 
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.useAbsoluteTimeContract,
             onCheckedChange = {
-                settingsViewModel.updateUseAbsoluteTimeContract(!settingsViewModel.useAbsoluteTimeContract)
+                scope.launch {
+                    settingsViewModel.updateUseAbsoluteTimeContract(!settingsViewModel.useAbsoluteTimeContract)
+                }
             }
         )
     }
@@ -892,10 +931,13 @@ fun OfflineTimeRow(settingsViewModel: SettingsViewModel) {
             OfflineTimeDialog(settingsViewModel)
         }
 
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.useOfflineTime,
             onCheckedChange = {
-                settingsViewModel.updateUseOfflineTime(!settingsViewModel.useOfflineTime)
+                scope.launch {
+                    settingsViewModel.updateUseOfflineTime(!settingsViewModel.useOfflineTime)
+                }
             }
         )
     }
@@ -953,10 +995,13 @@ fun OpenWasmeggDashboardRow(settingsViewModel: SettingsViewModel) {
             OpenWasmeggDashboardDialog(settingsViewModel)
         }
 
+        val scope = rememberCoroutineScope()
         Switch(
             checked = settingsViewModel.openWasmeggDashboard,
             onCheckedChange = {
-                settingsViewModel.updateOpenWasmeggDashboard(!settingsViewModel.openWasmeggDashboard)
+                scope.launch {
+                    settingsViewModel.updateOpenWasmeggDashboard(!settingsViewModel.openWasmeggDashboard)
+                }
             }
         )
     }
