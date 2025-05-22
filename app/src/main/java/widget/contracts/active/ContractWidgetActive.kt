@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -47,9 +48,9 @@ import tools.utilities.getContractTimeTextColor
 import tools.utilities.getEggName
 import tools.utilities.getRewardIconPath
 import tools.utilities.getScrollName
+import widget.WidgetUpdater
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
-import widget.contracts.ContractWidgetUpdater
 
 class ContractWidgetActive : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -63,21 +64,23 @@ class ContractWidgetActive : GlanceAppWidget() {
                     state[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] ?: ""
                 )
             val useAbsoluteTime =
-                state[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
+                state[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] == true
             val useOfflineTime =
-                state[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] ?: false
+                state[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] == true
             val openWasmeggDashboard =
-                state[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] ?: false
+                state[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] == true
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
                     CoroutineScope(context = Dispatchers.IO).launch {
-                        ContractWidgetUpdater().updateContracts(context)
+                        WidgetUpdater().updateWidgets(context)
                     }
                 }
             }
+
+            val scope = rememberCoroutineScope()
 
             Column(
                 verticalAlignment = Alignment.CenterVertically,
@@ -108,7 +111,9 @@ class ContractWidgetActive : GlanceAppWidget() {
                                 context.startActivity(launchIntent)
                             }
                         } else {
-                            ContractWidgetUpdater().updateContracts(context)
+                            scope.launch {
+                                WidgetUpdater().updateWidgets(context)
+                            }
                         }
                     }
             ) {

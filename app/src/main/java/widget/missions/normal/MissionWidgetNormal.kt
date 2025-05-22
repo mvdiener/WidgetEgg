@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -46,9 +47,9 @@ import tools.utilities.getAsset
 import tools.utilities.getMissionDurationRemaining
 import tools.utilities.getMissionPercentComplete
 import tools.utilities.getShipName
+import widget.WidgetUpdater
 import widget.missions.MissionWidgetDataStore
 import widget.missions.MissionWidgetDataStorePreferencesKeys
-import widget.missions.MissionWidgetUpdater
 
 class MissionWidgetNormal : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -62,25 +63,27 @@ class MissionWidgetNormal : GlanceAppWidget() {
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
             val useAbsoluteTime =
-                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] == true
             val useAbsoluteTimePlusDay =
-                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] == true
             val showTargetArtifact =
-                state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_NORMAL_WIDGET] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_NORMAL_WIDGET] == true
             val showFuelingShip =
-                state[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] == true
             val openEggInc =
-                state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] == true
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
                     CoroutineScope(context = Dispatchers.IO).launch {
-                        MissionWidgetUpdater().updateMissions(context)
+                        WidgetUpdater().updateWidgets(context)
                     }
                 }
             }
+
+            val scope = rememberCoroutineScope()
 
             Column(
                 verticalAlignment = Alignment.CenterVertically,
@@ -97,7 +100,9 @@ class MissionWidgetNormal : GlanceAppWidget() {
                                 context.startActivity(launchIntent)
                             }
                         } else {
-                            MissionWidgetUpdater().updateMissions(context)
+                            scope.launch {
+                                WidgetUpdater().updateWidgets(context)
+                            }
                         }
                     }
             ) {

@@ -1,10 +1,10 @@
-package widget.contracts
+package widget
 
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 
-class ContractWidgetWorker(
+class WidgetWorker(
     private val context: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
@@ -16,8 +16,8 @@ class ContractWidgetWorker(
         }
 
         try {
-            ContractWidgetUpdater().updateContracts(context)
-        } catch (e: Exception) {
+            WidgetUpdater().updateWidgets(context)
+        } catch (_: Exception) {
             result = Result.retry()
         }
 

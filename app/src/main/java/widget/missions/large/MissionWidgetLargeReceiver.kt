@@ -1,8 +1,8 @@
 package widget.missions.large
 
 import androidx.glance.appwidget.GlanceAppWidget
-import widget.missions.MissionWidgetReceiver
+import widget.WidgetReceiver
 
-class MissionWidgetLargeReceiver : MissionWidgetReceiver() {
+class MissionWidgetLargeReceiver : WidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = MissionWidgetLarge()
 }

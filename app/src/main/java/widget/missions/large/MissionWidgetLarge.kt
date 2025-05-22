@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
@@ -53,9 +54,9 @@ import tools.utilities.getMissionsWithBlankMission
 import tools.utilities.getMissionsWithFuelTank
 import tools.utilities.getShipName
 import tools.utilities.getTankCapacity
+import widget.WidgetUpdater
 import widget.missions.MissionWidgetDataStore
 import widget.missions.MissionWidgetDataStorePreferencesKeys
-import widget.missions.MissionWidgetUpdater
 
 class MissionWidgetLarge : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -72,27 +73,29 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 state[MissionWidgetDataStorePreferencesKeys.TANK_INFO] ?: ""
             )
             val useAbsoluteTime =
-                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] == true
             val useAbsoluteTimePlusDay =
-                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] == true
             val showTargetArtifact =
-                state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] == true
             val showTankLevels =
-                state[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] == true
             val useSliderCapacity =
-                state[MissionWidgetDataStorePreferencesKeys.USE_SLIDER_CAPACITY] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.USE_SLIDER_CAPACITY] == true
             val openEggInc =
-                state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] == true
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
                     CoroutineScope(context = Dispatchers.IO).launch {
-                        MissionWidgetUpdater().updateMissions(context)
+                        WidgetUpdater().updateWidgets(context)
                     }
                 }
             }
+
+            val scope = rememberCoroutineScope()
 
             Column(
                 verticalAlignment = Alignment.CenterVertically,
@@ -109,7 +112,9 @@ class MissionWidgetLarge : GlanceAppWidget() {
                                 context.startActivity(launchIntent)
                             }
                         } else {
-                            MissionWidgetUpdater().updateMissions(context)
+                            scope.launch {
+                                WidgetUpdater().updateWidgets(context)
+                            }
                         }
                     }
             ) {

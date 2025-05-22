@@ -61,8 +61,8 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
                 isLegacy = contract.contract.leggacy,
                 eggsDelivered = status?.totalAmount ?: 0.0,
                 timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
-                allGoalsAchieved = status?.allGoalsAchieved ?: false,
-                clearedForExit = status?.clearedForExit ?: false,
+                allGoalsAchieved = status?.allGoalsAchieved == true,
+                clearedForExit = status?.clearedForExit == true,
                 goals = formattedGoals,
                 contributors = formattedContributors
             )

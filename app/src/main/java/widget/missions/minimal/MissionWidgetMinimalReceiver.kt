@@ -1,8 +1,8 @@
 package widget.missions.minimal
 
 import androidx.glance.appwidget.GlanceAppWidget
-import widget.missions.MissionWidgetReceiver
+import widget.WidgetReceiver
 
-class MissionWidgetMinimalReceiver : MissionWidgetReceiver() {
+class MissionWidgetMinimalReceiver : WidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = MissionWidgetMinimal()
 }

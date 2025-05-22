@@ -472,7 +472,7 @@ fun OpenEggIncDialog(settingsViewModel: SettingsViewModel) {
                 Text(
                     text =
                         """
-                        Tapping any mission widget will open Egg, Inc. instead of manually refreshing the displayed missions.
+                        Tapping any mission widget will open Egg, Inc. instead of manually refreshing all widgets.
                         
                         Automatic widget updates every 15 minutes will still happen independent of this setting.
                     """.trimIndent()
@@ -1027,7 +1027,7 @@ fun OpenWasmeggDashboardDialog(settingsViewModel: SettingsViewModel) {
                 Text(
                     text =
                         """
-                        Tapping any contract widget will your open your eicoop dashboard in a browser, instead of manually refreshing the displayed contracts. Must have a default browser set.
+                        Tapping any contract widget will your open your eicoop dashboard in a browser, instead of manually refreshing all widgets. Must have a default browser set.
                         
                         Please note that not all browsers handle links from a widget correctly. The widget will do its best to try and open the dashboard.
                         
