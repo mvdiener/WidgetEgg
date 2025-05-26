@@ -13,6 +13,7 @@ import ei.Ei.ContractCoopStatusResponse.ContributionInfo
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
 import kotlin.math.abs
 
 fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
@@ -54,6 +55,8 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
 
         formattedContracts = formattedContracts.plus(
             ContractInfoEntry(
+                stateId = UUID.randomUUID()
+                    .toString(), // Probably not necessary, but used in the off chance server data is not different from the last api call
                 eggId = contract.contract.egg.number,
                 customEggId = contract.contract.customEggId,
                 name = contract.contract.name,

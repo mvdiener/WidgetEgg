@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 // Data class used to save mission information to preferences
 @Serializable
 data class MissionInfoEntry(
+    var stateId: String,
     var secondsRemaining: Double,
     var missionDuration: Double,
     var date: Long,
