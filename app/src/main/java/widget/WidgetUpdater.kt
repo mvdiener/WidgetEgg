@@ -149,7 +149,7 @@ class WidgetUpdater {
 
         try {
             if (prefEid.isNotBlank()) {
-                val contractInfo = fetchContractData(prefEid, backup)
+                val contractInfo = fetchContractData(backup)
                 prefContractInfo = formatContractData(contractInfo)
 
                 preferences.saveContractInfo(prefContractInfo)

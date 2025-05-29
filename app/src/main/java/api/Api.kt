@@ -1,5 +1,6 @@
 package api
 
+import com.widgetegg.widgeteggapp.BuildConfig
 import data.BACKUP_ENDPOINT
 import data.CONTRACT_ENDPOINT
 import data.CURRENT_CLIENT_VERSION
@@ -42,7 +43,8 @@ suspend fun fetchMissionData(eid: String): MissionData {
     return MissionData(activeMissions)
 }
 
-suspend fun fetchContractData(eid: String, backup: Backup): ContractData {
+suspend fun fetchContractData(backup: Backup): ContractData {
+    val eid = BuildConfig.DEV_ACCOUNT
     val basicRequestInfo = getBasicRequestInfo(eid)
     val statuses = backup.contracts.contractsList.map { contract ->
         fetchContractStatus(

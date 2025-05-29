@@ -110,7 +110,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 if (prefEid.isNotBlank()) {
                     val backupResult = fetchBackupData(prefEid)
                     val missionResult = fetchMissionData(prefEid)
-                    val contractResult = fetchContractData(prefEid, backupResult)
+                    val contractResult = fetchContractData(backupResult)
                     val formattedMissionData = formatMissionData(missionResult, backupResult)
                     val formattedTankInfo = formatTankInfo(backupResult)
                     val formattedContractInfo = formatContractData(contractResult)

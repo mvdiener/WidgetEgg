@@ -36,8 +36,10 @@ android {
         properties.load(secretsFile.inputStream())
 
         val secretKey = properties.getProperty("SECRET_KEY") ?: ""
+        val devAccount = properties.getProperty("DEV_ACCOUNT") ?: ""
         debug {
             buildConfigField("String", "SECRET_KEY", secretKey)
+            buildConfigField("String", "DEV_ACCOUNT", devAccount)
         }
         release {
             isMinifyEnabled = true
@@ -46,6 +48,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "SECRET_KEY", secretKey)
+            buildConfigField("String", "DEV_ACCOUNT", devAccount)
             isDebuggable = false
         }
     }

@@ -26,8 +26,12 @@ default file size and as a result, all of the generated protobuf Kotlin files wi
 ### API Calls
 
 In order to make API calls via the app, you will need to add a `secrets.properties` file to the root
-of your project. Within this file add the key/value pair `SECRET_KEY=value_here` with the correct
-value.
+of your project. Within this file add the following key/value pairs with the correct values.
+
+```
+SECRET_KEY=value_here
+DEV_ACCOUNT=value_here
+```
 
 ## Contributing
 
