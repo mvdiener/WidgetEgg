@@ -173,15 +173,17 @@ fun getRewardIconPath(goal: GoalInfoEntry): String {
 }
 
 private fun getEpicResearchImagePath(goal: GoalInfoEntry): String {
-    return when (goal.rewardSubType) {
-        "epic_internal_incubators" -> "research/epic_internal_hatchery.png"
-        "cheaper_research" -> "research/lab_upgrade.png"
-        "int_hatch_sharing" -> "research/internal_hatchery_sharing.png"
-        "int_hatch_calm" -> "research/internal_hatchery_calm.png"
-        "soul_eggs" -> "research/soul_food.png"
-        "afx_mission_time" -> "research/afx_mission_duration.png"
-        else -> "eggs/egg_unknown.png"
+    val name = when (goal.rewardSubType) {
+        "epic_internal_incubators" -> "epic_internal_hatchery"
+        "cheaper_research" -> "lab_upgrade"
+        "int_hatch_sharing" -> "internal_hatchery_sharing"
+        "int_hatch_calm" -> "internal_hatchery_calm"
+        "soul_eggs" -> "soul_food"
+        "afx_mission_time" -> "afx_mission_duration"
+        else -> goal.rewardSubType
     }
+
+    return "research/r_icon_${name}.png"
 }
 
 private fun getBoostImagePath(goal: GoalInfoEntry): String {
