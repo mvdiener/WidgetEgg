@@ -15,7 +15,7 @@ class WidgetScheduler() {
             .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "widgetegg_worker",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
             workRequest
         )
     }
