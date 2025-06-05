@@ -38,21 +38,37 @@ class WidgetUpdater {
 
                 coroutineScope {
                     val jobs = mutableListOf<Job>()
+                    val exceptions = mutableListOf<Exception>()
 
                     if (hasMissionWidgets) {
-                        val job = launch { updateMissions(context, preferences, backup) }
+                        val job = launch {
+                            try {
+                                updateMissions(context, preferences, backup)
+                            } catch (e: Exception) {
+                                exceptions.add(e)
+                            }
+                        }
                         jobs.add(job)
                     }
 
                     if (hasContractWidgets) {
-                        val job = launch { updateContracts(context, preferences, backup) }
+                        val job = launch {
+                            try {
+                                updateContracts(context, preferences, backup)
+                            } catch (e: Exception) {
+                                exceptions.add(e)
+                            }
+                        }
                         jobs.add(job)
                     }
 
                     jobs.joinAll()
+
+                    if (exceptions.isNotEmpty()) {
+                        val messages = exceptions.joinToString(", ") { e -> e.message.toString() }
+                        throw Exception("Errors while updating data: $messages")
+                    }
                 }
-
-
             } catch (e: Exception) {
                 throw e
             }

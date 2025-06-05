@@ -90,7 +90,10 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
                     CoroutineScope(context = Dispatchers.IO).launch {
-                        WidgetUpdater().updateWidgets(context)
+                        try {
+                            WidgetUpdater().updateWidgets(context)
+                        } catch (_: Exception) {
+                        }
                     }
                 }
             }
@@ -113,7 +116,10 @@ class MissionWidgetLarge : GlanceAppWidget() {
                             }
                         } else {
                             scope.launch {
-                                WidgetUpdater().updateWidgets(context)
+                                try {
+                                    WidgetUpdater().updateWidgets(context)
+                                } catch (_: Exception) {
+                                }
                             }
                         }
                     }
