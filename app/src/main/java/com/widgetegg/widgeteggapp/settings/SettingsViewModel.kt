@@ -29,16 +29,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var useAbsoluteTimeMission by mutableStateOf(false)
         private set
 
-    fun updateUseAbsoluteTimeMission(input: Boolean) {
+    suspend fun updateUseAbsoluteTimeMission(input: Boolean) {
         useAbsoluteTimeMission = input
-        runBlocking {
-            preferences.saveUseAbsoluteTimeMission(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setUseAbsoluteTime(context, input)
-        }
+        preferences.saveUseAbsoluteTimeMission(input)
+        val context = getApplication<Application>().applicationContext
+        MissionWidgetDataStore().setUseAbsoluteTime(context, input)
     }
 
     var showAbsoluteTimeMissionDialog by mutableStateOf(false)
@@ -51,16 +46,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var useAbsoluteTimePlusDay by mutableStateOf(false)
         private set
 
-    fun updateUseAbsoluteTimePlusDay(input: Boolean) {
+    suspend fun updateUseAbsoluteTimePlusDay(input: Boolean) {
         useAbsoluteTimePlusDay = input
-        runBlocking {
-            preferences.saveUseAbsoluteTimePlusDay(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setUseAbsoluteTimePlusDay(context, input)
-        }
+        preferences.saveUseAbsoluteTimePlusDay(input)
+        val context = getApplication<Application>().applicationContext
+        MissionWidgetDataStore().setUseAbsoluteTimePlusDay(context, input)
     }
 
     var showAbsoluteTimePlusDayDialog by mutableStateOf(false)
@@ -73,16 +63,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var openEggInc by mutableStateOf(false)
         private set
 
-    fun updateOpenEggInc(input: Boolean) {
+    suspend fun updateOpenEggInc(input: Boolean) {
         openEggInc = input
-        runBlocking {
-            preferences.saveOpenEggInc(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setOpenEggInc(context, input)
-        }
+        preferences.saveOpenEggInc(input)
+        val context = getApplication<Application>().applicationContext
+        MissionWidgetDataStore().setOpenEggInc(context, input)
     }
 
     var showOpenEggIncDialog by mutableStateOf(false)
@@ -95,61 +80,41 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var showTargetArtifactNormalWidget by mutableStateOf(false)
         private set
 
-    fun updateShowTargetArtifactNormalWidget(input: Boolean) {
+    suspend fun updateShowTargetArtifactNormalWidget(input: Boolean) {
         showTargetArtifactNormalWidget = input
-        runBlocking {
-            preferences.saveTargetArtifactNormalWidget(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setTargetArtifactNormalWidget(context, input)
-        }
+        preferences.saveTargetArtifactNormalWidget(input)
+        val context = getApplication<Application>().applicationContext
+        MissionWidgetDataStore().setTargetArtifactNormalWidget(context, input)
     }
 
     var showFuelingShip by mutableStateOf(false)
         private set
 
-    fun updateShowFuelingShip(input: Boolean) {
+    suspend fun updateShowFuelingShip(input: Boolean) {
         showFuelingShip = input
-        runBlocking {
-            preferences.saveShowFuelingShip(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setShowFuelingShip(context, input)
-        }
+        preferences.saveShowFuelingShip(input)
+        val context = getApplication<Application>().applicationContext
+        MissionWidgetDataStore().setShowFuelingShip(context, input)
     }
 
     var showTargetArtifactLargeWidget by mutableStateOf(false)
         private set
 
-    fun updateShowTargetArtifactLargeWidget(input: Boolean) {
+    suspend fun updateShowTargetArtifactLargeWidget(input: Boolean) {
         showTargetArtifactLargeWidget = input
-        runBlocking {
-            preferences.saveTargetArtifactLargeWidget(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setTargetArtifactLargeWidget(context, input)
-        }
+        preferences.saveTargetArtifactLargeWidget(input)
+        val context = getApplication<Application>().applicationContext
+        MissionWidgetDataStore().setTargetArtifactLargeWidget(context, input)
     }
 
     var showTankLevels by mutableStateOf(false)
         private set
 
-    fun updateShowTankLevels(input: Boolean) {
+    suspend fun updateShowTankLevels(input: Boolean) {
         showTankLevels = input
-        runBlocking {
-            preferences.saveShowTankLevels(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setShowTankLevels(context, input)
-        }
+        preferences.saveShowTankLevels(input)
+        val context = getApplication<Application>().applicationContext
+        MissionWidgetDataStore().setShowTankLevels(context, input)
     }
 
     var showTankLevelsDialog by mutableStateOf(false)
@@ -176,16 +141,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var useSliderCapacity by mutableStateOf(false)
         private set
 
-    fun updateUseSliderCapacity(input: Boolean) {
+    suspend fun updateUseSliderCapacity(input: Boolean) {
         useSliderCapacity = input
-        runBlocking {
-            preferences.saveUseSliderCapacity(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setUseSliderCapacity(context, input)
-        }
+        preferences.saveUseSliderCapacity(input)
+        val context = getApplication<Application>().applicationContext
+        MissionWidgetDataStore().setUseSliderCapacity(context, input)
     }
 
     var showSliderCapacityDialog by mutableStateOf(false)
@@ -207,6 +167,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateScheduleEvents(input: Boolean) {
         scheduleEvents = input
+        // This is the one setting that needs to use runBlocking
+        // Changes to this value are tied into lifecycle events and need to wait for this operation to finish
         runBlocking {
             preferences.saveScheduleEvents(input)
             if (!scheduleEvents) {
@@ -225,11 +187,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var selectedCalendar by mutableStateOf(CalendarEntry())
         private set
 
-    fun updateSelectedCalendar(input: CalendarEntry) {
+    suspend fun updateSelectedCalendar(input: CalendarEntry) {
         selectedCalendar = input
-        runBlocking {
-            preferences.saveSelectedCalendar(input)
-        }
+        preferences.saveSelectedCalendar(input)
     }
 
     var userCalendars by mutableStateOf(listOf(CalendarEntry()))
@@ -282,16 +242,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var useAbsoluteTimeContract by mutableStateOf(false)
         private set
 
-    fun updateUseAbsoluteTimeContract(input: Boolean) {
+    suspend fun updateUseAbsoluteTimeContract(input: Boolean) {
         useAbsoluteTimeContract = input
-        runBlocking {
-            preferences.saveUseAbsoluteTimeContract(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            ContractWidgetDataStore().setUseAbsoluteTime(context, input)
-        }
+        preferences.saveUseAbsoluteTimeContract(input)
+        val context = getApplication<Application>().applicationContext
+        ContractWidgetDataStore().setUseAbsoluteTime(context, input)
     }
 
     var showAbsoluteTimeContractDialog by mutableStateOf(false)
@@ -304,16 +259,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var useOfflineTime by mutableStateOf(false)
         private set
 
-    fun updateUseOfflineTime(input: Boolean) {
+    suspend fun updateUseOfflineTime(input: Boolean) {
         useOfflineTime = input
-        runBlocking {
-            preferences.saveUseOfflineTime(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            ContractWidgetDataStore().setUseOfflineTime(context, input)
-        }
+        preferences.saveUseOfflineTime(input)
+        val context = getApplication<Application>().applicationContext
+        ContractWidgetDataStore().setUseOfflineTime(context, input)
     }
 
     var showOfflineTimeDialog by mutableStateOf(false)
@@ -326,16 +276,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var openWasmeggDashboard by mutableStateOf(false)
         private set
 
-    fun updateOpenWasmeggDashboard(input: Boolean) {
+    suspend fun updateOpenWasmeggDashboard(input: Boolean) {
         openWasmeggDashboard = input
-        runBlocking {
-            preferences.saveOpenWasmeggDashboard(input)
-        }
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val context = getApplication<Application>().applicationContext
-            ContractWidgetDataStore().setOpenWasmeggDashboard(context, input)
-        }
+        preferences.saveOpenWasmeggDashboard(input)
+        val context = getApplication<Application>().applicationContext
+        ContractWidgetDataStore().setOpenWasmeggDashboard(context, input)
     }
 
     var showOpenWasmeggDashboardDialog by mutableStateOf(false)

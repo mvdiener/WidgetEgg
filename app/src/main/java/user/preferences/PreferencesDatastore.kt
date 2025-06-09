@@ -13,7 +13,6 @@ import data.MissionInfoEntry
 import data.TankInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "eiUserPrefs")
@@ -121,7 +120,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getUseAbsoluteTimeMission() = dataStore.data.map {
-        it[USE_ABSOLUTE_TIME] ?: false
+        it[USE_ABSOLUTE_TIME] == true
     }.first()
 
     suspend fun saveUseAbsoluteTimeMission(useAbsoluteTimeMission: Boolean) {
@@ -131,7 +130,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getUseAbsoluteTimePlusDay() = dataStore.data.map {
-        it[USE_ABSOLUTE_TIME_PLUS_DAY] ?: false
+        it[USE_ABSOLUTE_TIME_PLUS_DAY] == true
     }.first()
 
     suspend fun saveUseAbsoluteTimePlusDay(useAbsoluteTimePlusDay: Boolean) {
@@ -141,7 +140,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getTargetArtifactNormalWidget() = dataStore.data.map {
-        it[TARGET_ARTIFACT_NORMAL_WIDGET] ?: false
+        it[TARGET_ARTIFACT_NORMAL_WIDGET] == true
     }.first()
 
     suspend fun saveTargetArtifactNormalWidget(targetArtifactNormalWidget: Boolean) {
@@ -151,7 +150,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getTargetArtifactLargeWidget() = dataStore.data.map {
-        it[TARGET_ARTIFACT_LARGE_WIDGET] ?: false
+        it[TARGET_ARTIFACT_LARGE_WIDGET] == true
     }.first()
 
     suspend fun saveTargetArtifactLargeWidget(targetArtifactLargeWidget: Boolean) {
@@ -161,7 +160,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getShowFuelingShip() = dataStore.data.map {
-        it[SHOW_FUELING_SHIP] ?: false
+        it[SHOW_FUELING_SHIP] == true
     }.first()
 
     suspend fun saveShowFuelingShip(showFuelingShip: Boolean) {
@@ -171,7 +170,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getShowTankLevels() = dataStore.data.map {
-        it[SHOW_TANK_LEVELS] ?: false
+        it[SHOW_TANK_LEVELS] == true
     }.first()
 
     suspend fun saveShowTankLevels(showTankLevels: Boolean) {
@@ -181,7 +180,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getUseSliderCapacity() = dataStore.data.map {
-        it[USE_SLIDER_CAPACITY] ?: false
+        it[USE_SLIDER_CAPACITY] == true
     }.first()
 
     suspend fun saveUseSliderCapacity(useSliderCapacity: Boolean) {
@@ -191,7 +190,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getOpenEggInc() = dataStore.data.map {
-        it[OPEN_EGG_INC] ?: false
+        it[OPEN_EGG_INC] == true
     }.first()
 
     suspend fun saveOpenEggInc(openEggInc: Boolean) {
@@ -201,7 +200,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getScheduleEvents() = dataStore.data.map {
-        it[SCHEDULE_EVENTS] ?: false
+        it[SCHEDULE_EVENTS] == true
     }.first()
 
     suspend fun saveScheduleEvents(scheduleEvents: Boolean) {
@@ -247,7 +246,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getUseAbsoluteTimeContract() = dataStore.data.map {
-        it[USE_ABSOLUTE_TIME_CONTRACT] ?: false
+        it[USE_ABSOLUTE_TIME_CONTRACT] == true
     }.first()
 
     suspend fun saveUseAbsoluteTimeContract(useAbsoluteTimeContract: Boolean) {
@@ -257,7 +256,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getUseOfflineTime() = dataStore.data.map {
-        it[USE_OFFLINE_TIME] ?: false
+        it[USE_OFFLINE_TIME] == true
     }.first()
 
     suspend fun saveUseOfflineTime(useOfflineTime: Boolean) {
@@ -267,7 +266,7 @@ class PreferencesDatastore(context: Context) {
     }
 
     suspend fun getOpenWasmeggDashboard() = dataStore.data.map {
-        it[OPEN_WASMEGG_DASHBOARD] ?: false
+        it[OPEN_WASMEGG_DASHBOARD] == true
     }.first()
 
     suspend fun saveOpenWasmeggDashboard(openWasmeggDashboard: Boolean) {

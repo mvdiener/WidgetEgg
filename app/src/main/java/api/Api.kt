@@ -1,5 +1,6 @@
 package api
 
+import com.widgetegg.widgeteggapp.BuildConfig
 import data.BACKUP_ENDPOINT
 import data.CONTRACT_ENDPOINT
 import data.CURRENT_CLIENT_VERSION
@@ -28,7 +29,42 @@ import io.ktor.util.encodeBase64
 import tools.buildSecureAuthMessage
 import java.util.concurrent.TimeUnit
 
-suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<MissionInfo> {
+suspend fun fetchBackupData(eid: String): Backup {
+    val basicRequestInfo = getBasicRequestInfo(eid)
+    val backup = fetchBackup(basicRequestInfo)
+
+    return backup
+}
+
+suspend fun fetchMissionData(eid: String): MissionData {
+    val basicRequestInfo = getBasicRequestInfo(eid)
+    var activeMissions = fetchActiveMissions(basicRequestInfo)
+
+    return MissionData(activeMissions)
+}
+
+suspend fun fetchContractData(backup: Backup): ContractData {
+    val eid = BuildConfig.DEV_ACCOUNT
+    val basicRequestInfo = getBasicRequestInfo(eid)
+    val statuses = backup.contracts.contractsList.map { contract ->
+        fetchContractStatus(
+            basicRequestInfo,
+            contract.contract.identifier,
+            contract.coopIdentifier
+        )
+    }
+    return ContractData(backup.contracts.contractsList, statuses)
+}
+
+fun getBasicRequestInfo(eid: String): BasicRequestInfo {
+    return BasicRequestInfo.newBuilder()
+        .setEiUserId(eid)
+        .setClientVersion(CURRENT_CLIENT_VERSION)
+        .setPlatform("DROID")
+        .build()
+}
+
+private suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<MissionInfo> {
     val url = MISSION_ENDPOINT
 
     val authMessage = try {
@@ -60,7 +96,7 @@ suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<Missio
     }
 }
 
-suspend fun fetchContractStatus(
+private suspend fun fetchContractStatus(
     basicRequestInfo: BasicRequestInfo,
     contractId: String,
     coopId: String
@@ -97,7 +133,7 @@ suspend fun fetchContractStatus(
     }
 }
 
-suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
+private suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
     val url = BACKUP_ENDPOINT
 
     val firstContactRequest = EggIncFirstContactRequest.newBuilder()
@@ -123,43 +159,6 @@ suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
 
         else -> throw Exception("Error retrieving data")
     }
-}
-
-suspend fun fetchMissionData(eid: String): MissionData {
-    val basicRequestInfo = getBasicRequestInfo(eid)
-    var activeMissions = fetchActiveMissions(basicRequestInfo)
-    val backup = fetchBackup(basicRequestInfo)
-
-    val fuelingMission = backup.artifactsDb.fuelingMission
-
-    fuelingMission?.let {
-        if (fuelingMission.capacity > 0) {
-            activeMissions = activeMissions + fuelingMission
-        }
-    }
-
-    return MissionData(activeMissions, backup.artifacts)
-}
-
-suspend fun fetchContractData(eid: String): ContractData {
-    val basicRequestInfo = getBasicRequestInfo(eid)
-    val backup = fetchBackup(basicRequestInfo)
-    val statuses = backup.contracts.contractsList.map { contract ->
-        fetchContractStatus(
-            basicRequestInfo,
-            contract.contract.identifier,
-            contract.coopIdentifier
-        )
-    }
-    return ContractData(backup.contracts.contractsList, statuses)
-}
-
-fun getBasicRequestInfo(eid: String): BasicRequestInfo {
-    return BasicRequestInfo.newBuilder()
-        .setEiUserId(eid)
-        .setClientVersion(CURRENT_CLIENT_VERSION)
-        .setPlatform("DROID")
-        .build()
 }
 
 private fun createHttpClient(): HttpClient {

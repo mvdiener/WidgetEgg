@@ -71,4 +71,3 @@ fun getImageFromAfxId(afxId: Int): String {
         else -> ""
     }
 }
-

@@ -17,8 +17,8 @@ android {
         applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
         targetSdk = 35
-        versionCode = 14
-        versionName = "2.0.1"
+        versionCode = 15
+        versionName = "2.1.0"
 
         ndk {
             debugSymbolLevel = "SYMBOL_TABLE"
@@ -36,8 +36,10 @@ android {
         properties.load(secretsFile.inputStream())
 
         val secretKey = properties.getProperty("SECRET_KEY") ?: ""
+        val devAccount = properties.getProperty("DEV_ACCOUNT") ?: ""
         debug {
             buildConfigField("String", "SECRET_KEY", secretKey)
+            buildConfigField("String", "DEV_ACCOUNT", devAccount)
         }
         release {
             isMinifyEnabled = true
@@ -46,6 +48,7 @@ android {
                 "proguard-rules.pro"
             )
             buildConfigField("String", "SECRET_KEY", secretKey)
+            buildConfigField("String", "DEV_ACCOUNT", devAccount)
             isDebuggable = false
         }
     }
@@ -118,7 +121,7 @@ dependencies {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:4.27.0"
+        artifact = "com.google.protobuf:protoc:4.31.0"
     }
     generateProtoTasks {
         all().forEach { task ->

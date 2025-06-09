@@ -29,7 +29,7 @@
         </activity>
 
         <receiver
-            android:name="widget.missions.MissionWidgetReceiver"
+            android:name="widget.missions.normal.MissionWidgetNormalReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -65,7 +65,7 @@
         </receiver>
 
         <receiver
-            android:name="widget.contracts.ContractWidgetReceiver"
+            android:name="widget.contracts.active.ContractWidgetActiveReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

@@ -13,6 +13,7 @@ import ei.Ei.ContractCoopStatusResponse.ContributionInfo
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
 import kotlin.math.abs
 
 fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
@@ -54,6 +55,8 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
 
         formattedContracts = formattedContracts.plus(
             ContractInfoEntry(
+                stateId = UUID.randomUUID()
+                    .toString(), // Probably not necessary, but used in the off chance server data is not different from the last api call
                 eggId = contract.contract.egg.number,
                 customEggId = contract.contract.customEggId,
                 name = contract.contract.name,
@@ -61,8 +64,8 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
                 isLegacy = contract.contract.leggacy,
                 eggsDelivered = status?.totalAmount ?: 0.0,
                 timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
-                allGoalsAchieved = status?.allGoalsAchieved ?: false,
-                clearedForExit = status?.clearedForExit ?: false,
+                allGoalsAchieved = status?.allGoalsAchieved == true,
+                clearedForExit = status?.clearedForExit == true,
                 goals = formattedGoals,
                 contributors = formattedContributors
             )
@@ -170,15 +173,17 @@ fun getRewardIconPath(goal: GoalInfoEntry): String {
 }
 
 private fun getEpicResearchImagePath(goal: GoalInfoEntry): String {
-    return when (goal.rewardSubType) {
-        "epic_internal_incubators" -> "research/epic_internal_hatchery.png"
-        "cheaper_research" -> "research/lab_upgrade.png"
-        "int_hatch_sharing" -> "research/internal_hatchery_sharing.png"
-        "int_hatch_calm" -> "research/internal_hatchery_calm.png"
-        "soul_eggs" -> "research/soul_food.png"
-        "afx_mission_time" -> "research/afx_mission_duration.png"
-        else -> "eggs/egg_unknown.png"
+    val name = when (goal.rewardSubType) {
+        "epic_internal_incubators" -> "epic_internal_hatchery"
+        "cheaper_research" -> "lab_upgrade"
+        "int_hatch_sharing" -> "internal_hatchery_sharing"
+        "int_hatch_calm" -> "internal_hatchery_calm"
+        "soul_eggs" -> "soul_food"
+        "afx_mission_time" -> "afx_mission_duration"
+        else -> goal.rewardSubType
     }
+
+    return "research/r_icon_${name}.png"
 }
 
 private fun getBoostImagePath(goal: GoalInfoEntry): String {

@@ -7,6 +7,7 @@ import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
@@ -38,9 +39,9 @@ import tools.utilities.createMissionCircularProgressBarBitmap
 import tools.utilities.getAsset
 import tools.utilities.getMissionPercentComplete
 import tools.utilities.getShipName
+import widget.WidgetUpdater
 import widget.missions.MissionWidgetDataStore
 import widget.missions.MissionWidgetDataStorePreferencesKeys
-import widget.missions.MissionWidgetUpdater
 
 class MissionWidgetMinimal : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -54,17 +55,22 @@ class MissionWidgetMinimal : GlanceAppWidget() {
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
             val openEggInc =
-                state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] ?: false
+                state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] == true
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
                     CoroutineScope(context = Dispatchers.IO).launch {
-                        MissionWidgetUpdater().updateMissions(context)
+                        try {
+                            WidgetUpdater().updateWidgets(context)
+                        } catch (_: Exception) {
+                        }
                     }
                 }
             }
+
+            val scope = rememberCoroutineScope()
 
             Column(
                 verticalAlignment = Alignment.CenterVertically,
@@ -80,7 +86,12 @@ class MissionWidgetMinimal : GlanceAppWidget() {
                                 context.startActivity(launchIntent)
                             }
                         } else {
-                            MissionWidgetUpdater().updateMissions(context)
+                            scope.launch {
+                                try {
+                                    WidgetUpdater().updateWidgets(context)
+                                } catch (_: Exception) {
+                                }
+                            }
                         }
                     }
             ) {

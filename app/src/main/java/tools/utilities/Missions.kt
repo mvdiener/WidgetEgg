@@ -7,12 +7,15 @@ import data.MissionData
 import data.MissionInfoEntry
 import data.TANK_SIZES
 import data.TankInfo
+import ei.Ei
 import ei.Ei.Egg
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
+import kotlin.collections.plus
 
 fun getMissionPercentComplete(
     missionDuration: Double,
@@ -82,12 +85,19 @@ fun getMissionEndTimeMilliseconds(mission: MissionInfoEntry): Long {
     return endingTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 }
 
-fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
+fun formatMissionData(missionInfo: MissionData, backup: Ei.Backup): List<MissionInfoEntry> {
     var formattedMissions: List<MissionInfoEntry> = emptyList()
+    var missionsWithFueling = missionInfo.missions
+    val fuelingMission = backup.artifactsDb.fuelingMission
 
-    missionInfo.missions.forEach { mission ->
+    if (fuelingMission.capacity > 0) {
+        missionsWithFueling = missionsWithFueling + fuelingMission
+    }
+
+    missionsWithFueling.forEach { mission ->
         formattedMissions = formattedMissions.plus(
             MissionInfoEntry(
+                stateId = UUID.randomUUID().toString(),
                 secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
                 missionDuration = mission.durationSeconds,
                 date = Instant.now().epochSecond,
@@ -104,27 +114,60 @@ fun formatMissionData(missionInfo: MissionData): List<MissionInfoEntry> {
     return formattedMissions
 }
 
+fun updateFuelingMission(
+    missions: List<MissionInfoEntry>,
+    backup: Ei.Backup
+): List<MissionInfoEntry> {
+    var activeMissions = missions.filter { mission -> mission.identifier.isNotBlank() }
+    val fuelingMission = backup.artifactsDb.fuelingMission
+
+    if (fuelingMission.capacity > 0) {
+        activeMissions = activeMissions.plus(
+            MissionInfoEntry(
+                stateId = UUID.randomUUID().toString(),
+                secondsRemaining = if (fuelingMission.secondsRemaining >= 0) fuelingMission.secondsRemaining else 0.0,
+                missionDuration = fuelingMission.durationSeconds,
+                date = Instant.now().epochSecond,
+                shipId = fuelingMission.ship.number,
+                capacity = fuelingMission.capacity,
+                shipLevel = fuelingMission.level,
+                targetArtifact = fuelingMission.targetArtifact.number,
+                durationType = fuelingMission.durationType.number,
+                identifier = fuelingMission.identifier
+            )
+        )
+    }
+
+    val activeMissionsUpdatedState = activeMissions.map { mission ->
+        // If all data is the same from the last update (no change in fueling ship, no change in active ships), widgets won't update state
+        // By changing the stateId, this will force widgets to re-render
+        mission.copy(stateId = UUID.randomUUID().toString())
+    }
+
+    return activeMissionsUpdatedState
+}
+
 fun getTankCapacity(tankLevel: Int): Long {
     return TANK_SIZES[tankLevel]
 }
 
-fun formatTankInfo(missionInfo: MissionData): TankInfo {
+fun formatTankInfo(backup: Ei.Backup): TankInfo {
     var formattedFuelLevels: List<FuelLevelInfo> = emptyList()
 
-    missionInfo.artifacts.tankFuelsList.forEachIndexed { index, fuel ->
+    backup.artifacts.tankFuelsList.forEachIndexed { index, fuel ->
         if (fuel > 0) {
             formattedFuelLevels = formattedFuelLevels.plus(
                 FuelLevelInfo(
                     eggId = index + 1,
                     fuelQuantity = fuel,
-                    fuelSlider = missionInfo.artifacts.tankLimitsList[index]
+                    fuelSlider = backup.artifacts.tankLimitsList[index]
                 )
             )
         }
     }
 
     return TankInfo(
-        level = missionInfo.artifacts.tankLevel,
+        level = backup.artifacts.tankLevel,
         fuelLevels = formattedFuelLevels
     )
 }
@@ -136,6 +179,7 @@ fun formatTankInfo(missionInfo: MissionData): TankInfo {
 fun getMissionsWithFuelTank(missions: List<MissionInfoEntry>): List<MissionInfoEntry> {
     var missionsCopy = missions.toList()
     val fuelMission = MissionInfoEntry(
+        stateId = UUID.randomUUID().toString(),
         secondsRemaining = 0.0,
         missionDuration = 0.0,
         date = 0,
@@ -165,6 +209,7 @@ fun getMissionsWithFuelTank(missions: List<MissionInfoEntry>): List<MissionInfoE
 // the spacing gets really weird. So add an empty mission to take up the extra space
 fun getMissionsWithBlankMission(missions: List<MissionInfoEntry>): List<MissionInfoEntry> {
     val blankMission = MissionInfoEntry(
+        stateId = UUID.randomUUID().toString(),
         secondsRemaining = 0.0,
         missionDuration = 0.0,
         date = 0,

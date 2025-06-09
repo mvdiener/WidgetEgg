@@ -14,11 +14,15 @@ import androidx.navigation.compose.rememberNavController
 import com.widgetegg.widgeteggapp.main.MainScreen
 import com.widgetegg.widgeteggapp.settings.SettingsScreen
 import com.widgetegg.widgeteggapp.ui.theme.WidgetEggTheme
+import widget.WidgetScheduler
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val activity = this
+
+        WidgetScheduler().scheduleUpdate(this.applicationContext)
+
         enableEdgeToEdge()
         setContent {
             WidgetEggTheme {

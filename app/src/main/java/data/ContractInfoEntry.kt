@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 // Data class used to save contract information to preferences
 @Serializable
 data class ContractInfoEntry(
+    var stateId: String,
     var eggId: Int,
     var customEggId: String?,
     var name: String,

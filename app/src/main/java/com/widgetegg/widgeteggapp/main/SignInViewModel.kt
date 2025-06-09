@@ -6,8 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import api.fetchBackupData
 import api.fetchContractData
 import api.fetchMissionData
+import ei.Ei
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
@@ -85,11 +87,10 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
     fun getBackupData() {
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>().applicationContext
-            val basicRequestInfo = api.getBasicRequestInfo(eid)
             updateHasSubmitted(true)
             updateHasError(false)
             try {
-                val backupResult = api.fetchBackup(basicRequestInfo)
+                val backupResult = fetchBackupData(eid)
                 updateEiUserName(backupResult.userName)
                 preferences.saveEiUserName(backupResult.userName)
                 preferences.saveEid(eid)
@@ -97,7 +98,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 ContractWidgetDataStore().setEid(context, eid)
                 updateHasSubmitted(false)
                 updateEid("")
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 updateErrorMessage("Please enter a valid EID!")
                 updateHasError(true)
                 updateHasSubmitted(false)
@@ -107,10 +108,11 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 //Attempt to get data ahead of time for any widgets
                 val prefEid = preferences.getEid()
                 if (prefEid.isNotBlank()) {
+                    val backupResult = fetchBackupData(prefEid)
                     val missionResult = fetchMissionData(prefEid)
-                    val contractResult = fetchContractData(prefEid)
-                    val formattedMissionData = formatMissionData(missionResult)
-                    val formattedTankInfo = formatTankInfo(missionResult)
+                    val contractResult = fetchContractData(backupResult)
+                    val formattedMissionData = formatMissionData(missionResult, backupResult)
+                    val formattedTankInfo = formatTankInfo(backupResult)
                     val formattedContractInfo = formatContractData(contractResult)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveTankInfo(formattedTankInfo)
