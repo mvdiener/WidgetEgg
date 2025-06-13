@@ -4,6 +4,7 @@
     android:minWidth="150dp"
     android:minHeight="100dp"
     android:minResizeWidth="100dp"
+    android:previewImage="@drawable/contract_widget_active"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen" />
