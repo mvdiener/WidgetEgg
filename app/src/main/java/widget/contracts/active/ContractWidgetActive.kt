@@ -40,6 +40,7 @@ import data.ContractInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.utilities.bitmapResize
 import tools.utilities.createContractCircularProgressBarBitmap
 import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
@@ -407,8 +408,15 @@ fun SeasonAndRewardInfo(
 
     Row {
         contract.goals.forEachIndexed { index, goal ->
-            val rewardBitmap =
-                BitmapFactory.decodeStream(getAsset(assetManager, getRewardIconPath(goal)))
+            val rewardBitmap = bitmapResize(
+                BitmapFactory.decodeStream(
+                    getAsset(
+                        assetManager,
+                        getRewardIconPath(goal)
+                    )
+                )
+            )
+
 
             Image(
                 provider = ImageProvider(rewardBitmap),
