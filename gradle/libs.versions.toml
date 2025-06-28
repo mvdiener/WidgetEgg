@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.1"
+agp = "8.11.0"
 datastorePreferences = "1.1.7"
 glanceAppwidget = "1.1.1"
 kotlin = "2.1.0"
@@ -17,7 +17,7 @@ lifecycleViewmodelCompose = "2.9.1"
 navigationCompose = "2.9.0"
 protobufGradlePlugin = "0.9.5"
 protobuf = "4.31.0"
-workRuntimeKtx = "2.10.1"
+workRuntimeKtx = "2.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
