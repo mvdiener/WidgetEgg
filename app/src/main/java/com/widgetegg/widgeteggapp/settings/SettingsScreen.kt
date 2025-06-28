@@ -5,12 +5,14 @@ import android.content.Intent
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
@@ -50,6 +54,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.github.skydoves.colorpicker.compose.AlphaSlider
+import com.github.skydoves.colorpicker.compose.AlphaTile
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
 import kotlinx.coroutines.launch
@@ -140,6 +149,7 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
             BatteryPermissionsContent(settingsViewModel, packageName, context)
         }
 
+        WidgetsGeneralGroup(settingsViewModel, context)
         MissionsGeneralGroup(settingsViewModel, packageName, context, activity)
         ContractsGeneralGroup(settingsViewModel)
         NormalMissionWidgetGroup(settingsViewModel)
@@ -225,6 +235,96 @@ fun BatteryPermissionsDialog(
                 ) {
                     Text(text = "App Settings")
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun WidgetsGeneralGroup(settingsViewModel: SettingsViewModel, context: Context) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(text = "Widgets General", fontSize = TextUnit(18f, TextUnitType.Sp))
+        BackgroundColorPicker(settingsViewModel)
+    }
+}
+
+@Composable
+fun BackgroundColorPicker(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier
+            .settingsRowModifier()
+            .clickable {
+                settingsViewModel.updateShowBackgroundColorPickerDialog(true)
+            },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "Widget background color")
+        BackgroundColorPickerDialog(settingsViewModel)
+        AlphaTile(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .border(1.dp, Color.White),
+            selectedColor = settingsViewModel.widgetBackgroundColor
+        )
+    }
+}
+
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun BackgroundColorPickerDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showBackgroundColorPickerDialog) {
+        val controller = rememberColorPickerController()
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateWidgetBackgroundColor(controller.selectedColor.value)
+                settingsViewModel.updateShowBackgroundColorPickerDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                HsvColorPicker(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(450.dp),
+                    controller = controller,
+                    initialColor = settingsViewModel.widgetBackgroundColor,
+                )
+                AlphaSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(35.dp),
+                    controller = controller,
+                    initialColor = settingsViewModel.widgetBackgroundColor
+                )
+                BrightnessSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp)
+                        .height(35.dp),
+                    controller = controller,
+                    initialColor = settingsViewModel.widgetBackgroundColor
+                )
+                AlphaTile(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(6.dp)),
+                    controller = controller
+                )
             }
         }
     }

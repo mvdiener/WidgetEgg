@@ -1,11 +1,16 @@
 package data
 
+import androidx.compose.ui.graphics.Color
+
 const val API_ROOT = "https://www.auxbrain.com"
 const val MISSION_ENDPOINT = "${API_ROOT}/ei_afx/get_active_missions"
 const val BACKUP_ENDPOINT = "${API_ROOT}/ei/bot_first_contact"
 const val CONTRACT_ENDPOINT = "${API_ROOT}/ei/coop_status"
 
 const val CURRENT_CLIENT_VERSION = 69
+
+val DEFAULT_WIDGET_BACKGROUND_COLOR = Color(0xff181818)
+val DEFAULT_WIDGET_TEXT_COLOR = Color.White
 
 val ALL_SHIPS = arrayOf(
     "afx_ship_chicken_1",

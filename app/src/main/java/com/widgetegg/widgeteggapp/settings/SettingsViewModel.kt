@@ -8,9 +8,11 @@ import android.provider.CalendarContract.Calendars
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import data.CalendarEntry
+import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -288,5 +290,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateShowOpenWasmeggDashboardDialog(input: Boolean) {
         showOpenWasmeggDashboardDialog = input
+    }
+
+    var widgetBackgroundColor by mutableStateOf(DEFAULT_WIDGET_BACKGROUND_COLOR)
+        private set
+
+    fun updateWidgetBackgroundColor(input: Color) {
+        widgetBackgroundColor = input
+    }
+
+    var showBackgroundColorPickerDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowBackgroundColorPickerDialog(input: Boolean) {
+        showBackgroundColorPickerDialog = input
     }
 }
