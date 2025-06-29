@@ -37,6 +37,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import data.TankInfo
 import data.getImageFromAfxId
@@ -92,7 +93,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
             val textColor =
                 state[MissionWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR]?.let { colorInt ->
                     Color(colorInt)
-                } ?: DEFAULT_WIDGET_BACKGROUND_COLOR
+                } ?: DEFAULT_WIDGET_TEXT_COLOR
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
