@@ -13,6 +13,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import data.CalendarEntry
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -295,8 +296,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var widgetBackgroundColor by mutableStateOf(DEFAULT_WIDGET_BACKGROUND_COLOR)
         private set
 
-    fun updateWidgetBackgroundColor(input: Color) {
+    suspend fun updateWidgetBackgroundColor(input: Color) {
         widgetBackgroundColor = input
+        preferences.saveWidgetBackgroundColor(input)
     }
 
     var showBackgroundColorPickerDialog by mutableStateOf(false)
@@ -304,5 +306,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateShowBackgroundColorPickerDialog(input: Boolean) {
         showBackgroundColorPickerDialog = input
+    }
+
+    var widgetTextColor by mutableStateOf(DEFAULT_WIDGET_TEXT_COLOR)
+        private set
+
+    suspend fun updateWidgetTextColor(input: Color) {
+        widgetTextColor = input
+        preferences.saveWidgetTextColor(input)
+    }
+
+    var showTextColorPickerDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowTextColorPickerDialog(input: Boolean) {
+        showTextColorPickerDialog = input
     }
 }

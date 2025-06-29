@@ -89,6 +89,8 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
         settingsViewModel.updateUseAbsoluteTimeContract(preferences.getUseAbsoluteTimeContract())
         settingsViewModel.updateUseOfflineTime(preferences.getUseOfflineTime())
         settingsViewModel.updateOpenWasmeggDashboard(preferences.getOpenWasmeggDashboard())
+        settingsViewModel.updateWidgetBackgroundColor(preferences.getWidgetBackgroundColor())
+        settingsViewModel.updateWidgetTextColor(preferences.getWidgetTextColor())
     }
 
     val packageName = context.packageName
@@ -149,7 +151,7 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
             BatteryPermissionsContent(settingsViewModel, packageName, context)
         }
 
-        WidgetsGeneralGroup(settingsViewModel, context)
+        WidgetsGeneralGroup(settingsViewModel)
         MissionsGeneralGroup(settingsViewModel, packageName, context, activity)
         ContractsGeneralGroup(settingsViewModel)
         NormalMissionWidgetGroup(settingsViewModel)
@@ -241,7 +243,7 @@ fun BatteryPermissionsDialog(
 }
 
 @Composable
-fun WidgetsGeneralGroup(settingsViewModel: SettingsViewModel, context: Context) {
+fun WidgetsGeneralGroup(settingsViewModel: SettingsViewModel) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
         horizontalAlignment = Alignment.Start,
@@ -249,6 +251,7 @@ fun WidgetsGeneralGroup(settingsViewModel: SettingsViewModel, context: Context) 
     ) {
         Text(text = "Widgets General", fontSize = TextUnit(18f, TextUnitType.Sp))
         BackgroundColorPicker(settingsViewModel)
+        TextColorPicker(settingsViewModel)
     }
 }
 
@@ -264,7 +267,20 @@ fun BackgroundColorPicker(settingsViewModel: SettingsViewModel) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = "Widget background color")
-        BackgroundColorPickerDialog(settingsViewModel)
+        if (settingsViewModel.showBackgroundColorPickerDialog) {
+            val scope = rememberCoroutineScope()
+            ColorPickerDialog(
+                "Widget Background Color",
+                settingsViewModel.widgetBackgroundColor,
+                onDismissDialog = { settingsViewModel.updateShowBackgroundColorPickerDialog(false) },
+                onColorSelected = { newColor ->
+                    scope.launch {
+                        settingsViewModel.updateWidgetBackgroundColor(
+                            newColor
+                        )
+                    }
+                })
+        }
         AlphaTile(
             modifier = Modifier
                 .size(30.dp)
@@ -275,57 +291,99 @@ fun BackgroundColorPicker(settingsViewModel: SettingsViewModel) {
     }
 }
 
+@Composable
+fun TextColorPicker(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier
+            .settingsRowModifier()
+            .clickable {
+                settingsViewModel.updateShowTextColorPickerDialog(true)
+            },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "Widget text color")
+        if (settingsViewModel.showTextColorPickerDialog) {
+            val scope = rememberCoroutineScope()
+            ColorPickerDialog(
+                "Widget Text Color",
+                settingsViewModel.widgetTextColor,
+                onDismissDialog = { settingsViewModel.updateShowTextColorPickerDialog(false) },
+                onColorSelected = { newColor ->
+                    scope.launch {
+                        settingsViewModel.updateWidgetTextColor(
+                            newColor
+                        )
+                    }
+                })
+        }
+        AlphaTile(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .border(1.dp, Color.White),
+            selectedColor = settingsViewModel.widgetTextColor
+        )
+    }
+}
+
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BackgroundColorPickerDialog(settingsViewModel: SettingsViewModel) {
-    if (settingsViewModel.showBackgroundColorPickerDialog) {
-        val controller = rememberColorPickerController()
-        Dialog(
-            onDismissRequest = {
-                settingsViewModel.updateWidgetBackgroundColor(controller.selectedColor.value)
-                settingsViewModel.updateShowBackgroundColorPickerDialog(false)
-            }
+fun ColorPickerDialog(
+    headerText: String,
+    initialColor: Color,
+    onDismissDialog: () -> Unit,
+    onColorSelected: (Color) -> Unit
+) {
+    val controller = rememberColorPickerController()
+    Dialog(
+        onDismissRequest = {
+            onColorSelected(controller.selectedColor.value)
+            onDismissDialog()
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(size = 16.dp)
+                )
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
-            Column(
+            Text(text = headerText, fontSize = TextUnit(18f, TextUnitType.Sp))
+            HsvColorPicker(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = RoundedCornerShape(size = 16.dp)
-                    )
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                HsvColorPicker(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(450.dp),
-                    controller = controller,
-                    initialColor = settingsViewModel.widgetBackgroundColor,
-                )
-                AlphaSlider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(35.dp),
-                    controller = controller,
-                    initialColor = settingsViewModel.widgetBackgroundColor
-                )
-                BrightnessSlider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp)
-                        .height(35.dp),
-                    controller = controller,
-                    initialColor = settingsViewModel.widgetBackgroundColor
-                )
-                AlphaTile(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(6.dp)),
-                    controller = controller
-                )
-            }
+                    .height(350.dp),
+                controller = controller,
+                initialColor = initialColor,
+            )
+            AlphaSlider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(35.dp),
+                controller = controller,
+                initialColor = initialColor,
+            )
+            BrightnessSlider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+                    .height(35.dp),
+                controller = controller,
+                initialColor = initialColor,
+            )
+            AlphaTile(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(6.dp)),
+                controller = controller
+            )
         }
     }
 }
