@@ -95,6 +95,8 @@ class WidgetUpdater {
         val prefUseSliderCapacity = preferences.getUseSliderCapacity()
         val prefScheduleEvents = preferences.getScheduleEvents()
         val prefSelectedCalendar = preferences.getSelectedCalendar()
+        val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
+        val prefWidgetTextColor = preferences.getWidgetTextColor()
 
         try {
             if (prefEid.isNotBlank()) {
@@ -145,6 +147,8 @@ class WidgetUpdater {
                 MissionWidgetDataStore().setOpenEggInc(context, prefOpenEggInc)
                 MissionWidgetDataStore().setShowTankLevels(context, prefShowTankLevels)
                 MissionWidgetDataStore().setUseSliderCapacity(context, prefUseSliderCapacity)
+                MissionWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
+                MissionWidgetDataStore().setTextColor(context, prefWidgetTextColor)
             }
         } catch (e: Exception) {
             throw e
@@ -162,6 +166,8 @@ class WidgetUpdater {
         val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeContract()
         val prefUseOfflineTime = preferences.getUseOfflineTime()
         val prefOpenWasmeggDashboard = preferences.getOpenWasmeggDashboard()
+        val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
+        val prefWidgetTextColor = preferences.getWidgetTextColor()
 
         try {
             if (prefEid.isNotBlank()) {
@@ -178,6 +184,8 @@ class WidgetUpdater {
                     context,
                     prefOpenWasmeggDashboard
                 )
+                ContractWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
+                ContractWidgetDataStore().setTextColor(context, prefWidgetTextColor)
             }
         } catch (e: Exception) {
             throw e

@@ -170,7 +170,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateScheduleEvents(input: Boolean) {
         scheduleEvents = input
-        // This is the one setting that needs to use runBlocking
         // Changes to this value are tied into lifecycle events and need to wait for this operation to finish
         runBlocking {
             preferences.saveScheduleEvents(input)
@@ -293,12 +292,25 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showOpenWasmeggDashboardDialog = input
     }
 
+    var showWidgetColorsDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowWidgetColorsDialog(input: Boolean) {
+        showWidgetColorsDialog = input
+    }
+
     var widgetBackgroundColor by mutableStateOf(DEFAULT_WIDGET_BACKGROUND_COLOR)
         private set
 
-    suspend fun updateWidgetBackgroundColor(input: Color) {
+    fun updateWidgetBackgroundColor(input: Color) {
         widgetBackgroundColor = input
-        preferences.saveWidgetBackgroundColor(input)
+        // Color updates need runBlocking to ensure proper widget state updates
+        runBlocking {
+            preferences.saveWidgetBackgroundColor(input)
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setBackgroundColor(context, input)
+            ContractWidgetDataStore().setBackgroundColor(context, input)
+        }
     }
 
     var showBackgroundColorPickerDialog by mutableStateOf(false)
@@ -311,9 +323,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     var widgetTextColor by mutableStateOf(DEFAULT_WIDGET_TEXT_COLOR)
         private set
 
-    suspend fun updateWidgetTextColor(input: Color) {
+    fun updateWidgetTextColor(input: Color) {
         widgetTextColor = input
-        preferences.saveWidgetTextColor(input)
+        // Color updates need runBlocking to ensure proper widget state updates
+        runBlocking {
+            preferences.saveWidgetTextColor(input)
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setTextColor(context, input)
+            ContractWidgetDataStore().setTextColor(context, input)
+        }
     }
 
     var showTextColorPickerDialog by mutableStateOf(false)

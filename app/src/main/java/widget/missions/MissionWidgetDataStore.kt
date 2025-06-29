@@ -1,14 +1,16 @@
 package widget.missions
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.MissionInfoEntry
 import data.TankInfo
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import widget.missions.large.MissionWidgetLarge
 import widget.missions.minimal.MissionWidgetMinimal
@@ -26,6 +28,8 @@ data object MissionWidgetDataStorePreferencesKeys {
     val SHOW_TANK_LEVELS = booleanPreferencesKey("widgetShowTankLevels")
     val USE_SLIDER_CAPACITY = booleanPreferencesKey("widgetUseSliderCapacity")
     val OPEN_EGG_INC = booleanPreferencesKey("widgetOpenEggInc")
+    val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
+    val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
 }
 
 class MissionWidgetDataStore {
@@ -201,6 +205,38 @@ class MissionWidgetDataStore {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.USE_SLIDER_CAPACITY] =
                         useSliderCapacity
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setBackgroundColor(context: Context, backgroundColor: Color) {
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetLargeIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
+                        backgroundColor.toArgb()
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setTextColor(context: Context, textColor: Color) {
+        val missionWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
+        (missionWidgetNormalIds + missionWidgetLargeIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[MissionWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
+                        textColor.toArgb()
                 }
             }
 

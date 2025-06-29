@@ -61,6 +61,8 @@ import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
+import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import tools.utilities.hasCalendarPermissions
@@ -151,7 +153,7 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
             BatteryPermissionsContent(settingsViewModel, packageName, context)
         }
 
-        WidgetsGeneralGroup(settingsViewModel)
+        WidgetColorsGroup(settingsViewModel)
         MissionsGeneralGroup(settingsViewModel, packageName, context, activity)
         ContractsGeneralGroup(settingsViewModel)
         NormalMissionWidgetGroup(settingsViewModel)
@@ -243,15 +245,70 @@ fun BatteryPermissionsDialog(
 }
 
 @Composable
-fun WidgetsGeneralGroup(settingsViewModel: SettingsViewModel) {
+fun WidgetColorsGroup(settingsViewModel: SettingsViewModel) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(text = "Widgets General", fontSize = TextUnit(18f, TextUnitType.Sp))
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Widgets Colors", fontSize = TextUnit(18f, TextUnitType.Sp))
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Widget colors info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowWidgetColorsDialog(true)
+                    }
+            )
+            WidgetColorsDialog(settingsViewModel)
+        }
         BackgroundColorPicker(settingsViewModel)
         TextColorPicker(settingsViewModel)
+        Button(
+            modifier = Modifier
+                .padding(top = 15.dp, start = 15.dp),
+            onClick = {
+                settingsViewModel.updateWidgetBackgroundColor(DEFAULT_WIDGET_BACKGROUND_COLOR)
+                settingsViewModel.updateWidgetTextColor(DEFAULT_WIDGET_TEXT_COLOR)
+            }
+        ) {
+            Text(text = "Reset Colors")
+        }
+    }
+}
+
+@Composable
+fun WidgetColorsDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showWidgetColorsDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowWidgetColorsDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                        """
+                        Background color does not apply to minimal mission widget.
+                        
+                        Text color applies where text default is white.
+                    """.trimIndent()
+                )
+            }
+        }
     }
 }
 
@@ -268,17 +325,14 @@ fun BackgroundColorPicker(settingsViewModel: SettingsViewModel) {
     ) {
         Text(text = "Widget background color")
         if (settingsViewModel.showBackgroundColorPickerDialog) {
-            val scope = rememberCoroutineScope()
             ColorPickerDialog(
                 "Widget Background Color",
                 settingsViewModel.widgetBackgroundColor,
                 onDismissDialog = { settingsViewModel.updateShowBackgroundColorPickerDialog(false) },
                 onColorSelected = { newColor ->
-                    scope.launch {
-                        settingsViewModel.updateWidgetBackgroundColor(
-                            newColor
-                        )
-                    }
+                    settingsViewModel.updateWidgetBackgroundColor(
+                        newColor
+                    )
                 })
         }
         AlphaTile(
@@ -304,17 +358,14 @@ fun TextColorPicker(settingsViewModel: SettingsViewModel) {
     ) {
         Text(text = "Widget text color")
         if (settingsViewModel.showTextColorPickerDialog) {
-            val scope = rememberCoroutineScope()
             ColorPickerDialog(
                 "Widget Text Color",
                 settingsViewModel.widgetTextColor,
                 onDismissDialog = { settingsViewModel.updateShowTextColorPickerDialog(false) },
                 onColorSelected = { newColor ->
-                    scope.launch {
-                        settingsViewModel.updateWidgetTextColor(
-                            newColor
-                        )
-                    }
+                    settingsViewModel.updateWidgetTextColor(
+                        newColor
+                    )
                 })
         }
         AlphaTile(
