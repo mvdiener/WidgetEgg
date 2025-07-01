@@ -225,7 +225,7 @@ fun ContractSingle(
         style = TextStyle(color = ColorProvider(textColor))
     )
 
-    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime)
+    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, textColor)
     SeasonAndRewardInfo(assetManager, contract)
 }
 
@@ -257,7 +257,16 @@ fun ContractDouble(
             )
         )
 
-        TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 13f, 15)
+        TimeTextAndScroll(
+            assetManager,
+            context,
+            contract,
+            useAbsoluteTime,
+            useOfflineTime,
+            textColor,
+            13f,
+            15
+        )
         SeasonAndRewardInfo(assetManager, contract, 13f, 20)
     }
 }
@@ -286,7 +295,16 @@ fun ContractAll(
         )
     )
 
-    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 10f, 12)
+    TimeTextAndScroll(
+        assetManager,
+        context,
+        contract,
+        useAbsoluteTime,
+        useOfflineTime,
+        textColor,
+        10f,
+        12
+    )
 }
 
 @Composable
@@ -361,8 +379,9 @@ fun TimeTextAndScroll(
     contract: ContractInfoEntry,
     useAbsoluteTime: Boolean,
     useOfflineTime: Boolean,
+    textColor: Color,
     textSize: Float = 14f,
-    scrollSize: Int = 20
+    scrollSize: Int = 20,
 ) {
     val use24HrFormat = DateFormat.is24HourFormat(context)
     val (timeText, isOnTrack) = getContractDurationRemaining(
@@ -376,7 +395,15 @@ fun TimeTextAndScroll(
         Text(
             text = timeText,
             style = TextStyle(
-                color = ColorProvider(Color(getContractTimeTextColor(contract, isOnTrack))),
+                color = ColorProvider(
+                    Color(
+                        getContractTimeTextColor(
+                            contract,
+                            isOnTrack,
+                            textColor
+                        )
+                    )
+                ),
                 fontSize = TextUnit(textSize, TextUnitType.Sp)
             )
         )
