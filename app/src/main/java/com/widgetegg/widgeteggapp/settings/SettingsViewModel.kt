@@ -20,6 +20,7 @@ import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
 import widget.missions.MissionWidgetDataStore
+import widget.stats.StatsWidgetDataStore
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences: PreferencesDatastore
@@ -310,6 +311,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             val context = getApplication<Application>().applicationContext
             MissionWidgetDataStore().setBackgroundColor(context, input)
             ContractWidgetDataStore().setBackgroundColor(context, input)
+            StatsWidgetDataStore().setBackgroundColor(context, input)
         }
     }
 
@@ -331,6 +333,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             val context = getApplication<Application>().applicationContext
             MissionWidgetDataStore().setTextColor(context, input)
             ContractWidgetDataStore().setTextColor(context, input)
+            StatsWidgetDataStore().setTextColor(context, input)
         }
     }
 
