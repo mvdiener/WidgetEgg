@@ -40,7 +40,7 @@ import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import data.TankInfo
-import data.getImageFromAfxId
+import tools.utilities.getImageNameFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ import tools.utilities.bitmapResize
 import tools.utilities.createMissionCircularProgressBarBitmap
 import tools.utilities.getAsset
 import tools.utilities.getEggName
-import tools.utilities.getFuelAmount
+import tools.utilities.numberToString
 import tools.utilities.getFuelPercentFilled
 import tools.utilities.getMissionDurationRemaining
 import tools.utilities.getMissionPercentComplete
@@ -279,7 +279,7 @@ fun MissionProgressLarge(
         )
     }
 
-    val artifactName = getImageFromAfxId(mission.targetArtifact)
+    val artifactName = getImageNameFromAfxId(mission.targetArtifact)
 
     Column(
         modifier = GlanceModifier.fillMaxWidth().padding(start = 2.dp, end = 8.dp),
@@ -437,7 +437,7 @@ fun TankInfoContent(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = getFuelAmount(fuel.fuelQuantity),
+                            text = numberToString(fuel.fuelQuantity),
                             style = TextStyle(color = ColorProvider(textColor))
                         )
                     }

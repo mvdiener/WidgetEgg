@@ -39,7 +39,7 @@ import androidx.glance.unit.ColorProvider
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
-import data.getImageFromAfxId
+import tools.utilities.getImageNameFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -244,7 +244,7 @@ fun MissionProgress(
             modifier = GlanceModifier.fillMaxWidth(),
             contentAlignment = Alignment.TopEnd
         ) {
-            val artifactName = getImageFromAfxId(mission.targetArtifact)
+            val artifactName = getImageNameFromAfxId(mission.targetArtifact)
             if (showTargetArtifact && artifactName.isNotBlank()) {
                 val artifactBitmap = bitmapResize(
                     BitmapFactory.decodeStream(
