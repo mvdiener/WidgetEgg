@@ -339,7 +339,7 @@ fun BackgroundColorPicker(settingsViewModel: SettingsViewModel) {
             modifier = Modifier
                 .size(30.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .border(1.dp, Color.White),
+                .border(1.dp, Color.White, RoundedCornerShape(6.dp)),
             selectedColor = settingsViewModel.widgetBackgroundColor
         )
     }
