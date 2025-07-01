@@ -8,7 +8,6 @@ import data.MissionInfoEntry
 import data.TANK_SIZES
 import data.TankInfo
 import ei.Ei
-import ei.Ei.Egg
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -235,15 +234,6 @@ fun createMissionCircularProgressBarBitmap(
 
 fun getShipName(shipId: Int): String {
     return ALL_SHIPS[shipId]
-}
-
-fun getEggName(eggId: Int): String {
-    val eggName = Egg.forNumber(eggId)?.name?.lowercase()
-    return if (eggName.isNullOrBlank()) {
-        "egg_unknown"
-    } else {
-        "egg_$eggName"
-    }
 }
 
 fun getMissionColor(durationType: Int, isFueling: Boolean): Int {

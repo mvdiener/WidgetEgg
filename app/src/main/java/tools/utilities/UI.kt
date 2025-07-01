@@ -8,6 +8,7 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
 import data.NUMBER_UNITS
+import ei.Ei
 import java.io.InputStream
 import java.util.Locale
 
@@ -70,6 +71,15 @@ fun getAsset(assetManager: AssetManager, path: String): InputStream {
     }
 }
 
+fun getEggName(eggId: Int): String {
+    val eggName = Ei.Egg.forNumber(eggId)?.name?.lowercase()
+    return if (eggName.isNullOrBlank()) {
+        "egg_unknown"
+    } else {
+        "egg_$eggName"
+    }
+}
+
 fun getImageNameFromAfxId(afxId: Int): String {
     return when (afxId) {
         23 -> "afx_puzzle_cube_4"
@@ -122,6 +132,9 @@ fun numberToString(amount: Double): String {
 
     while (number >= 1000) {
         number /= 1000
+        if (units.isEmpty()) {
+            return "Inf"
+        }
         unit = units.first()
         units = units.drop(1).toTypedArray()
     }
