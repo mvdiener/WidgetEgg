@@ -2,6 +2,7 @@ package widget.stats.normal
 
 import android.content.Context
 import android.content.res.AssetManager
+import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -10,6 +11,8 @@ import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.provideContent
@@ -22,6 +25,7 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -32,6 +36,7 @@ import data.StatsInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.utilities.getAsset
 import tools.utilities.getFarmerRole
 import tools.utilities.getShortenedFarmerName
 import widget.WidgetUpdater
@@ -72,7 +77,6 @@ class StatsWidgetNormal : GlanceAppWidget() {
             }
 
             val scope = rememberCoroutineScope()
-
             Column(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -88,17 +92,49 @@ class StatsWidgetNormal : GlanceAppWidget() {
                         }
                     }
             ) {
-                val assetManager = context.assets
-                NameAndPermit(statsInfo, eiUserName, assetManager, textColor)
-                MysticalEggs(statsInfo, assetManager, textColor)
-                Earnings(statsInfo, assetManager, textColor)
-                Spendable(statsInfo, assetManager, textColor)
-                HomeFarm(statsInfo, assetManager, textColor)
-                Contracts(statsInfo, assetManager, textColor)
-                ShipsAndDrones(statsInfo, assetManager, textColor)
-                Crafting(statsInfo, assetManager, textColor)
+                if (eid.isBlank()) {
+                    NoStatsContent(context.assets, textColor)
+                } else {
+                    val assetManager = context.assets
+                    NameAndPermit(statsInfo, eiUserName, assetManager, textColor)
+                    MysticalEggs(statsInfo, assetManager, textColor)
+                    Earnings(statsInfo, assetManager, textColor)
+                    Spendable(statsInfo, assetManager, textColor)
+                    HomeFarm(statsInfo, assetManager, textColor)
+                    Contracts(statsInfo, assetManager, textColor)
+                    ShipsAndDrones(statsInfo, assetManager, textColor)
+                    Crafting(statsInfo, assetManager, textColor)
+                }
             }
         }
+    }
+}
+
+@Composable
+fun LogoContentStats(assetManager: AssetManager) {
+    val bitmapImage =
+        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
+
+    Image(
+        provider = ImageProvider(bitmapImage),
+        contentDescription = "Empty Widget Logo",
+        modifier = GlanceModifier.size(80.dp)
+    )
+}
+
+@Composable
+fun NoStatsContent(assetManager: AssetManager, textColor: Color) {
+    Column(
+        modifier = GlanceModifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        LogoContentStats(assetManager)
+        Text(
+            text = "Waiting for stats data...",
+            style = TextStyle(color = ColorProvider(textColor)),
+            modifier = GlanceModifier.padding(top = 5.dp)
+        )
     }
 }
 
