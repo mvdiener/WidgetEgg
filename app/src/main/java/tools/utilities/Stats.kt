@@ -2,14 +2,15 @@ package tools.utilities
 
 import androidx.compose.ui.graphics.Color
 import data.ALL_ROLES
-import data.StatsInfoEntry
+import data.CRAFTING_LEVELS
+import data.StatsInfo
 import ei.Ei
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
-fun formatStatsData(backup: Ei.Backup): StatsInfoEntry {
+fun formatStatsData(backup: Ei.Backup): StatsInfo {
     val eb = calculateEB(backup)
     val roleId = getEBRoleId(eb)
     val geBalance = (backup.game.goldenEggsEarned - backup.game.goldenEggsSpent).toDouble()
@@ -21,7 +22,7 @@ fun formatStatsData(backup: Ei.Backup): StatsInfoEntry {
     val totalMissions =
         backup.artifactsDb.missionArchiveCount + backup.artifactsDb.missionInfosCount
 
-    return StatsInfoEntry(
+    return StatsInfo(
         hasProPermit = backup.game.permitLevel > 0,
         soulEggs = numberToString(backup.game.soulEggsD),
         prophecyEggs = backup.game.eggsOfProphecy.toString(),
@@ -36,7 +37,27 @@ fun formatStatsData(backup: Ei.Backup): StatsInfoEntry {
         contractTotalScore = numberToString(contractInfo.totalCxp),
         shipsLaunched = numberToString(totalMissions.toDouble()),
         droneTakedowns = numberToString(backup.stats.droneTakedowns.toDouble()),
+        craftingLevel = getCraftingLevel(backup.artifacts.craftingXp),
+        craftingXP = numberToString(backup.artifacts.craftingXp)
     )
+}
+
+fun getFarmerRole(roleInt: Int): Pair<String, Color> {
+    val allRolesSize = ALL_ROLES.size
+    if (roleInt >= allRolesSize) {
+        return ALL_ROLES[allRolesSize - 1]
+    }
+
+    return ALL_ROLES[roleInt]
+}
+
+fun getShortenedFarmerName(name: String): String {
+    val split = name.split(" ")
+    return if (split.size == 1) {
+        "Hmm..."
+    } else {
+        "${split[0].first()}${split[1]}"
+    }
 }
 
 private fun calculateEB(backup: Ei.Backup): Double {
@@ -56,11 +77,14 @@ private fun getEBRoleId(eb: Double): Int {
     return min((log10(max(eb, 1.0))).toInt(), ALL_ROLES.size - 1)
 }
 
-private fun getFarmerRole(roleInt: Int): Pair<String, Color> {
-    val allRolesSize = ALL_ROLES.size
-    if (roleInt >= allRolesSize) {
-        return ALL_ROLES[allRolesSize - 1]
+private fun getCraftingLevel(craftingXp: Double): Int {
+    var xpRequired = 0.0
+    CRAFTING_LEVELS.forEachIndexed { i, level ->
+        xpRequired = xpRequired + CRAFTING_LEVELS[i]
+        if (craftingXp < xpRequired) {
+            return i + 1
+        }
     }
-    
-    return ALL_ROLES[roleInt]
+
+    return 30
 }

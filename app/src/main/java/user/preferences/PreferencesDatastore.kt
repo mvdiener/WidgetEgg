@@ -15,6 +15,7 @@ import data.ContractInfoEntry
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
+import data.StatsInfo
 import data.TankInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -48,6 +49,7 @@ class PreferencesDatastore(context: Context) {
         private val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
         private val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
         private val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
+        private val STATS_INFO = stringPreferencesKey("statsInfo")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
@@ -68,7 +70,8 @@ class PreferencesDatastore(context: Context) {
             USE_OFFLINE_TIME,
             OPEN_WASMEGG_DASHBOARD,
             WIDGET_BACKGROUND_COLOR,
-            WIDGET_TEXT_COLOR
+            WIDGET_TEXT_COLOR,
+            STATS_INFO
         )
     }
 
@@ -302,6 +305,24 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveWidgetTextColor(widgetTextColor: Color) {
         dataStore.edit {
             it[WIDGET_TEXT_COLOR] = widgetTextColor.toArgb()
+        }
+    }
+
+    suspend fun getStatsInfo(): StatsInfo {
+        return dataStore.data.map {
+            it[STATS_INFO]?.let { statsJson ->
+                try {
+                    Json.decodeFromString<StatsInfo>(statsJson)
+                } catch (e: Exception) {
+                    StatsInfo()
+                }
+            } ?: StatsInfo()
+        }.first()
+    }
+
+    suspend fun saveStatsInfo(statsInfo: StatsInfo) {
+        dataStore.edit {
+            it[STATS_INFO] = Json.encodeToString(statsInfo)
         }
     }
 

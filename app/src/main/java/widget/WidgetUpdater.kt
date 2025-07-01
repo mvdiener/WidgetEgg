@@ -13,6 +13,7 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
 import tools.utilities.formatMissionData
+import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import tools.utilities.scheduleCalendarEvents
 import tools.utilities.updateFuelingMission
@@ -23,6 +24,8 @@ import widget.missions.MissionWidgetDataStore
 import widget.missions.large.MissionWidgetLarge
 import widget.missions.minimal.MissionWidgetMinimal
 import widget.missions.normal.MissionWidgetNormal
+import widget.stats.StatsWidgetDataStore
+import widget.stats.normal.StatsWidgetNormal
 import java.time.Instant
 
 class WidgetUpdater {
@@ -31,6 +34,7 @@ class WidgetUpdater {
         val prefEid = preferences.getEid()
         val hasMissionWidgets = hasMissionWidgets(context)
         val hasContractWidgets = hasContractWidgets(context)
+        val hasStatsWidgets = hasStatsWidgets(context)
 
         if (prefEid.isNotBlank() && (hasMissionWidgets || hasContractWidgets)) {
             try {
@@ -55,6 +59,17 @@ class WidgetUpdater {
                         val job = launch {
                             try {
                                 updateContracts(context, preferences, backup)
+                            } catch (e: Exception) {
+                                exceptions.add(e)
+                            }
+                        }
+                        jobs.add(job)
+                    }
+
+                    if (hasStatsWidgets) {
+                        val job = launch {
+                            try {
+                                updateStats(context, preferences, backup)
                             } catch (e: Exception) {
                                 exceptions.add(e)
                             }
@@ -192,6 +207,35 @@ class WidgetUpdater {
         }
     }
 
+    private suspend fun updateStats(
+        context: Context,
+        preferences: PreferencesDatastore,
+        backup: Ei.Backup
+    ) {
+        var prefStatsInfo = preferences.getStatsInfo()
+
+        val prefEid = preferences.getEid()
+        val prefEiUserName = preferences.getEiUserName()
+        val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
+        val prefWidgetTextColor = preferences.getWidgetTextColor()
+
+        try {
+            if (prefEid.isNotBlank()) {
+                prefStatsInfo = formatStatsData(backup)
+
+                preferences.saveStatsInfo(prefStatsInfo)
+
+                StatsWidgetDataStore().setEid(context, prefEid)
+                StatsWidgetDataStore().setEiUserName(context, prefEiUserName)
+                StatsWidgetDataStore().setStatsInfo(context, prefStatsInfo)
+                StatsWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
+                StatsWidgetDataStore().setTextColor(context, prefWidgetTextColor)
+            }
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
     private fun numOfActiveMissions(missions: List<MissionInfoEntry>): Int {
         return missions.count { mission ->
             mission.identifier.isNotBlank()
@@ -220,8 +264,14 @@ class WidgetUpdater {
         ).isNotEmpty()
     }
 
+    private suspend fun hasStatsWidgets(context: Context): Boolean {
+        return GlanceAppWidgetManager(context).getGlanceIds(
+            StatsWidgetNormal::class.java
+        ).isNotEmpty()
+    }
+
     private fun shouldMakeApiCall(preferencesMissionData: List<MissionInfoEntry>): Boolean {
-        // Only make an api call if:
+        // To help reduce load on auxbrain, only make an api call if:
         // preferencesMissionData has less than 3 active missions, meaning all active missions haven't been saved
         // preferencesMissionData has complete missions, meaning we need to fetch new active missions
         return (numOfActiveMissions(preferencesMissionData) < 3 || anyMissionsComplete(

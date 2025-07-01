@@ -9,15 +9,16 @@ import androidx.lifecycle.viewModelScope
 import api.fetchBackupData
 import api.fetchContractData
 import api.fetchMissionData
-import ei.Ei
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
 import tools.utilities.formatMissionData
+import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
 import widget.missions.MissionWidgetDataStore
+import widget.stats.StatsWidgetDataStore
 
 class SignInViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -96,6 +97,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 preferences.saveEid(eid)
                 MissionWidgetDataStore().setEid(context, eid)
                 ContractWidgetDataStore().setEid(context, eid)
+                StatsWidgetDataStore().setEid(context, eid)
+                StatsWidgetDataStore().setEiUserName(context, backupResult.userName)
                 updateHasSubmitted(false)
                 updateEid("")
             } catch (_: Exception) {
@@ -113,13 +116,16 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     val contractResult = fetchContractData(backupResult)
                     val formattedMissionData = formatMissionData(missionResult, backupResult)
                     val formattedTankInfo = formatTankInfo(backupResult)
-                    val formattedContractInfo = formatContractData(contractResult)
+                    val formattedContractData = formatContractData(contractResult)
+                    val formattedStatsData = formatStatsData(backupResult)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveTankInfo(formattedTankInfo)
-                    preferences.saveContractInfo(formattedContractInfo)
+                    preferences.saveContractInfo(formattedContractData)
+                    preferences.saveStatsInfo(formattedStatsData)
                     MissionWidgetDataStore().setMissionInfo(context, formattedMissionData)
                     MissionWidgetDataStore().setTankInfo(context, formattedTankInfo)
-                    ContractWidgetDataStore().setContractInfo(context, formattedContractInfo)
+                    ContractWidgetDataStore().setContractInfo(context, formattedContractData)
+                    StatsWidgetDataStore().setStatsInfo(context, formattedStatsData)
                 }
             } catch (_: Exception) {
             }
@@ -131,6 +137,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
             val context = getApplication<Application>().applicationContext
             MissionWidgetDataStore().clearAllData(context)
             ContractWidgetDataStore().clearAllData(context)
+            StatsWidgetDataStore().clearAllData(context)
             preferences.clearPreferences()
             updateHasSubmitted(false)
             updateHasError(false)
