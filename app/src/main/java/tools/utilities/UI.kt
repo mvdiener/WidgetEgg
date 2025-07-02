@@ -49,7 +49,7 @@ fun createCircularProgressBarBitmap(
 
 // Widgets have a maximum bitmap memory that will cause a render failure if it is exceeded
 // This resize function scales down images. Image quality is worse, but not noticeable if image is already small
-// Useful in places like fuel tank egg icons, target artifacts or contract rewards
+// Useful in places like fuel tank egg icons, target artifacts, contract rewards, or stats icons
 fun bitmapResize(image: Bitmap): Bitmap {
     val width = image.width
     val height = image.height

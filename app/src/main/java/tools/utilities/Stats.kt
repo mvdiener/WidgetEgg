@@ -1,6 +1,7 @@
 package tools.utilities
 
 import androidx.compose.ui.graphics.Color
+import data.ALL_GRADES
 import data.ALL_ROLES
 import data.CRAFTING_LEVELS
 import data.StatsInfo
@@ -58,6 +59,15 @@ fun getShortenedFarmerName(name: String): String {
     } else {
         "${split[0].first()}${split[1]}"
     }
+}
+
+fun getContractGradeName(grade: Int): String {
+    val allGradesSize = ALL_GRADES.size
+    if (grade >= allGradesSize) {
+        return ALL_GRADES[0]
+    }
+
+    return ALL_GRADES[grade]
 }
 
 private fun calculateEB(backup: Ei.Backup): Double {

@@ -15,6 +15,7 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
@@ -36,7 +37,10 @@ import data.StatsInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.utilities.bitmapResize
 import tools.utilities.getAsset
+import tools.utilities.getContractGradeName
+import tools.utilities.getEggName
 import tools.utilities.getFarmerRole
 import tools.utilities.getShortenedFarmerName
 import widget.WidgetUpdater
@@ -147,13 +151,37 @@ fun NameAndPermit(
 ) {
     Row(
         modifier = GlanceModifier.statsRowModifier(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        val profileBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "other/icon_player.png"
+                )
+            )
+        )
+
+        val permitName = if (statsInfo.hasProPermit) {
+            "pro_permit"
+        } else {
+            "free_permit"
+        }
+        val permitBitmap =
+            BitmapFactory.decodeStream(getAsset(assetManager, "other/$permitName.png"))
+
+        Image(
+            provider = ImageProvider(profileBitmap),
+            contentDescription = "Player Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(text = eiUserName, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
-        Text(
-            text = statsInfo.hasProPermit.toString(),
-            style = TextStyle(color = ColorProvider(textColor))
+        Image(
+            provider = ImageProvider(permitBitmap),
+            contentDescription = "Permit Icon",
+            modifier = GlanceModifier.size(20.dp)
         )
     }
 }
@@ -168,8 +196,37 @@ fun MysticalEggs(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val soulEggBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "eggs/egg_soul.png"
+                )
+            )
+        )
+
+        val prophecyEggBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "eggs/egg_of_prophecy.png"
+                )
+            )
+        )
+
+        Image(
+            provider = ImageProvider(soulEggBitmap),
+            contentDescription = "Soul Egg Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(text = statsInfo.soulEggs, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
+
+        Image(
+            provider = ImageProvider(prophecyEggBitmap),
+            contentDescription = "Prophecy Egg Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(text = statsInfo.prophecyEggs, style = TextStyle(color = ColorProvider(textColor)))
     }
 }
@@ -182,13 +239,36 @@ fun Earnings(
 ) {
     Row(
         modifier = GlanceModifier.statsRowModifier(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        val bookBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "artifacts/afx_book_of_basan_4.png"
+                )
+            )
+        )
+
         val farmerRole = getFarmerRole(statsInfo.farmerRoleId)
         val farmerName = getShortenedFarmerName(farmerRole.first)
+
+        Image(
+            provider = ImageProvider(bookBitmap),
+            contentDescription = "Book Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(text = farmerName, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
+        Box(
+            modifier = GlanceModifier
+                .size(10.dp)
+                .background(farmerRole.second)
+                .cornerRadius(5.dp)
+        ) {}
         Text(
+            modifier = GlanceModifier.padding(start = 5.dp),
             text = "${statsInfo.earningsBonus} %",
             style = TextStyle(color = ColorProvider(textColor))
         )
@@ -205,8 +285,36 @@ fun Spendable(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val goldEggBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "other/icon_golden_egg.png"
+                )
+            )
+        )
+
+        val ticketBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "other/icon_shell_script.png"
+                )
+            )
+        )
+
+        Image(
+            provider = ImageProvider(goldEggBitmap),
+            contentDescription = "Gold Egg Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(text = statsInfo.goldEggs, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
+        Image(
+            provider = ImageProvider(ticketBitmap),
+            contentDescription = "Ticket Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(text = statsInfo.tickets, style = TextStyle(color = ColorProvider(textColor)))
     }
 }
@@ -221,11 +329,50 @@ fun HomeFarm(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = statsInfo.homeFarmEggId.toString(),
-            style = TextStyle(color = ColorProvider(textColor))
+        val farmBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "other/icon_home_farm.png"
+                )
+            )
+        )
+
+        val eggName = getEggName(statsInfo.homeFarmEggId)
+        val eggBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "eggs/$eggName.png"
+                )
+            )
+        )
+
+        val chickenBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "other/icon_chicken.png"
+                )
+            )
+        )
+
+        Image(
+            provider = ImageProvider(farmBitmap),
+            contentDescription = "Home Farm Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
+        Image(
+            provider = ImageProvider(eggBitmap),
+            contentDescription = "Home Egg Icon",
+            modifier = GlanceModifier.size(20.dp)
         )
         Box(modifier = GlanceModifier.defaultWeight()) {}
+        Image(
+            provider = ImageProvider(chickenBitmap),
+            contentDescription = "Home Population Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(
             text = statsInfo.homeFarmPopulation,
             style = TextStyle(color = ColorProvider(textColor))
@@ -243,11 +390,40 @@ fun Contracts(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val grade = getContractGradeName(statsInfo.contractGrade)
+        val gradeBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "grades/contract_$grade.png"
+                )
+            )
+        )
+
+        val leaderboardBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "other/icon_leaderboard.png"
+                )
+            )
+        )
+
+        Image(
+            provider = ImageProvider(gradeBitmap),
+            contentDescription = "Contract Grade Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(
             text = statsInfo.contractSeasonScore,
             style = TextStyle(color = ColorProvider(textColor))
         )
         Box(modifier = GlanceModifier.defaultWeight()) {}
+        Image(
+            provider = ImageProvider(leaderboardBitmap),
+            contentDescription = "Leaderboard Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(
             text = statsInfo.contractTotalScore, style = TextStyle(color = ColorProvider(textColor))
         )
@@ -264,8 +440,36 @@ fun ShipsAndDrones(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val shipBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "ships/afx_ship_chicken_heavy.png"
+                )
+            )
+        )
+
+        val droneBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "other/icon_drone.png"
+                )
+            )
+        )
+
+        Image(
+            provider = ImageProvider(shipBitmap),
+            contentDescription = "Ship Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(text = statsInfo.shipsLaunched, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
+        Image(
+            provider = ImageProvider(droneBitmap),
+            contentDescription = "Drone Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(text = statsInfo.droneTakedowns, style = TextStyle(color = ColorProvider(textColor)))
     }
 }
@@ -280,6 +484,20 @@ fun Crafting(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val craftingBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "other/icon_afx_craft.png"
+                )
+            )
+        )
+
+        Image(
+            provider = ImageProvider(craftingBitmap),
+            contentDescription = "Crafting Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
         Text(
             text = statsInfo.craftingLevel.toString(),
             style = TextStyle(color = ColorProvider(textColor))
@@ -293,7 +511,6 @@ fun Crafting(
 }
 
 @Composable
-
 private fun GlanceModifier.statsRowModifier() =
     this
         .padding(horizontal = 15.dp)
