@@ -35,8 +35,9 @@ class WidgetUpdater {
         val hasMissionWidgets = hasMissionWidgets(context)
         val hasContractWidgets = hasContractWidgets(context)
         val hasStatsWidgets = hasStatsWidgets(context)
+        val anyWidgets = listOf(hasMissionWidgets, hasContractWidgets, hasStatsWidgets)
 
-        if (prefEid.isNotBlank() && (hasMissionWidgets || hasContractWidgets)) {
+        if (prefEid.isNotBlank() && anyWidgets.any { it }) {
             try {
                 val backup = fetchBackupData(prefEid)
 
