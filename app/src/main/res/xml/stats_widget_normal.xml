@@ -4,6 +4,7 @@
     android:minWidth="100dp"
     android:minHeight="100dp"
     android:minResizeHeight="50dp"
+    android:previewImage="@drawable/stats_widget_normal"
     android:resizeMode="vertical|horizontal"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen" />

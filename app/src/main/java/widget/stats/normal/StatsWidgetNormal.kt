@@ -174,7 +174,7 @@ fun NameAndPermit(
         Image(
             provider = ImageProvider(profileBitmap),
             contentDescription = "Player Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(text = eiUserName, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
@@ -217,7 +217,7 @@ fun MysticalEggs(
         Image(
             provider = ImageProvider(soulEggBitmap),
             contentDescription = "Soul Egg Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(text = statsInfo.soulEggs, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
@@ -225,7 +225,7 @@ fun MysticalEggs(
         Image(
             provider = ImageProvider(prophecyEggBitmap),
             contentDescription = "Prophecy Egg Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(text = statsInfo.prophecyEggs, style = TextStyle(color = ColorProvider(textColor)))
     }
@@ -257,7 +257,7 @@ fun Earnings(
         Image(
             provider = ImageProvider(bookBitmap),
             contentDescription = "Book Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(text = farmerName, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
@@ -265,10 +265,10 @@ fun Earnings(
             modifier = GlanceModifier
                 .size(10.dp)
                 .background(farmerRole.second)
-                .cornerRadius(5.dp)
+                .cornerRadius(3.dp)
         ) {}
         Text(
-            modifier = GlanceModifier.padding(start = 5.dp),
+            modifier = GlanceModifier.padding(start = 3.dp),
             text = "${statsInfo.earningsBonus} %",
             style = TextStyle(color = ColorProvider(textColor))
         )
@@ -306,14 +306,14 @@ fun Spendable(
         Image(
             provider = ImageProvider(goldEggBitmap),
             contentDescription = "Gold Egg Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(text = statsInfo.goldEggs, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
         Image(
             provider = ImageProvider(ticketBitmap),
             contentDescription = "Ticket Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(text = statsInfo.tickets, style = TextStyle(color = ColorProvider(textColor)))
     }
@@ -360,7 +360,7 @@ fun HomeFarm(
         Image(
             provider = ImageProvider(farmBitmap),
             contentDescription = "Home Farm Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Image(
             provider = ImageProvider(eggBitmap),
@@ -371,7 +371,7 @@ fun HomeFarm(
         Image(
             provider = ImageProvider(chickenBitmap),
             contentDescription = "Home Population Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(
             text = statsInfo.homeFarmPopulation,
@@ -412,7 +412,7 @@ fun Contracts(
         Image(
             provider = ImageProvider(gradeBitmap),
             contentDescription = "Contract Grade Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(
             text = statsInfo.contractSeasonScore,
@@ -422,7 +422,7 @@ fun Contracts(
         Image(
             provider = ImageProvider(leaderboardBitmap),
             contentDescription = "Leaderboard Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(
             text = statsInfo.contractTotalScore, style = TextStyle(color = ColorProvider(textColor))
@@ -461,14 +461,14 @@ fun ShipsAndDrones(
         Image(
             provider = ImageProvider(shipBitmap),
             contentDescription = "Ship Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(text = statsInfo.shipsLaunched, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
         Image(
             provider = ImageProvider(droneBitmap),
             contentDescription = "Drone Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(text = statsInfo.droneTakedowns, style = TextStyle(color = ColorProvider(textColor)))
     }
@@ -496,7 +496,7 @@ fun Crafting(
         Image(
             provider = ImageProvider(craftingBitmap),
             contentDescription = "Crafting Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
         Text(
             text = statsInfo.craftingLevel.toString(),
