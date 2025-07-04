@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 // Data class used to save backup stats to preferences
 @Serializable
 data class StatsInfo(
+    var stateId: String = "",
     var hasProPermit: Boolean = false,
     var soulEggs: String = "",
     var prophecyEggs: String = "",

@@ -6,6 +6,7 @@ import data.ALL_ROLES
 import data.CRAFTING_LEVELS
 import data.StatsInfo
 import ei.Ei
+import java.util.UUID
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
@@ -24,6 +25,7 @@ fun formatStatsData(backup: Ei.Backup): StatsInfo {
         backup.artifactsDb.missionArchiveCount + backup.artifactsDb.missionInfosCount
 
     return StatsInfo(
+        stateId = UUID.randomUUID().toString(),
         hasProPermit = backup.game.permitLevel > 0,
         soulEggs = numberToString(backup.game.soulEggsD),
         prophecyEggs = backup.game.eggsOfProphecy.toString(),
