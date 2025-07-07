@@ -181,7 +181,12 @@ fun NameAndPermit(
             contentDescription = "Player Icon",
             modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
-        Text(text = eiUserName, style = TextStyle(color = ColorProvider(textColor)))
+        val formattedName = if (eiUserName.length > 15) {
+            eiUserName.substring(0, 12) + "..."
+        } else {
+            eiUserName
+        }
+        Text(text = formattedName, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
         Image(
             provider = ImageProvider(permitBitmap),
@@ -539,7 +544,7 @@ fun Badges(statsInfo: StatsInfo, assetManager: AssetManager) {
             BadgeComposable("alc", assetManager)
         }
     }
-    
+
     Row(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
