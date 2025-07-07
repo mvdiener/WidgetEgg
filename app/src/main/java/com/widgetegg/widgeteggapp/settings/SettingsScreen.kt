@@ -93,6 +93,7 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
         settingsViewModel.updateOpenWasmeggDashboard(preferences.getOpenWasmeggDashboard())
         settingsViewModel.updateWidgetBackgroundColor(preferences.getWidgetBackgroundColor())
         settingsViewModel.updateWidgetTextColor(preferences.getWidgetTextColor())
+        settingsViewModel.updateShowCommunityBadges(preferences.getShowCommunityBadges())
     }
 
     val packageName = context.packageName
@@ -158,6 +159,7 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
         ContractsGeneralGroup(settingsViewModel)
         NormalMissionWidgetGroup(settingsViewModel)
         LargeMissionWidgetGroup(settingsViewModel)
+        StatsWidgetGroup(settingsViewModel)
     }
 }
 
@@ -1245,6 +1247,43 @@ fun OpenWasmeggDashboardDialog(settingsViewModel: SettingsViewModel) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun StatsWidgetGroup(settingsViewModel: SettingsViewModel) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(text = "Stats Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
+        CommunityBadgesRow(settingsViewModel)
+    }
+}
+
+@Composable
+fun CommunityBadgesRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Show community badges")
+        }
+
+        val scope = rememberCoroutineScope()
+        Switch(
+            checked = settingsViewModel.showCommunityBadges,
+            onCheckedChange = {
+                scope.launch {
+                    settingsViewModel.updateShowCommunityBadges(!settingsViewModel.showCommunityBadges)
+                }
+            }
+        )
     }
 }
 

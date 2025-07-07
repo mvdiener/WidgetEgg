@@ -219,6 +219,7 @@ class WidgetUpdater {
         val prefEiUserName = preferences.getEiUserName()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
+        val prefShowCommunityBadges = preferences.getShowCommunityBadges()
 
         try {
             if (prefEid.isNotBlank()) {
@@ -231,6 +232,7 @@ class WidgetUpdater {
                 StatsWidgetDataStore().setStatsInfo(context, prefStatsInfo)
                 StatsWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
                 StatsWidgetDataStore().setTextColor(context, prefWidgetTextColor)
+                StatsWidgetDataStore().setShowCommunityBadges(context, prefShowCommunityBadges)
             }
         } catch (e: Exception) {
             throw e

@@ -3,6 +3,7 @@ package widget.stats
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -18,6 +19,7 @@ data object StatsWidgetDataStorePreferencesKeys {
     val STATS_INFO = stringPreferencesKey("widgetStatsInfo")
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
+    val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
 }
 
 class StatsWidgetDataStore {
@@ -91,6 +93,20 @@ class StatsWidgetDataStore {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[StatsWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
                         textColor.toArgb()
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setShowCommunityBadges(context: Context, showCommunityBadges: Boolean) {
+        val statsWidgetIds =
+            GlanceAppWidgetManager(context).getGlanceIds(StatsWidgetNormal::class.java)
+        (statsWidgetIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[StatsWidgetDataStorePreferencesKeys.SHOW_COMMUNITY_BADGES] =
+                        showCommunityBadges
                 }
             }
 

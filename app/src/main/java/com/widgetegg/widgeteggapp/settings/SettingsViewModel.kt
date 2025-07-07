@@ -343,4 +343,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun updateShowTextColorPickerDialog(input: Boolean) {
         showTextColorPickerDialog = input
     }
+
+    var showCommunityBadges by mutableStateOf(false)
+        private set
+
+    suspend fun updateShowCommunityBadges(input: Boolean) {
+        showCommunityBadges = input
+        preferences.saveShowCommunityBadges(input)
+        val context = getApplication<Application>().applicationContext
+        StatsWidgetDataStore().setShowCommunityBadges(context, input)
+    }
 }

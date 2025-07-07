@@ -21,5 +21,18 @@ data class StatsInfo(
     var shipsLaunched: String = "",
     var droneTakedowns: String = "",
     var craftingLevel: Int = 0,
-    var craftingXP: String = ""
+    var craftingXP: String = "",
+    var badges: Badges = Badges()
+)
+
+@Serializable
+data class Badges(
+    var hasAlc: Boolean = false,
+    var hasAsc: Boolean = false,
+    var hasCraftingLegend: Boolean = false,
+    var hasEnd: Boolean = false,
+    var hasNah: Boolean = false,
+    var hasFed: Boolean = false,
+    var hasAllShells: Boolean = false,
+    var hasZlc: Boolean = false
 )

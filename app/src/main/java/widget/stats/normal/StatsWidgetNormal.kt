@@ -66,6 +66,8 @@ class StatsWidgetNormal : GlanceAppWidget() {
                 state[StatsWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR]?.let { colorInt ->
                     Color(colorInt)
                 } ?: DEFAULT_WIDGET_TEXT_COLOR
+            val showCommunityBadges =
+                state[StatsWidgetDataStorePreferencesKeys.SHOW_COMMUNITY_BADGES] == true
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
@@ -108,6 +110,9 @@ class StatsWidgetNormal : GlanceAppWidget() {
                     Contracts(statsInfo, assetManager, textColor)
                     ShipsAndDrones(statsInfo, assetManager, textColor)
                     Crafting(statsInfo, assetManager, textColor)
+                    if (showCommunityBadges) {
+                        Badges(statsInfo, assetManager)
+                    }
                 }
             }
         }
@@ -263,9 +268,10 @@ fun Earnings(
         Box(modifier = GlanceModifier.defaultWeight()) {}
         Box(
             modifier = GlanceModifier
-                .size(10.dp)
+                .size(12.dp)
                 .background(farmerRole.second)
-                .cornerRadius(3.dp)
+                .cornerRadius(6.dp),
+            contentAlignment = Alignment.Center
         ) {}
         Text(
             modifier = GlanceModifier.padding(start = 3.dp),
@@ -511,7 +517,65 @@ fun Crafting(
 }
 
 @Composable
+fun Badges(statsInfo: StatsInfo, assetManager: AssetManager) {
+    val badges = statsInfo.badges
+    Row(
+        modifier = GlanceModifier.statsRowModifier(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (badges.hasEnd) {
+            BadgeComposable("end", assetManager)
+        }
+        if (badges.hasNah) {
+            BadgeComposable("nah", assetManager)
+        }
+        if (badges.hasFed) {
+            BadgeComposable("fed", assetManager)
+        }
+        if (badges.hasZlc) {
+            BadgeComposable("zlc", assetManager)
+        }
+        if (badges.hasAlc) {
+            BadgeComposable("alc", assetManager)
+        }
+    }
+    
+    Row(
+        modifier = GlanceModifier.statsRowModifier(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (badges.hasAsc) {
+            BadgeComposable("asc", assetManager)
+        }
+        if (badges.hasCraftingLegend) {
+            BadgeComposable("crafting", assetManager)
+        }
+        if (badges.hasAllShells) {
+            BadgeComposable("shell", assetManager)
+        }
+    }
+}
+
+@Composable
+fun BadgeComposable(badgeName: String, assetManager: AssetManager) {
+    val bitmap = bitmapResize(
+        BitmapFactory.decodeStream(
+            getAsset(
+                assetManager,
+                "badges/badge_$badgeName.png"
+            )
+        )
+    )
+
+    Image(
+        provider = ImageProvider(bitmap),
+        contentDescription = "$badgeName badge",
+        modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
+    )
+}
+
+@Composable
 private fun GlanceModifier.statsRowModifier() =
     this
-        .padding(horizontal = 15.dp)
+        .padding(horizontal = 10.dp)
         .fillMaxWidth()
