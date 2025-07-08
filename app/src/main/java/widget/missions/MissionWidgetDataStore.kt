@@ -230,9 +230,11 @@ class MissionWidgetDataStore {
     suspend fun setTextColor(context: Context, textColor: Color) {
         val missionWidgetNormalIds =
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
+        val missionWidgetMinimalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetMinimal::class.java)
         val missionWidgetLargeIds =
             GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-        (missionWidgetNormalIds + missionWidgetLargeIds)
+        (missionWidgetNormalIds + missionWidgetMinimalIds + missionWidgetLargeIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[MissionWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
