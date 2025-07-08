@@ -57,8 +57,8 @@ fun getFarmerRole(roleInt: Int): Pair<String, Color> {
     return ALL_ROLES[roleInt]
 }
 
-fun getShortenedFarmerName(name: String): String {
-    val split = name.split(" ")
+fun getShortenedFarmerRole(role: String): String {
+    val split = role.split(" ")
     return if (split.size == 1) {
         "Hmm..."
     } else {

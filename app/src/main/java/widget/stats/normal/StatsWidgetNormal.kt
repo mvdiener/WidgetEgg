@@ -42,7 +42,7 @@ import tools.utilities.getAsset
 import tools.utilities.getContractGradeName
 import tools.utilities.getEggName
 import tools.utilities.getFarmerRole
-import tools.utilities.getShortenedFarmerName
+import tools.utilities.getShortenedFarmerRole
 import widget.WidgetUpdater
 import widget.stats.StatsWidgetDataStore
 import widget.stats.StatsWidgetDataStorePreferencesKeys
@@ -260,14 +260,14 @@ fun Earnings(
         )
 
         val farmerRole = getFarmerRole(statsInfo.farmerRoleId)
-        val farmerName = getShortenedFarmerName(farmerRole.first)
+        val shortenedRole = getShortenedFarmerRole(farmerRole.first)
 
         Image(
             provider = ImageProvider(bookBitmap),
             contentDescription = "Book Icon",
             modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
-        Text(text = farmerName, style = TextStyle(color = ColorProvider(textColor)))
+        Text(text = shortenedRole, style = TextStyle(color = ColorProvider(textColor)))
         Box(modifier = GlanceModifier.defaultWeight()) {}
         Box(
             modifier = GlanceModifier
