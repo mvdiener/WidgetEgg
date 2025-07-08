@@ -181,13 +181,11 @@ fun NameAndPermit(
             contentDescription = "Player Icon",
             modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
         )
-        val formattedName = if (eiUserName.length > 15) {
-            eiUserName.substring(0, 12) + "..."
-        } else {
-            eiUserName
-        }
-        Text(text = formattedName, style = TextStyle(color = ColorProvider(textColor)))
-        Box(modifier = GlanceModifier.defaultWeight()) {}
+        Text(
+            modifier = GlanceModifier.defaultWeight(),
+            text = eiUserName,
+            style = TextStyle(color = ColorProvider(textColor))
+        )
         Image(
             provider = ImageProvider(permitBitmap),
             contentDescription = "Permit Icon",
