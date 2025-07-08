@@ -8,15 +8,19 @@ import android.provider.CalendarContract.Calendars
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import data.CalendarEntry
+import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
 import widget.missions.MissionWidgetDataStore
+import widget.stats.StatsWidgetDataStore
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences: PreferencesDatastore
@@ -167,7 +171,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateScheduleEvents(input: Boolean) {
         scheduleEvents = input
-        // This is the one setting that needs to use runBlocking
         // Changes to this value are tied into lifecycle events and need to wait for this operation to finish
         runBlocking {
             preferences.saveScheduleEvents(input)
@@ -288,5 +291,66 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateShowOpenWasmeggDashboardDialog(input: Boolean) {
         showOpenWasmeggDashboardDialog = input
+    }
+
+    var showWidgetColorsDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowWidgetColorsDialog(input: Boolean) {
+        showWidgetColorsDialog = input
+    }
+
+    var widgetBackgroundColor by mutableStateOf(DEFAULT_WIDGET_BACKGROUND_COLOR)
+        private set
+
+    fun updateWidgetBackgroundColor(input: Color) {
+        widgetBackgroundColor = input
+        // Color updates need runBlocking to ensure proper widget state updates
+        runBlocking {
+            preferences.saveWidgetBackgroundColor(input)
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setBackgroundColor(context, input)
+            ContractWidgetDataStore().setBackgroundColor(context, input)
+            StatsWidgetDataStore().setBackgroundColor(context, input)
+        }
+    }
+
+    var showBackgroundColorPickerDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowBackgroundColorPickerDialog(input: Boolean) {
+        showBackgroundColorPickerDialog = input
+    }
+
+    var widgetTextColor by mutableStateOf(DEFAULT_WIDGET_TEXT_COLOR)
+        private set
+
+    fun updateWidgetTextColor(input: Color) {
+        widgetTextColor = input
+        // Color updates need runBlocking to ensure proper widget state updates
+        runBlocking {
+            preferences.saveWidgetTextColor(input)
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setTextColor(context, input)
+            ContractWidgetDataStore().setTextColor(context, input)
+            StatsWidgetDataStore().setTextColor(context, input)
+        }
+    }
+
+    var showTextColorPickerDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowTextColorPickerDialog(input: Boolean) {
+        showTextColorPickerDialog = input
+    }
+
+    var showCommunityBadges by mutableStateOf(false)
+        private set
+
+    suspend fun updateShowCommunityBadges(input: Boolean) {
+        showCommunityBadges = input
+        preferences.saveShowCommunityBadges(input)
+        val context = getApplication<Application>().applicationContext
+        StatsWidgetDataStore().setShowCommunityBadges(context, input)
     }
 }

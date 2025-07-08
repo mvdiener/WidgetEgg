@@ -1,13 +1,15 @@
 package widget.contracts
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.ContractInfoEntry
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import widget.contracts.active.ContractWidgetActive
 
@@ -17,6 +19,8 @@ data object ContractWidgetDataStorePreferencesKeys {
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
     val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
     val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
+    val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
+    val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
 }
 
 class ContractWidgetDataStore {
@@ -91,6 +95,34 @@ class ContractWidgetDataStore {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] =
                         openWasmeggDashboard
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setBackgroundColor(context: Context, backgroundColor: Color) {
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        (contractWidgetActiveIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
+                        backgroundColor.toArgb()
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setTextColor(context: Context, textColor: Color) {
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        (contractWidgetActiveIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
+                        textColor.toArgb()
                 }
             }
 

@@ -1,15 +1,21 @@
 package user.preferences
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.CalendarEntry
 import data.ContractInfoEntry
+import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
+import data.StatsInfo
 import data.TankInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -41,6 +47,10 @@ class PreferencesDatastore(context: Context) {
         private val USE_ABSOLUTE_TIME_CONTRACT = booleanPreferencesKey("useAbsoluteTimeContract")
         private val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
         private val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
+        private val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
+        private val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
+        private val STATS_INFO = stringPreferencesKey("statsInfo")
+        private val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
         private val ALL_KEYS = listOf(
             EID,
             EI_USER_NAME,
@@ -59,7 +69,11 @@ class PreferencesDatastore(context: Context) {
             CONTRACT_INFO,
             USE_ABSOLUTE_TIME_CONTRACT,
             USE_OFFLINE_TIME,
-            OPEN_WASMEGG_DASHBOARD
+            OPEN_WASMEGG_DASHBOARD,
+            WIDGET_BACKGROUND_COLOR,
+            WIDGET_TEXT_COLOR,
+            STATS_INFO,
+            SHOW_COMMUNITY_BADGES
         )
     }
 
@@ -272,6 +286,55 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveOpenWasmeggDashboard(openWasmeggDashboard: Boolean) {
         dataStore.edit {
             it[OPEN_WASMEGG_DASHBOARD] = openWasmeggDashboard
+        }
+    }
+
+    suspend fun getWidgetBackgroundColor() = dataStore.data.map {
+        it[WIDGET_BACKGROUND_COLOR]?.let { colorInt -> Color(colorInt) }
+            ?: DEFAULT_WIDGET_BACKGROUND_COLOR
+    }.first()
+
+    suspend fun saveWidgetBackgroundColor(widgetBackgroundColor: Color) {
+        dataStore.edit {
+            it[WIDGET_BACKGROUND_COLOR] = widgetBackgroundColor.toArgb()
+        }
+    }
+
+    suspend fun getWidgetTextColor() = dataStore.data.map {
+        it[WIDGET_TEXT_COLOR]?.let { colorInt -> Color(colorInt) } ?: DEFAULT_WIDGET_TEXT_COLOR
+    }.first()
+
+    suspend fun saveWidgetTextColor(widgetTextColor: Color) {
+        dataStore.edit {
+            it[WIDGET_TEXT_COLOR] = widgetTextColor.toArgb()
+        }
+    }
+
+    suspend fun getStatsInfo(): StatsInfo {
+        return dataStore.data.map {
+            it[STATS_INFO]?.let { statsJson ->
+                try {
+                    Json.decodeFromString<StatsInfo>(statsJson)
+                } catch (e: Exception) {
+                    StatsInfo()
+                }
+            } ?: StatsInfo()
+        }.first()
+    }
+
+    suspend fun saveStatsInfo(statsInfo: StatsInfo) {
+        dataStore.edit {
+            it[STATS_INFO] = Json.encodeToString(statsInfo)
+        }
+    }
+
+    suspend fun getShowCommunityBadges() = dataStore.data.map {
+        it[SHOW_COMMUNITY_BADGES] == true
+    }.first()
+
+    suspend fun saveShowCommunityBadges(showCommunityBadges: Boolean) {
+        dataStore.edit {
+            it[SHOW_COMMUNITY_BADGES] = showCommunityBadges
         }
     }
 

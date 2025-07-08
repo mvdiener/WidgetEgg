@@ -147,13 +147,17 @@ fun getScrollName(contract: ContractInfoEntry, timeText: String): String {
     }
 }
 
-fun getContractTimeTextColor(contract: ContractInfoEntry, isOnTrack: Boolean): Int {
+fun getContractTimeTextColor(
+    contract: ContractInfoEntry,
+    isOnTrack: Boolean,
+    textColor: Color
+): Int {
     return if (contract.timeRemainingSeconds <= 0.0 && !isOnTrack) {
         Color.Red.toArgb()
     } else if (!isOnTrack) {
         android.graphics.Color.argb(255, 255, 165, 0) //orange
     } else {
-        Color.White.toArgb()
+        textColor.toArgb()
     }
 }
 

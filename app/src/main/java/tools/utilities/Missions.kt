@@ -8,12 +8,10 @@ import data.MissionInfoEntry
 import data.TANK_SIZES
 import data.TankInfo
 import ei.Ei
-import ei.Ei.Egg
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import java.util.UUID
 import kotlin.collections.plus
 
@@ -238,15 +236,6 @@ fun getShipName(shipId: Int): String {
     return ALL_SHIPS[shipId]
 }
 
-fun getEggName(eggId: Int): String {
-    val eggName = Egg.forNumber(eggId)?.name?.lowercase()
-    return if (eggName.isNullOrBlank()) {
-        "egg_unknown"
-    } else {
-        "egg_$eggName"
-    }
-}
-
 fun getMissionColor(durationType: Int, isFueling: Boolean): Int {
     val fuelingAlpha =
         if (isFueling) {
@@ -272,67 +261,3 @@ fun getFuelPercentFilled(capacity: Long, fuelQuantity: Double): Float {
     return fuelQuantity.toFloat() / capacity.toFloat()
 }
 
-fun getFuelAmount(fuelQuantity: Double): String {
-    var number = fuelQuantity
-    var unit = ""
-
-    if (number < 1000) {
-        return number.toInt().toString()
-    }
-
-    var units = arrayOf(
-        "k",
-        "M",
-        "B",
-        "T",
-        "q",
-        "Q",
-        "s",
-        "S",
-        "o",
-        "N",
-        "d",
-        "U",
-        "D",
-        "Td",
-        "qd",
-        "Qd",
-        "sd",
-        "Sd",
-        "Od",
-        "Nd",
-        "V",
-        "uV",
-        "dV",
-        "tV",
-        "qV",
-        "QV",
-        "sV",
-        "SV",
-        "OV",
-        "NV",
-        "tT"
-    )
-
-    while (number >= 1000) {
-        number /= 1000
-        unit = units.first()
-        units = units.drop(1).toTypedArray()
-    }
-
-    var formatted = String.format(Locale.ROOT, "%.3g", number)
-
-    // If using %.3g for the string format it _sometimes_ ends up in sci. notation
-    // It seems to only be cases where it's right below the threshold of the next power of ten
-    // e.g. 999,999,999,999.999999 becomes 1.00+e03B
-    // In this case, strip off the +e03 and bump the unit to the next tier letter
-
-    if (formatted.contains("e+")) {
-        val split = formatted.split("e+")
-        val unitIndex = units.indexOf(unit)
-        unit = units[unitIndex + 1]
-        formatted = split[0]
-    }
-
-    return "$formatted$unit"
-}

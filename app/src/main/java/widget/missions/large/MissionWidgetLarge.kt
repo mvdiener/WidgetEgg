@@ -36,9 +36,11 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import data.TankInfo
-import data.getImageFromAfxId
+import tools.utilities.getImageNameFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,7 +48,7 @@ import tools.utilities.bitmapResize
 import tools.utilities.createMissionCircularProgressBarBitmap
 import tools.utilities.getAsset
 import tools.utilities.getEggName
-import tools.utilities.getFuelAmount
+import tools.utilities.numberToString
 import tools.utilities.getFuelPercentFilled
 import tools.utilities.getMissionDurationRemaining
 import tools.utilities.getMissionPercentComplete
@@ -84,6 +86,14 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 state[MissionWidgetDataStorePreferencesKeys.USE_SLIDER_CAPACITY] == true
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] == true
+            val backgroundColor =
+                state[MissionWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR]?.let { colorInt ->
+                    Color(colorInt)
+                } ?: DEFAULT_WIDGET_BACKGROUND_COLOR
+            val textColor =
+                state[MissionWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR]?.let { colorInt ->
+                    Color(colorInt)
+                } ?: DEFAULT_WIDGET_TEXT_COLOR
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
@@ -105,7 +115,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(Color(0xff181818))
+                    .background(backgroundColor)
                     .clickable {
                         if (openEggInc) {
                             val packageManager: PackageManager = context.packageManager
@@ -126,7 +136,7 @@ class MissionWidgetLarge : GlanceAppWidget() {
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || missionData.isEmpty()) {
-                    NoMissionsContentLarge(assetManager)
+                    NoMissionsContentLarge(assetManager, textColor)
                 } else {
                     val adjustedMissions: List<MissionInfoEntry> =
                         if (showTankLevels) {
@@ -162,7 +172,8 @@ class MissionWidgetLarge : GlanceAppWidget() {
                                             TankInfoContent(
                                                 tankInfo,
                                                 useSliderCapacity,
-                                                assetManager
+                                                assetManager,
+                                                textColor
                                             )
                                         }
 
@@ -177,7 +188,8 @@ class MissionWidgetLarge : GlanceAppWidget() {
                                                 useAbsoluteTime,
                                                 useAbsoluteTimePlusDay,
                                                 use24HrFormat,
-                                                showTargetArtifact
+                                                showTargetArtifact,
+                                                textColor
                                             )
                                         }
                                     }
@@ -204,7 +216,7 @@ fun LogoContentLarge(assetManager: AssetManager) {
 }
 
 @Composable
-fun NoMissionsContentLarge(assetManager: AssetManager) {
+fun NoMissionsContentLarge(assetManager: AssetManager, textColor: Color) {
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -213,7 +225,7 @@ fun NoMissionsContentLarge(assetManager: AssetManager) {
         LogoContentLarge(assetManager)
         Text(
             text = "Waiting for mission data...",
-            style = TextStyle(color = ColorProvider(Color.White)),
+            style = TextStyle(color = ColorProvider(textColor)),
             modifier = GlanceModifier.padding(top = 5.dp)
         )
     }
@@ -226,7 +238,8 @@ fun MissionProgressLarge(
     useAbsoluteTime: Boolean,
     useAbsoluteTimePlusDay: Boolean,
     use24HrFormat: Boolean,
-    showTargetArtifact: Boolean
+    showTargetArtifact: Boolean,
+    textColor: Color
 ) {
     val isFueling = mission.identifier.isBlank()
 
@@ -266,7 +279,7 @@ fun MissionProgressLarge(
         )
     }
 
-    val artifactName = getImageFromAfxId(mission.targetArtifact)
+    val artifactName = getImageNameFromAfxId(mission.targetArtifact)
 
     Column(
         modifier = GlanceModifier.fillMaxWidth().padding(start = 2.dp, end = 8.dp),
@@ -278,10 +291,11 @@ fun MissionProgressLarge(
             useAbsoluteTime,
             useAbsoluteTimePlusDay,
             use24HrFormat,
-            mission
+            mission,
+            textColor
         )
-        MissionLevelContent(mission)
-        CapacityContent(mission, assetManager)
+        MissionLevelContent(mission, textColor)
+        CapacityContent(mission, assetManager, textColor)
         if (showTargetArtifact && artifactName.isNotBlank()) {
             TargetArtifactContent(artifactName, assetManager)
         }
@@ -294,7 +308,8 @@ fun TimeRemainingContent(
     useAbsoluteTime: Boolean,
     useAbsoluteTimePlusDay: Boolean,
     use24HrFormat: Boolean,
-    mission: MissionInfoEntry
+    mission: MissionInfoEntry,
+    textColor: Color
 ) {
     Text(
         text =
@@ -315,19 +330,19 @@ fun TimeRemainingContent(
                 }
             },
         style = TextStyle(
-            color = ColorProvider(Color.White),
+            color = ColorProvider(textColor),
         )
     )
 }
 
 @Composable
-fun MissionLevelContent(mission: MissionInfoEntry) {
+fun MissionLevelContent(mission: MissionInfoEntry, textColor: Color) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "${mission.shipLevel} ",
-            style = TextStyle(color = ColorProvider(Color.White))
+            style = TextStyle(color = ColorProvider(textColor))
         )
         Text(
             text = "★",
@@ -337,7 +352,7 @@ fun MissionLevelContent(mission: MissionInfoEntry) {
 }
 
 @Composable
-fun CapacityContent(mission: MissionInfoEntry, assetManager: AssetManager) {
+fun CapacityContent(mission: MissionInfoEntry, assetManager: AssetManager, textColor: Color) {
     val crateBitmap =
         BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_afx_chest_3.png"))
 
@@ -346,7 +361,7 @@ fun CapacityContent(mission: MissionInfoEntry, assetManager: AssetManager) {
     ) {
         Text(
             text = "${mission.capacity} ",
-            style = TextStyle(color = ColorProvider(Color.White))
+            style = TextStyle(color = ColorProvider(textColor))
         )
         Image(
             provider = ImageProvider(crateBitmap),
@@ -374,11 +389,16 @@ fun TargetArtifactContent(artifactName: String, assetManager: AssetManager) {
 }
 
 @Composable
-fun TankInfoContent(tankInfo: TankInfo, useSliderCapacity: Boolean, assetManager: AssetManager) {
+fun TankInfoContent(
+    tankInfo: TankInfo,
+    useSliderCapacity: Boolean,
+    assetManager: AssetManager,
+    textColor: Color
+) {
     if (tankInfo.fuelLevels.isEmpty()) {
         Text(
             text = "Your tanks are empty!",
-            style = TextStyle(color = ColorProvider(Color.White))
+            style = TextStyle(color = ColorProvider(textColor))
         )
     } else {
         Column(
@@ -417,8 +437,8 @@ fun TankInfoContent(tankInfo: TankInfo, useSliderCapacity: Boolean, assetManager
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = getFuelAmount(fuel.fuelQuantity),
-                            style = TextStyle(color = ColorProvider(Color.White))
+                            text = numberToString(fuel.fuelQuantity),
+                            style = TextStyle(color = ColorProvider(textColor))
                         )
                     }
                 }

@@ -11,14 +11,14 @@ plugins {
 
 android {
     namespace = "com.widgetegg.widgeteggapp"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 18
-        versionName = "2.1.3"
+        targetSdk = 36
+        versionCode = 19
+        versionName = "2.2.0"
 
         ndk {
             debugSymbolLevel = "SYMBOL_TABLE"
@@ -116,6 +116,9 @@ dependencies {
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
+
+    // Color picker
+    implementation("com.github.skydoves:colorpicker-compose:1.1.2")
 
 }
 

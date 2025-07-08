@@ -31,6 +31,7 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -56,6 +57,10 @@ class MissionWidgetMinimal : GlanceAppWidget() {
                 )
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] == true
+            val textColor =
+                state[MissionWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR]?.let { colorInt ->
+                    Color(colorInt)
+                } ?: DEFAULT_WIDGET_TEXT_COLOR
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
@@ -97,7 +102,7 @@ class MissionWidgetMinimal : GlanceAppWidget() {
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || missionData.isEmpty()) {
-                    NoMissionsContentMinimal(assetManager)
+                    NoMissionsContentMinimal(assetManager, textColor)
                 } else {
                     val missionsChunked = missionData.chunked(2)
                     missionsChunked.forEach { missionGroup ->
@@ -133,7 +138,7 @@ fun LogoContentMinimal(assetManager: AssetManager) {
 }
 
 @Composable
-fun NoMissionsContentMinimal(assetManager: AssetManager) {
+fun NoMissionsContentMinimal(assetManager: AssetManager, textColor: Color) {
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -142,7 +147,7 @@ fun NoMissionsContentMinimal(assetManager: AssetManager) {
         LogoContentMinimal(assetManager)
         Text(
             text = "Waiting for mission data...",
-            style = TextStyle(color = ColorProvider(Color.White)),
+            style = TextStyle(color = ColorProvider(textColor)),
             modifier = GlanceModifier.padding(top = 5.dp)
         )
     }

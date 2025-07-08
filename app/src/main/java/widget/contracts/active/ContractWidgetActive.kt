@@ -37,6 +37,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.ContractInfoEntry
+import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -70,6 +72,14 @@ class ContractWidgetActive : GlanceAppWidget() {
                 state[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] == true
             val openWasmeggDashboard =
                 state[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] == true
+            val backgroundColor =
+                state[ContractWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR]?.let { colorInt ->
+                    Color(colorInt)
+                } ?: DEFAULT_WIDGET_BACKGROUND_COLOR
+            val textColor =
+                state[ContractWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR]?.let { colorInt ->
+                    Color(colorInt)
+                } ?: DEFAULT_WIDGET_TEXT_COLOR
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
@@ -91,7 +101,7 @@ class ContractWidgetActive : GlanceAppWidget() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(Color(0xff181818))
+                    .background(backgroundColor)
                     .clickable {
                         if (openWasmeggDashboard) {
                             val problematicBrowsers =
@@ -126,7 +136,7 @@ class ContractWidgetActive : GlanceAppWidget() {
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || contractData.isEmpty()) {
-                    NoContractsContent(assetManager)
+                    NoContractsContent(assetManager, textColor)
                 } else {
                     when (contractData.size) {
                         1 -> {
@@ -135,7 +145,8 @@ class ContractWidgetActive : GlanceAppWidget() {
                                 context,
                                 contractData.first(),
                                 useAbsoluteTime,
-                                useOfflineTime
+                                useOfflineTime,
+                                textColor
                             )
                         }
 
@@ -151,7 +162,8 @@ class ContractWidgetActive : GlanceAppWidget() {
                                         context,
                                         contract,
                                         useAbsoluteTime,
-                                        useOfflineTime
+                                        useOfflineTime,
+                                        textColor
                                     )
                                 }
                             }
@@ -177,7 +189,8 @@ class ContractWidgetActive : GlanceAppWidget() {
                                                 context,
                                                 contract,
                                                 useAbsoluteTime,
-                                                useOfflineTime
+                                                useOfflineTime,
+                                                textColor
                                             )
                                         }
                                     }
@@ -198,6 +211,7 @@ fun ContractSingle(
     contract: ContractInfoEntry,
     useAbsoluteTime: Boolean,
     useOfflineTime: Boolean,
+    textColor: Color
 ) {
     Box(
         contentAlignment = Alignment.Center
@@ -208,10 +222,10 @@ fun ContractSingle(
     Text(
         modifier = GlanceModifier.padding(top = 5.dp),
         text = contract.name,
-        style = TextStyle(color = ColorProvider(Color.White))
+        style = TextStyle(color = ColorProvider(textColor))
     )
 
-    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime)
+    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, textColor)
     SeasonAndRewardInfo(assetManager, contract)
 }
 
@@ -222,6 +236,7 @@ fun ContractDouble(
     contract: ContractInfoEntry,
     useAbsoluteTime: Boolean,
     useOfflineTime: Boolean,
+    textColor: Color
 ) {
     Box(
         modifier = GlanceModifier.padding(start = 5.dp),
@@ -237,12 +252,21 @@ fun ContractDouble(
         Text(
             text = contract.name,
             style = TextStyle(
-                color = ColorProvider(Color.White),
+                color = ColorProvider(textColor),
                 fontSize = TextUnit(13f, TextUnitType.Sp)
             )
         )
 
-        TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 13f, 15)
+        TimeTextAndScroll(
+            assetManager,
+            context,
+            contract,
+            useAbsoluteTime,
+            useOfflineTime,
+            textColor,
+            13f,
+            15
+        )
         SeasonAndRewardInfo(assetManager, contract, 13f, 20)
     }
 }
@@ -254,6 +278,7 @@ fun ContractAll(
     contract: ContractInfoEntry,
     useAbsoluteTime: Boolean,
     useOfflineTime: Boolean,
+    textColor: Color
 ) {
     Box(
         contentAlignment = Alignment.Center
@@ -265,12 +290,21 @@ fun ContractAll(
         modifier = GlanceModifier.padding(top = 5.dp),
         text = contract.name,
         style = TextStyle(
-            color = ColorProvider(Color.White),
+            color = ColorProvider(textColor),
             fontSize = TextUnit(10f, TextUnitType.Sp)
         )
     )
 
-    TimeTextAndScroll(assetManager, context, contract, useAbsoluteTime, useOfflineTime, 10f, 12)
+    TimeTextAndScroll(
+        assetManager,
+        context,
+        contract,
+        useAbsoluteTime,
+        useOfflineTime,
+        textColor,
+        10f,
+        12
+    )
 }
 
 @Composable
@@ -286,7 +320,7 @@ fun LogoContentContracts(assetManager: AssetManager) {
 }
 
 @Composable
-fun NoContractsContent(assetManager: AssetManager) {
+fun NoContractsContent(assetManager: AssetManager, textColor: Color) {
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -295,7 +329,7 @@ fun NoContractsContent(assetManager: AssetManager) {
         LogoContentContracts(assetManager)
         Text(
             text = "No active contracts...",
-            style = TextStyle(color = ColorProvider(Color.White)),
+            style = TextStyle(color = ColorProvider(textColor)),
             modifier = GlanceModifier.padding(top = 5.dp)
         )
     }
@@ -345,8 +379,9 @@ fun TimeTextAndScroll(
     contract: ContractInfoEntry,
     useAbsoluteTime: Boolean,
     useOfflineTime: Boolean,
+    textColor: Color,
     textSize: Float = 14f,
-    scrollSize: Int = 20
+    scrollSize: Int = 20,
 ) {
     val use24HrFormat = DateFormat.is24HourFormat(context)
     val (timeText, isOnTrack) = getContractDurationRemaining(
@@ -360,7 +395,15 @@ fun TimeTextAndScroll(
         Text(
             text = timeText,
             style = TextStyle(
-                color = ColorProvider(Color(getContractTimeTextColor(contract, isOnTrack))),
+                color = ColorProvider(
+                    Color(
+                        getContractTimeTextColor(
+                            contract,
+                            isOnTrack,
+                            textColor
+                        )
+                    )
+                ),
                 fontSize = TextUnit(textSize, TextUnitType.Sp)
             )
         )

@@ -36,8 +36,10 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
-import data.getImageFromAfxId
+import tools.utilities.getImageNameFromAfxId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,6 +74,14 @@ class MissionWidgetNormal : GlanceAppWidget() {
                 state[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] == true
             val openEggInc =
                 state[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] == true
+            val backgroundColor =
+                state[MissionWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR]?.let { colorInt ->
+                    Color(colorInt)
+                } ?: DEFAULT_WIDGET_BACKGROUND_COLOR
+            val textColor =
+                state[MissionWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR]?.let { colorInt ->
+                    Color(colorInt)
+                } ?: DEFAULT_WIDGET_TEXT_COLOR
 
             if (eid.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
@@ -93,7 +103,7 @@ class MissionWidgetNormal : GlanceAppWidget() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = GlanceModifier
                     .fillMaxSize()
-                    .background(Color(0xff181818))
+                    .background(backgroundColor)
                     .clickable {
                         if (openEggInc) {
                             val packageManager: PackageManager = context.packageManager
@@ -114,7 +124,7 @@ class MissionWidgetNormal : GlanceAppWidget() {
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || missionData.isEmpty()) {
-                    NoMissionsContent(assetManager)
+                    NoMissionsContent(assetManager, textColor)
                 } else {
                     Row(
                         modifier = GlanceModifier.fillMaxWidth(),
@@ -136,7 +146,8 @@ class MissionWidgetNormal : GlanceAppWidget() {
                                     useAbsoluteTime,
                                     useAbsoluteTimePlusDay,
                                     use24HrFormat,
-                                    showTargetArtifact
+                                    showTargetArtifact,
+                                    textColor
                                 )
                             }
                         }
@@ -160,7 +171,7 @@ fun LogoContent(assetManager: AssetManager) {
 }
 
 @Composable
-fun NoMissionsContent(assetManager: AssetManager) {
+fun NoMissionsContent(assetManager: AssetManager, textColor: Color) {
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -169,7 +180,7 @@ fun NoMissionsContent(assetManager: AssetManager) {
         LogoContent(assetManager)
         Text(
             text = "Waiting for mission data...",
-            style = TextStyle(color = ColorProvider(Color.White)),
+            style = TextStyle(color = ColorProvider(textColor)),
             modifier = GlanceModifier.padding(top = 5.dp)
         )
     }
@@ -182,7 +193,8 @@ fun MissionProgress(
     useAbsoluteTime: Boolean,
     useAbsoluteTimePlusDay: Boolean,
     use24HrFormat: Boolean,
-    showTargetArtifact: Boolean
+    showTargetArtifact: Boolean,
+    textColor: Color
 ) {
     val isFueling = mission.identifier.isBlank()
 
@@ -232,7 +244,7 @@ fun MissionProgress(
             modifier = GlanceModifier.fillMaxWidth(),
             contentAlignment = Alignment.TopEnd
         ) {
-            val artifactName = getImageFromAfxId(mission.targetArtifact)
+            val artifactName = getImageNameFromAfxId(mission.targetArtifact)
             if (showTargetArtifact && artifactName.isNotBlank()) {
                 val artifactBitmap = bitmapResize(
                     BitmapFactory.decodeStream(
@@ -275,7 +287,7 @@ fun MissionProgress(
                     }
                 },
             style = TextStyle(
-                color = ColorProvider(Color.White),
+                color = ColorProvider(textColor),
                 fontSize = TextUnit(13f, TextUnitType.Sp)
             )
         )

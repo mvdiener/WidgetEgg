@@ -5,12 +5,14 @@ import android.content.Intent
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
@@ -50,8 +54,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.github.skydoves.colorpicker.compose.AlphaSlider
+import com.github.skydoves.colorpicker.compose.AlphaTile
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.Routes
+import data.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.DEFAULT_WIDGET_TEXT_COLOR
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import tools.utilities.hasCalendarPermissions
@@ -80,6 +91,9 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
         settingsViewModel.updateUseAbsoluteTimeContract(preferences.getUseAbsoluteTimeContract())
         settingsViewModel.updateUseOfflineTime(preferences.getUseOfflineTime())
         settingsViewModel.updateOpenWasmeggDashboard(preferences.getOpenWasmeggDashboard())
+        settingsViewModel.updateWidgetBackgroundColor(preferences.getWidgetBackgroundColor())
+        settingsViewModel.updateWidgetTextColor(preferences.getWidgetTextColor())
+        settingsViewModel.updateShowCommunityBadges(preferences.getShowCommunityBadges())
     }
 
     val packageName = context.packageName
@@ -140,10 +154,12 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
             BatteryPermissionsContent(settingsViewModel, packageName, context)
         }
 
+        WidgetColorsGroup(settingsViewModel)
         MissionsGeneralGroup(settingsViewModel, packageName, context, activity)
         ContractsGeneralGroup(settingsViewModel)
         NormalMissionWidgetGroup(settingsViewModel)
         LargeMissionWidgetGroup(settingsViewModel)
+        StatsWidgetGroup(settingsViewModel)
     }
 }
 
@@ -226,6 +242,201 @@ fun BatteryPermissionsDialog(
                     Text(text = "App Settings")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun WidgetColorsGroup(settingsViewModel: SettingsViewModel) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Widgets Colors", fontSize = TextUnit(18f, TextUnitType.Sp))
+            Icon(
+                Icons.Rounded.Info,
+                contentDescription = "Widget colors info",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .size(15.dp)
+                    .clickable {
+                        settingsViewModel.updateShowWidgetColorsDialog(true)
+                    }
+            )
+            WidgetColorsDialog(settingsViewModel)
+        }
+        BackgroundColorPicker(settingsViewModel)
+        TextColorPicker(settingsViewModel)
+        Button(
+            modifier = Modifier
+                .padding(top = 15.dp, start = 15.dp),
+            onClick = {
+                settingsViewModel.updateWidgetBackgroundColor(DEFAULT_WIDGET_BACKGROUND_COLOR)
+                settingsViewModel.updateWidgetTextColor(DEFAULT_WIDGET_TEXT_COLOR)
+            }
+        ) {
+            Text(text = "Reset Colors")
+        }
+    }
+}
+
+@Composable
+fun WidgetColorsDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showWidgetColorsDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowWidgetColorsDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                        """
+                        Background color does not apply to minimal mission widget.
+                        
+                        Text color applies where text default is white.
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BackgroundColorPicker(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier
+            .settingsRowModifier()
+            .clickable {
+                settingsViewModel.updateShowBackgroundColorPickerDialog(true)
+            },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "Widget background color")
+        if (settingsViewModel.showBackgroundColorPickerDialog) {
+            ColorPickerDialog(
+                "Widget Background Color",
+                settingsViewModel.widgetBackgroundColor,
+                onDismissDialog = { settingsViewModel.updateShowBackgroundColorPickerDialog(false) },
+                onColorSelected = { newColor ->
+                    settingsViewModel.updateWidgetBackgroundColor(
+                        newColor
+                    )
+                })
+        }
+        AlphaTile(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .border(1.dp, Color.White, RoundedCornerShape(6.dp)),
+            selectedColor = settingsViewModel.widgetBackgroundColor
+        )
+    }
+}
+
+@Composable
+fun TextColorPicker(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier
+            .settingsRowModifier()
+            .clickable {
+                settingsViewModel.updateShowTextColorPickerDialog(true)
+            },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = "Widget text color")
+        if (settingsViewModel.showTextColorPickerDialog) {
+            ColorPickerDialog(
+                "Widget Text Color",
+                settingsViewModel.widgetTextColor,
+                onDismissDialog = { settingsViewModel.updateShowTextColorPickerDialog(false) },
+                onColorSelected = { newColor ->
+                    settingsViewModel.updateWidgetTextColor(
+                        newColor
+                    )
+                })
+        }
+        AlphaTile(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .border(1.dp, Color.White),
+            selectedColor = settingsViewModel.widgetTextColor
+        )
+    }
+}
+
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun ColorPickerDialog(
+    headerText: String,
+    initialColor: Color,
+    onDismissDialog: () -> Unit,
+    onColorSelected: (Color) -> Unit
+) {
+    val controller = rememberColorPickerController()
+    Dialog(
+        onDismissRequest = {
+            onColorSelected(controller.selectedColor.value)
+            onDismissDialog()
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = RoundedCornerShape(size = 16.dp)
+                )
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text(text = headerText, fontSize = TextUnit(18f, TextUnitType.Sp))
+            HsvColorPicker(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(350.dp),
+                controller = controller,
+                initialColor = initialColor,
+            )
+            AlphaSlider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(35.dp),
+                controller = controller,
+                initialColor = initialColor,
+            )
+            BrightnessSlider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+                    .height(35.dp),
+                controller = controller,
+                initialColor = initialColor,
+            )
+            AlphaTile(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(6.dp)),
+                controller = controller
+            )
         }
     }
 }
@@ -1036,6 +1247,43 @@ fun OpenWasmeggDashboardDialog(settingsViewModel: SettingsViewModel) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun StatsWidgetGroup(settingsViewModel: SettingsViewModel) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(text = "Stats Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
+        CommunityBadgesRow(settingsViewModel)
+    }
+}
+
+@Composable
+fun CommunityBadgesRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text(text = "Show community badges")
+        }
+
+        val scope = rememberCoroutineScope()
+        Switch(
+            checked = settingsViewModel.showCommunityBadges,
+            onCheckedChange = {
+                scope.launch {
+                    settingsViewModel.updateShowCommunityBadges(!settingsViewModel.showCommunityBadges)
+                }
+            }
+        )
     }
 }
 
