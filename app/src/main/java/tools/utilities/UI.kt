@@ -143,12 +143,13 @@ fun numberToString(amount: Double): String {
 
     // If using %.3g for the string format it _sometimes_ ends up in sci. notation
     // It seems to only be cases where it's right below the threshold of the next power of ten
-    // e.g. 999,999,999,999.999999 becomes 1.00+e03B
-    // In this case, strip off the +e03 and bump the unit to the next tier letter
+    // e.g. 999,999,999,999.999999 becomes 1.00e+03B
+    // In this case, strip off the e+03 and bump the unit to the next tier letter
 
     if (formatted.contains("e+")) {
         val split = formatted.split("e+")
         val unitIndex = units.indexOf(unit)
+        if ((unitIndex + 1) >= units.size) return "Inf"
         unit = units[unitIndex + 1]
         formatted = split[0]
     }

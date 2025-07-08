@@ -189,7 +189,7 @@ fun NameAndPermit(
         Image(
             provider = ImageProvider(permitBitmap),
             contentDescription = "Permit Icon",
-            modifier = GlanceModifier.size(20.dp)
+            modifier = GlanceModifier.size(24.dp)
         )
     }
 }
