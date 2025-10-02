@@ -243,7 +243,7 @@ fun ContractDouble(
         modifier = GlanceModifier.padding(start = 5.dp),
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, 45, 6)
+        EggAndProgressBars(assetManager, contract, useOfflineTime, 45, 6)
     }
 
     Column(
@@ -284,7 +284,7 @@ fun ContractAll(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, 30, 4)
+        EggAndProgressBars(assetManager, contract, useOfflineTime, 30, 4)
     }
 
     Text(
