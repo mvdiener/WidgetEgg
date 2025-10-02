@@ -229,7 +229,8 @@ fun createMissionCircularProgressBarBitmap(
     isFueling: Boolean
 ): Bitmap {
     val color = getMissionColor(durationType, isFueling)
-    return createCircularProgressBarBitmap(progress, color, size, 8f)
+    val progressData = listOf(CircularProgress(progress, color))
+    return createCircularProgressBarBitmap(progressData, size, 8f)
 }
 
 fun getShipName(shipId: Int): String {

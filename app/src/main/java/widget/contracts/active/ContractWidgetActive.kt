@@ -49,6 +49,7 @@ import tools.utilities.getContractDurationRemaining
 import tools.utilities.getContractGoalPercentComplete
 import tools.utilities.getContractTimeTextColor
 import tools.utilities.getEggName
+import tools.utilities.getOfflineEggsDelivered
 import tools.utilities.getRewardIconPath
 import tools.utilities.getScrollName
 import widget.WidgetUpdater
@@ -216,7 +217,7 @@ fun ContractSingle(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, 75, 10)
+        EggAndProgressBars(assetManager, contract, useOfflineTime, 75, 10)
     }
 
     Text(
@@ -339,6 +340,7 @@ fun NoContractsContent(assetManager: AssetManager, textColor: Color) {
 fun EggAndProgressBars(
     assetManager: AssetManager,
     contract: ContractInfoEntry,
+    useOfflineTime: Boolean,
     eggSize: Int,
     progressSize: Int
 ) {
@@ -351,8 +353,16 @@ fun EggAndProgressBars(
     contract.goals.sortedBy { goal -> goal.goalAmount }.forEachIndexed { index, goal ->
         val percentComplete =
             getContractGoalPercentComplete(contract.eggsDelivered, goal.goalAmount)
+        var offlinePercentComplete: Float? = null
+        if (useOfflineTime) {
+            val totalEggsDelivered = contract.eggsDelivered + getOfflineEggsDelivered(contract)
+            offlinePercentComplete =
+                getContractGoalPercentComplete(totalEggsDelivered, goal.goalAmount)
+        }
+
         val bitmap = createContractCircularProgressBarBitmap(
             percentComplete,
+            offlinePercentComplete,
             150,
         )
 

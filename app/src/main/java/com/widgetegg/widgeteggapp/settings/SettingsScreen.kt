@@ -1128,7 +1128,7 @@ fun OfflineTimeRow(settingsViewModel: SettingsViewModel) {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(text = "Show offline completion time")
+            Text(text = "Show offline data")
             Icon(
                 Icons.Rounded.Info,
                 contentDescription = "Offline time info",
@@ -1174,7 +1174,7 @@ fun OfflineTimeDialog(settingsViewModel: SettingsViewModel) {
                 Text(
                     text =
                         """
-                        Show an estimated completion time that includes the offline contribution of all co-op members.
+                        Show an estimated completion time that includes the offline contribution of all co-op members, and show offline eggs delivered in the progress bars.
                     """.trimIndent()
                 )
             }
