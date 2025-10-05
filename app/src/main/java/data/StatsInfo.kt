@@ -9,6 +9,7 @@ data class StatsInfo(
     var hasProPermit: Boolean = false,
     var soulEggs: String = "",
     var prophecyEggs: String = "",
+    var truthEggs: String = "",
     var farmerRoleId: Int = 0,
     var earningsBonus: String = "",
     var goldEggs: String = "",

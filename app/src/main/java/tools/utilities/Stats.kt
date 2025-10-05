@@ -31,6 +31,7 @@ fun formatStatsData(backup: Ei.Backup): StatsInfo {
         hasProPermit = backup.game.permitLevel > 0,
         soulEggs = numberToString(backup.game.soulEggsD),
         prophecyEggs = backup.game.eggsOfProphecy.toString(),
+        truthEggs = backup.virtue.eovEarnedList.sumOf { it }.toString(),
         farmerRoleId = roleId,
         earningsBonus = numberToString(eb),
         goldEggs = numberToString(geBalance),
@@ -141,12 +142,16 @@ private fun hasFed(backup: Ei.Backup): Boolean {
 private fun calculateEB(backup: Ei.Backup): Double {
     val peCount = backup.game.eggsOfProphecy
     val seCount = backup.game.soulEggsD
+    val teCount = backup.virtue.eovEarnedList.sumOf { it }.toDouble()
 
     val peResearch = backup.game.epicResearchList.first { it.id == "prophecy_bonus" }.level
     val seResearch = backup.game.epicResearchList.first { it.id == "soul_eggs" }.level
 
     val bonusFactor = peResearch.toDouble() * 0.01
-    val perEgg = (10.0 + seResearch.toDouble()) * ((1.05 + bonusFactor).pow(peCount.toDouble()))
+    val perEgg =
+        (10.0 + seResearch.toDouble()) * ((1.05 + bonusFactor).pow(peCount.toDouble())) * (1.01.pow(
+            teCount
+        ))
 
     return seCount * perEgg
 }

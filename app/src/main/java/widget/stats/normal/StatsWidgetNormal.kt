@@ -176,6 +176,15 @@ fun NameAndPermit(
         val permitBitmap =
             BitmapFactory.decodeStream(getAsset(assetManager, "other/$permitName.png"))
 
+        val truthEggBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "eggs/egg_truth.png"
+                )
+            )
+        )
+
         Image(
             provider = ImageProvider(profileBitmap),
             contentDescription = "Player Icon",
@@ -186,11 +195,22 @@ fun NameAndPermit(
             text = eiUserName,
             style = TextStyle(color = ColorProvider(textColor))
         )
-        Image(
-            provider = ImageProvider(permitBitmap),
-            contentDescription = "Permit Icon",
-            modifier = GlanceModifier.size(24.dp)
-        )
+        // If the player has no truth eggs, they may not be far enough in the game yet
+        // Show the permit icon instead, so there aren't potential spoilers with the truth egg icon
+        if (statsInfo.truthEggs.toIntOrNull() == 0) {
+            Image(
+                provider = ImageProvider(permitBitmap),
+                contentDescription = "Permit Icon",
+                modifier = GlanceModifier.size(24.dp)
+            )
+        } else {
+            Image(
+                provider = ImageProvider(truthEggBitmap),
+                contentDescription = "Truth Egg Icon",
+                modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
+            )
+            Text(text = statsInfo.truthEggs, style = TextStyle(color = ColorProvider(textColor)))
+        }
     }
 }
 

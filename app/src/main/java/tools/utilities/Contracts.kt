@@ -94,16 +94,15 @@ fun getOfflineEggsDelivered(contract: ContractInfoEntry): Double {
 
 fun createContractCircularProgressBarBitmap(
     totalProgress: Float,
-    offlineProgress: Float,
+    offlineProgress: Float?,
     size: Int
 ): Bitmap {
     val totalProgressColor = "#008531".toColorInt()
     val offlineProgressColor = "#51dda8".toColorInt()
-    val progressData = listOf(
-        CircularProgress(totalProgress, totalProgressColor),
-        CircularProgress(offlineProgress, offlineProgressColor)
-
-    )
+    val progressData = mutableListOf(CircularProgress(totalProgress, totalProgressColor))
+    if (offlineProgress != null) {
+        progressData.add(CircularProgress(offlineProgress, offlineProgressColor))
+    }
     return createCircularProgressBarBitmap(progressData, size, 4f)
 }
 
