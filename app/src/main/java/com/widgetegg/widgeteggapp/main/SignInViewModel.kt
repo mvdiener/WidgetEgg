@@ -115,15 +115,25 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     val missionResult = fetchMissionData(prefEid)
                     val contractResult = fetchContractData(backupResult)
                     val formattedMissionData = formatMissionData(missionResult, backupResult)
+                    val formattedVirtueMissionData =
+                        formatMissionData(missionResult, backupResult, true)
                     val formattedTankInfo = formatTankInfo(backupResult)
+                    val formattedVirtueTankInfo = formatTankInfo(backupResult, true)
                     val formattedContractData = formatContractData(contractResult)
                     val formattedStatsData = formatStatsData(backupResult)
                     preferences.saveMissionInfo(formattedMissionData)
+                    preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
                     preferences.saveTankInfo(formattedTankInfo)
+                    preferences.saveVirtueTankInfo(formattedVirtueTankInfo)
                     preferences.saveContractInfo(formattedContractData)
                     preferences.saveStatsInfo(formattedStatsData)
                     MissionWidgetDataStore().setMissionInfo(context, formattedMissionData)
+                    MissionWidgetDataStore().setVirtueMissionInfo(
+                        context,
+                        formattedVirtueMissionData
+                    )
                     MissionWidgetDataStore().setTankInfo(context, formattedTankInfo)
+                    MissionWidgetDataStore().setVirtueTankInfo(context, formattedVirtueTankInfo)
                     ContractWidgetDataStore().setContractInfo(context, formattedContractData)
                     StatsWidgetDataStore().setStatsInfo(context, formattedStatsData)
                 }

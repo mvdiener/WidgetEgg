@@ -65,6 +65,42 @@
         </receiver>
 
         <receiver
+            android:name="widget.missions.normal.VirtueMissionWidgetNormalReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/virtue_mission_widget_normal" />
+        </receiver>
+
+        <receiver
+            android:name="widget.missions.minimal.VirtueMissionWidgetMinimalReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/virtue_mission_widget_minimal" />
+        </receiver>
+
+        <receiver
+            android:name="widget.missions.large.VirtueMissionWidgetLargeReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/virtue_mission_widget_large" />
+        </receiver>
+
+        <receiver
             android:name="widget.contracts.active.ContractWidgetActiveReceiver"
             android:enabled="true"
             android:exported="false">

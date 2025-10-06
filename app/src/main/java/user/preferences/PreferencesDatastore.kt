@@ -30,7 +30,9 @@ class PreferencesDatastore(context: Context) {
         private val EID = stringPreferencesKey("eid")
         private val EI_USER_NAME = stringPreferencesKey("eiUserName")
         private val MISSION_INFO = stringPreferencesKey("missionInfo")
+        private val VIRTUE_MISSION_INFO = stringPreferencesKey("virtueMissionInfo")
         private val TANK_INFO = stringPreferencesKey("tankInfo")
+        private val VIRTUE_TANK_INFO = stringPreferencesKey("virtueTankInfo")
         private val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
         private val USE_ABSOLUTE_TIME_PLUS_DAY = booleanPreferencesKey("useAbsoluteTimePlusDay")
         private val TARGET_ARTIFACT_NORMAL_WIDGET =
@@ -55,7 +57,9 @@ class PreferencesDatastore(context: Context) {
             EID,
             EI_USER_NAME,
             MISSION_INFO,
+            VIRTUE_MISSION_INFO,
             TANK_INFO,
+            VIRTUE_TANK_INFO,
             USE_ABSOLUTE_TIME,
             USE_ABSOLUTE_TIME_PLUS_DAY,
             TARGET_ARTIFACT_NORMAL_WIDGET,
@@ -115,6 +119,24 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
+    suspend fun getVirtueMissionInfo(): List<MissionInfoEntry> {
+        return dataStore.data.map {
+            it[VIRTUE_MISSION_INFO]?.let { missionJson ->
+                try {
+                    Json.decodeFromString<List<MissionInfoEntry>>(missionJson)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList()
+        }.first()
+    }
+
+    suspend fun saveVirtueMissionInfo(missionInfo: List<MissionInfoEntry>) {
+        dataStore.edit {
+            it[VIRTUE_MISSION_INFO] = Json.encodeToString(missionInfo)
+        }
+    }
+
     suspend fun getTankInfo(): TankInfo {
         return dataStore.data.map {
             it[TANK_INFO]?.let { tankJson ->
@@ -130,6 +152,24 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveTankInfo(tankInfo: TankInfo) {
         dataStore.edit {
             it[TANK_INFO] = Json.encodeToString(tankInfo)
+        }
+    }
+
+    suspend fun getVirtueTankInfo(): TankInfo {
+        return dataStore.data.map {
+            it[VIRTUE_TANK_INFO]?.let { tankJson ->
+                try {
+                    Json.decodeFromString<TankInfo>(tankJson)
+                } catch (e: Exception) {
+                    TankInfo()
+                }
+            } ?: TankInfo()
+        }.first()
+    }
+
+    suspend fun saveVirtueTankInfo(tankInfo: TankInfo) {
+        dataStore.edit {
+            it[VIRTUE_TANK_INFO] = Json.encodeToString(tankInfo)
         }
     }
 

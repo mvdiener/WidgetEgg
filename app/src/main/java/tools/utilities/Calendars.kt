@@ -26,7 +26,8 @@ fun scheduleCalendarEvents(
     context: Context,
     missions: List<MissionInfoEntry>,
     eiUserName: String,
-    selectedCalendar: CalendarEntry
+    selectedCalendar: CalendarEntry,
+    isVirtueMission: Boolean = false
 ) {
     if (hasCalendarPermissions(context)) {
         missions.map { mission ->
@@ -38,10 +39,11 @@ fun scheduleCalendarEvents(
                 )
             ) {
                 val missionEndTimePlusMinute = missionEndTime + (60 * 1000)
+                val shipTypeText = if (isVirtueMission) "Virtue ship" else "Ship"
                 val eventValues = ContentValues().apply {
                     put(CalendarContract.Events.DTSTART, missionEndTime)
                     put(CalendarContract.Events.DTEND, missionEndTimePlusMinute)
-                    put(CalendarContract.Events.TITLE, "Ship returning for $eiUserName")
+                    put(CalendarContract.Events.TITLE, "$shipTypeText returning for $eiUserName")
                     put(CalendarContract.Events.DESCRIPTION, mission.identifier)
                     put(CalendarContract.Events.CALENDAR_ID, selectedCalendar.id)
                     put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().id)

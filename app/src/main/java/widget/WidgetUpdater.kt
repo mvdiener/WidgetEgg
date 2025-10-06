@@ -22,8 +22,11 @@ import widget.contracts.ContractWidgetDataStore
 import widget.contracts.active.ContractWidgetActive
 import widget.missions.MissionWidgetDataStore
 import widget.missions.large.MissionWidgetLarge
+import widget.missions.large.VirtueMissionWidgetLarge
 import widget.missions.minimal.MissionWidgetMinimal
+import widget.missions.minimal.VirtueMissionWidgetMinimal
 import widget.missions.normal.MissionWidgetNormal
+import widget.missions.normal.VirtueMissionWidgetNormal
 import widget.stats.StatsWidgetDataStore
 import widget.stats.normal.StatsWidgetNormal
 import java.time.Instant
@@ -33,6 +36,7 @@ class WidgetUpdater {
         val preferences = PreferencesDatastore(context)
         val prefEid = preferences.getEid()
         val hasMissionWidgets = hasMissionWidgets(context)
+        val hasVirtueMissionWidgets = hasVirtueMissionWidgets(context)
         val hasContractWidgets = hasContractWidgets(context)
         val hasStatsWidgets = hasStatsWidgets(context)
         val allWidgets = listOf(hasMissionWidgets, hasContractWidgets, hasStatsWidgets)
@@ -45,7 +49,7 @@ class WidgetUpdater {
                     val jobs = mutableListOf<Job>()
                     val exceptions = mutableListOf<Exception>()
 
-                    if (hasMissionWidgets) {
+                    if (hasMissionWidgets || hasVirtueMissionWidgets) {
                         val job = launch {
                             try {
                                 updateMissions(context, preferences, backup)
@@ -97,7 +101,9 @@ class WidgetUpdater {
         backup: Ei.Backup
     ) {
         var prefMissionInfo = preferences.getMissionInfo()
+        var prefVirtueMissionInfo = preferences.getVirtueMissionInfo()
         var prefTankInfo = preferences.getTankInfo()
+        var prefVirtueTankInfo = preferences.getVirtueTankInfo()
 
         val prefEid = preferences.getEid()
         val prefEiUserName = preferences.getEiUserName()
@@ -116,16 +122,28 @@ class WidgetUpdater {
 
         try {
             if (prefEid.isNotBlank()) {
-                if (shouldMakeApiCall(prefMissionInfo)) {
+                val hasMissionWidgets = hasMissionWidgets(context)
+                val hasVirtueMissionWidgets = hasVirtueMissionWidgets(context)
+                if (shouldMakeApiCall(
+                        prefMissionInfo,
+                        prefVirtueMissionInfo,
+                        hasMissionWidgets,
+                        hasVirtueMissionWidgets
+                    )
+                ) {
                     val missionInfo = fetchMissionData(prefEid)
                     // Get a new list of active missions and append fueling mission
                     prefMissionInfo = formatMissionData(missionInfo, backup)
+                    prefVirtueMissionInfo = formatMissionData(missionInfo, backup, true)
                 } else {
                     // Replace existing formatted missions with most recent fueling mission from backup
                     prefMissionInfo = updateFuelingMission(prefMissionInfo, backup)
+                    prefVirtueMissionInfo =
+                        updateFuelingMission(prefVirtueMissionInfo, backup, true)
                 }
 
                 prefTankInfo = formatTankInfo(backup)
+                prefVirtueTankInfo = formatTankInfo(backup, true)
 
                 if (prefScheduleEvents) {
                     scheduleCalendarEvents(
@@ -134,6 +152,14 @@ class WidgetUpdater {
                         prefEiUserName,
                         prefSelectedCalendar
                     )
+
+                    scheduleCalendarEvents(
+                        context,
+                        prefVirtueMissionInfo,
+                        prefEiUserName,
+                        prefSelectedCalendar,
+                        true
+                    )
                 }
 
                 // Mission data and tank fuels need to get saved back to preferences because they are changing regularly
@@ -141,9 +167,13 @@ class WidgetUpdater {
                 // If these items aren't updated in preferences, then a new widget will display old/outdated info
                 // Figuring out how to get all widgets and preferences to read from the same data store might fix this
                 preferences.saveMissionInfo(prefMissionInfo)
+                preferences.saveVirtueMissionInfo(prefVirtueMissionInfo)
                 preferences.saveTankInfo(prefTankInfo)
+                preferences.saveVirtueTankInfo(prefVirtueTankInfo)
                 MissionWidgetDataStore().setMissionInfo(context, prefMissionInfo)
+                MissionWidgetDataStore().setVirtueMissionInfo(context, prefVirtueMissionInfo)
                 MissionWidgetDataStore().setTankInfo(context, prefTankInfo)
+                MissionWidgetDataStore().setVirtueTankInfo(context, prefVirtueTankInfo)
 
                 MissionWidgetDataStore().setEid(context, prefEid)
                 MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
@@ -261,6 +291,16 @@ class WidgetUpdater {
         ).isNotEmpty()
     }
 
+    private suspend fun hasVirtueMissionWidgets(context: Context): Boolean {
+        return GlanceAppWidgetManager(context).getGlanceIds(
+            VirtueMissionWidgetLarge::class.java
+        ).isNotEmpty() || GlanceAppWidgetManager(context).getGlanceIds(
+            VirtueMissionWidgetNormal::class.java
+        ).isNotEmpty() || GlanceAppWidgetManager(context).getGlanceIds(
+            VirtueMissionWidgetMinimal::class.java
+        ).isNotEmpty()
+    }
+
     private suspend fun hasContractWidgets(context: Context): Boolean {
         return GlanceAppWidgetManager(context).getGlanceIds(
             ContractWidgetActive::class.java
@@ -273,12 +313,27 @@ class WidgetUpdater {
         ).isNotEmpty()
     }
 
-    private fun shouldMakeApiCall(preferencesMissionData: List<MissionInfoEntry>): Boolean {
+    private fun shouldMakeApiCall(
+        preferencesMissionInfo: List<MissionInfoEntry>,
+        preferencesVirtueMissionInfo: List<MissionInfoEntry>,
+        hasMissionWidgets: Boolean,
+        hasVirtueMissionWidgets: Boolean
+    ): Boolean {
         // To help reduce load on auxbrain, only make an api call if:
-        // preferencesMissionData has less than 3 active missions, meaning all active missions haven't been saved
-        // preferencesMissionData has complete missions, meaning we need to fetch new active missions
-        return (numOfActiveMissions(preferencesMissionData) < 3 || anyMissionsComplete(
-            preferencesMissionData
-        ))
+        // Mission widgets exist and there are fewer than 3 active missions, or any missions are finished
+        // Virtue mission widgets exist and there are fewer than 3 active virtue missions, or any virtue missions are finished
+        //
+        // Any of the above means we should hit the active missions endpoint to retrieve new data
+        val missionUpdateNeeded =
+            hasMissionWidgets && (numOfActiveMissions(preferencesMissionInfo) < 3 || anyMissionsComplete(
+                preferencesMissionInfo
+            )
+                    )
+        val virtueMissionUpdateNeeded =
+            hasVirtueMissionWidgets && (numOfActiveMissions(preferencesVirtueMissionInfo) < 3 || anyMissionsComplete(
+                preferencesVirtueMissionInfo
+            )
+                    )
+        return missionUpdateNeeded || virtueMissionUpdateNeeded
     }
 }
