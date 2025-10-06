@@ -13,6 +13,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.widgetegg.widgeteggapp.main.MainScreen
 import com.widgetegg.widgeteggapp.settings.SettingsScreen
+import com.widgetegg.widgeteggapp.settings.sections.Contracts
+import com.widgetegg.widgeteggapp.settings.sections.General
+import com.widgetegg.widgeteggapp.settings.sections.Missions
+import com.widgetegg.widgeteggapp.settings.sections.Stats
 import com.widgetegg.widgeteggapp.ui.theme.WidgetEggTheme
 import widget.WidgetScheduler
 
@@ -37,6 +41,18 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(Routes.settingsScreen) {
                                 SettingsScreen(navController, activity)
+                            }
+                            composable(Routes.generalSettingsScreen) {
+                                General(navController)
+                            }
+                            composable(Routes.contractsSettingsScreen) {
+                                Contracts(navController)
+                            }
+                            composable(Routes.missionsSettingsScreen) {
+                                Missions(navController)
+                            }
+                            composable(Routes.statsSettingsScreen) {
+                                Stats(navController)
                             }
                         },
                         modifier = Modifier.semantics { contentDescription = "WidgetEgg" })

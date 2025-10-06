@@ -15,12 +15,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.ArrowDropDown
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Button
@@ -125,41 +126,70 @@ fun SettingsScreen(navController: NavController, activity: MainActivity) {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(end = 25.dp, top = 50.dp)
-            .semantics { contentDescription = "Settings Screen" },
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.Top
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            Icons.Rounded.Home,
-            contentDescription = "Home",
-            modifier = Modifier.clickable {
-                navController.navigate(Routes.mainScreen)
-            })
-    }
+        SettingsHeader(
+            text = "Back to Home Screen",
+            onClick = { navController.navigate(Routes.mainScreen) }
+        )
 
-    Column(
-        modifier = Modifier
-            .padding(vertical = 100.dp)
-            .verticalScroll(rememberScrollState())
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Text(text = "Settings", fontSize = TextUnit(24f, TextUnitType.Sp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            Text(text = "Settings", fontSize = TextUnit(24f, TextUnitType.Sp))
 
-        if (!settingsViewModel.isOptimizationDisabled) {
-            BatteryPermissionsContent(settingsViewModel, packageName, context)
+//            if (!settingsViewModel.isOptimizationDisabled) {
+//                BatteryPermissionsContent(settingsViewModel, packageName, context)
+//            }
+
+//                WidgetColorsGroup(settingsViewModel)
+//        MissionsGeneralGroup(settingsViewModel, packageName, context, activity)
+//        ContractsGeneralGroup(settingsViewModel)
+//        NormalMissionWidgetGroup(settingsViewModel)
+//        LargeMissionWidgetGroup(settingsViewModel)
+//        StatsWidgetGroup(settingsViewModel)
         }
 
-        WidgetColorsGroup(settingsViewModel)
-        MissionsGeneralGroup(settingsViewModel, packageName, context, activity)
-        ContractsGeneralGroup(settingsViewModel)
-        NormalMissionWidgetGroup(settingsViewModel)
-        LargeMissionWidgetGroup(settingsViewModel)
-        StatsWidgetGroup(settingsViewModel)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 15.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            item {
+                if (!settingsViewModel.isOptimizationDisabled) {
+                    BatteryPermissionsContent(settingsViewModel, packageName, context)
+                }
+            }
+            item {
+                SettingsItem(
+                    text = "General",
+                    onClick = { navController.navigate(Routes.generalSettingsScreen) }
+                )
+            }
+            item {
+                SettingsItem(
+                    text = "Missions",
+                    onClick = { navController.navigate(Routes.missionsSettingsScreen) }
+                )
+            }
+            item {
+                SettingsItem(
+                    text = "Contracts",
+                    onClick = { navController.navigate(Routes.contractsSettingsScreen) }
+                )
+            }
+            item {
+                SettingsItem(
+                    text = "Stats",
+                    onClick = { navController.navigate(Routes.statsSettingsScreen) }
+                )
+            }
+        }
     }
 }
 
@@ -172,7 +202,7 @@ fun BatteryPermissionsContent(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 15.dp, top = 15.dp)
+            .padding(vertical = 15.dp)
             .clickable {
                 settingsViewModel.updateShowBatteryOptimizationDialog(true)
             },
@@ -244,6 +274,43 @@ fun BatteryPermissionsDialog(
             }
         }
     }
+}
+
+@Composable
+fun SettingsHeader(
+    text: String,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 25.dp, top = 50.dp)
+            .semantics { contentDescription = text },
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Icon(
+            Icons.AutoMirrored.Rounded.ArrowBack,
+            contentDescription = text,
+            modifier = Modifier.clickable { onClick() }
+        )
+    }
+}
+
+@Composable
+fun SettingsItem(
+    text: String,
+    onClick: () -> Unit
+) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(color = MaterialTheme.colorScheme.surfaceBright)
+            .clickable { onClick() }
+            .padding(vertical = 16.dp, horizontal = 20.dp)
+    )
 }
 
 @Composable
@@ -1250,44 +1317,7 @@ fun OpenWasmeggDashboardDialog(settingsViewModel: SettingsViewModel) {
     }
 }
 
-@Composable
-fun StatsWidgetGroup(settingsViewModel: SettingsViewModel) {
-    Column(
-        modifier = Modifier.widgetGroupingModifier(),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Text(text = "Stats Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
-        CommunityBadgesRow(settingsViewModel)
-    }
-}
-
-@Composable
-fun CommunityBadgesRow(settingsViewModel: SettingsViewModel) {
-    Row(
-        modifier = Modifier.settingsRowModifier(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Text(text = "Show community badges")
-        }
-
-        val scope = rememberCoroutineScope()
-        Switch(
-            checked = settingsViewModel.showCommunityBadges,
-            onCheckedChange = {
-                scope.launch {
-                    settingsViewModel.updateShowCommunityBadges(!settingsViewModel.showCommunityBadges)
-                }
-            }
-        )
-    }
-}
-
-private fun Modifier.settingsRowModifier() =
+fun Modifier.settingsRowModifier() =
     this
         .padding(top = 15.dp, start = 15.dp, end = 25.dp)
         .fillMaxWidth()
