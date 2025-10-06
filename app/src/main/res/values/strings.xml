@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">WidgetEgg</string>
-    <string name="mission_widget_normal">Active and fueling missions</string>
-    <string name="mission_widget_minimal">Active and fueling missions</string>
-    <string name="mission_widget_large">Active missions and fuel tanks or fueling mission</string>
+    <string name="mission_widget_normal">Active normal missions and fueling missions</string>
+    <string name="mission_widget_minimal">Active normal missions and fueling missions</string>
+    <string name="mission_widget_large">Active normal missions and fuel tanks or fueling mission</string>
+    <string name="virtue_mission_widget_normal">Active virtue missions and fueling missions</string>
+    <string name="virtue_mission_widget_minimal">Active virtue missions and fueling missions</string>
+    <string name="virtue_mission_widget_large">Active virtue missions and fuel tanks or fueling mission</string>
     <string name="contract_widget_active">Active contracts and rewards</string>
     <string name="stats_widget_normal">Egg Inc user stats</string>
 </resources>
