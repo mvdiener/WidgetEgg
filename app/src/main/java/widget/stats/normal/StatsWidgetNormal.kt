@@ -197,7 +197,7 @@ fun NameAndPermit(
         )
         // If the player has no truth eggs, they may not be far enough in the game yet
         // Show the permit icon instead, so there aren't potential spoilers with the truth egg icon
-        if (statsInfo.truthEggs.toIntOrNull() == 0) {
+        if ((statsInfo.truthEggs.toIntOrNull() ?: 0) == 0) {
             Image(
                 provider = ImageProvider(permitBitmap),
                 contentDescription = "Permit Icon",
