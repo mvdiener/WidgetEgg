@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                                 MainScreen(navController)
                             }
                             composable(Routes.settingsScreen) {
-                                SettingsScreen(navController, activity)
+                                SettingsScreen(navController)
                             }
                             composable(Routes.generalSettingsScreen) {
                                 General(navController)
@@ -49,7 +49,7 @@ class MainActivity : ComponentActivity() {
                                 Contracts(navController)
                             }
                             composable(Routes.missionsSettingsScreen) {
-                                Missions(navController)
+                                Missions(navController, activity)
                             }
                             composable(Routes.statsSettingsScreen) {
                                 Stats(navController)
