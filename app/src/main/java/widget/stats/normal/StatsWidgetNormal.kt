@@ -102,7 +102,7 @@ class StatsWidgetNormal : GlanceAppWidget() {
                     NoStatsContent(context.assets, textColor)
                 } else {
                     val assetManager = context.assets
-                    NameAndPermit(statsInfo, eiUserName, assetManager, textColor)
+                    NameAndRole(statsInfo, eiUserName, assetManager, textColor)
                     MysticalEggs(statsInfo, assetManager, textColor)
                     Earnings(statsInfo, assetManager, textColor)
                     Spendable(statsInfo, assetManager, textColor)
@@ -148,7 +148,7 @@ fun NoStatsContent(assetManager: AssetManager, textColor: Color) {
 }
 
 @Composable
-fun NameAndPermit(
+fun NameAndRole(
     statsInfo: StatsInfo,
     eiUserName: String,
     assetManager: AssetManager,
@@ -168,19 +168,11 @@ fun NameAndPermit(
             )
         )
 
-        val permitName = if (statsInfo.hasProPermit) {
-            "pro_permit"
-        } else {
-            "free_permit"
-        }
-        val permitBitmap =
-            BitmapFactory.decodeStream(getAsset(assetManager, "other/$permitName.png"))
-
-        val truthEggBitmap = bitmapResize(
+        val bookBitmap = bitmapResize(
             BitmapFactory.decodeStream(
                 getAsset(
                     assetManager,
-                    "eggs/egg_truth.png"
+                    "artifacts/afx_book_of_basan_4.png"
                 )
             )
         )
@@ -195,22 +187,17 @@ fun NameAndPermit(
             text = eiUserName,
             style = TextStyle(color = ColorProvider(textColor))
         )
-        // If the player has no truth eggs, they may not be far enough in the game yet
-        // Show the permit icon instead, so there aren't potential spoilers with the truth egg icon
-        if ((statsInfo.truthEggs.toIntOrNull() ?: 0) == 0) {
-            Image(
-                provider = ImageProvider(permitBitmap),
-                contentDescription = "Permit Icon",
-                modifier = GlanceModifier.size(24.dp)
-            )
-        } else {
-            Image(
-                provider = ImageProvider(truthEggBitmap),
-                contentDescription = "Truth Egg Icon",
-                modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
-            )
-            Text(text = statsInfo.truthEggs, style = TextStyle(color = ColorProvider(textColor)))
-        }
+        val farmerRole = getFarmerRole(statsInfo.farmerRoleId)
+        val shortenedRole = getShortenedFarmerRole(farmerRole.first)
+
+        Image(
+            provider = ImageProvider(bookBitmap),
+            contentDescription = "Book Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
+        )
+        Text(text = shortenedRole, style = TextStyle(color = ColorProvider(textColor)))
+
+
     }
 }
 
@@ -279,15 +266,41 @@ fun Earnings(
             )
         )
 
-        val farmerRole = getFarmerRole(statsInfo.farmerRoleId)
-        val shortenedRole = getShortenedFarmerRole(farmerRole.first)
+        val permitName = if (statsInfo.hasProPermit) {
+            "pro_permit"
+        } else {
+            "free_permit"
+        }
+        val permitBitmap =
+            BitmapFactory.decodeStream(getAsset(assetManager, "other/$permitName.png"))
 
-        Image(
-            provider = ImageProvider(bookBitmap),
-            contentDescription = "Book Icon",
-            modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
+        val truthEggBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "eggs/egg_truth.png"
+                )
+            )
         )
-        Text(text = shortenedRole, style = TextStyle(color = ColorProvider(textColor)))
+
+        val farmerRole = getFarmerRole(statsInfo.farmerRoleId)
+
+        // If the player has no truth eggs, they may not be far enough in the game yet
+        // Show the permit icon instead, so there aren't potential spoilers with the truth egg icon
+        if ((statsInfo.truthEggs.toIntOrNull() ?: 0) == 0) {
+            Image(
+                provider = ImageProvider(permitBitmap),
+                contentDescription = "Permit Icon",
+                modifier = GlanceModifier.size(24.dp)
+            )
+        } else {
+            Image(
+                provider = ImageProvider(truthEggBitmap),
+                contentDescription = "Truth Egg Icon",
+                modifier = GlanceModifier.size(20.dp).padding(end = 3.dp)
+            )
+            Text(text = statsInfo.truthEggs, style = TextStyle(color = ColorProvider(textColor)))
+        }
         Box(modifier = GlanceModifier.defaultWeight()) {}
         Box(
             modifier = GlanceModifier
