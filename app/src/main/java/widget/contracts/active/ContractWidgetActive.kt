@@ -217,7 +217,7 @@ fun ContractSingle(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, useOfflineTime, 75, 10)
+        EggAndProgressBars(assetManager, contract, useOfflineTime, 65, 9)
     }
 
     Text(
