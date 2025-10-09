@@ -35,7 +35,8 @@ fun scheduleCalendarEvents(
             if (missionEndTime > 0 && mission.identifier.isNotBlank() && selectedCalendar.id.toInt() != -1 && !hasEvent(
                     context,
                     mission.identifier,
-                    missionEndTime
+                    missionEndTime,
+                    selectedCalendar.id.toInt()
                 )
             ) {
                 val missionEndTimePlusMinute = missionEndTime + (60 * 1000)
@@ -73,6 +74,21 @@ fun scheduleCalendarEvents(
     }
 }
 
+fun removeCalendarEvents(context: Context, selectedCalendar: CalendarEntry) {
+    if (hasCalendarPermissions(context) && selectedCalendar.id.toInt() != -1) {
+        val eventIds = getEventIdsToDelete(context, selectedCalendar.id.toInt())
+
+        if (eventIds.isNotEmpty()) {
+            val selection = "${CalendarContract.Events._ID} IN (${eventIds.joinToString(",")})"
+            context.contentResolver.delete(
+                CalendarContract.Events.CONTENT_URI,
+                selection,
+                null
+            )
+        }
+    }
+}
+
 private fun removeDefaultReminders(context: Context, eventId: Long) {
     val selection = "${Reminders.EVENT_ID} = ?"
     val selectionArgs = arrayOf(eventId.toString())
@@ -80,7 +96,12 @@ private fun removeDefaultReminders(context: Context, eventId: Long) {
     context.contentResolver.delete(Reminders.CONTENT_URI, selection, selectionArgs)
 }
 
-private fun hasEvent(context: Context, identifier: String, eventTime: Long): Boolean {
+private fun hasEvent(
+    context: Context,
+    identifier: String,
+    eventTime: Long,
+    calendarId: Int
+): Boolean {
     val uri = CalendarContract.Events.CONTENT_URI
 
     val projection = arrayOf(
@@ -88,12 +109,13 @@ private fun hasEvent(context: Context, identifier: String, eventTime: Long): Boo
     )
 
     // Look for events within +/- 5 min of event time to reduce query scope
-    val startTime = eventTime - (5 * 60 * 1000)
-    val endTime = eventTime + (5 * 60 * 1000)
+    val startTime = eventTime - (5 * 60 * 1000L)
+    val endTime = eventTime + (5 * 60 * 1000L)
 
     val selection =
-        "${CalendarContract.Events.DESCRIPTION} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ?"
-    val selectionArgs = arrayOf(identifier, startTime.toString(), endTime.toString())
+        "${CalendarContract.Events.DESCRIPTION} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ? AND ${CalendarContract.Events.CALENDAR_ID} = ?"
+    val selectionArgs =
+        arrayOf(identifier, startTime.toString(), endTime.toString(), calendarId.toString())
 
     val contentResolver: ContentResolver = context.contentResolver
 
@@ -109,4 +131,49 @@ private fun hasEvent(context: Context, identifier: String, eventTime: Long): Boo
 
     cursor?.close()
     return hasEvent
+}
+
+private fun getEventIdsToDelete(context: Context, calendarId: Int): List<Long> {
+    val uri = CalendarContract.Events.CONTENT_URI
+
+    val projection = arrayOf(
+        CalendarContract.Events._ID
+    )
+
+    val shipDescriptionText = "%hip returning for %"
+
+    // Look for events from a day ago to a month ago to reduce query scope
+    val now = System.currentTimeMillis()
+    val startTime = now - (30 * 24 * 60 * 60 * 1000L)
+    val endTime = now - (24 * 60 * 60 * 1000L)
+
+    val selection =
+        "${CalendarContract.Events.CALENDAR_ID} = ? AND ${CalendarContract.Events.TITLE} LIKE ? AND ${CalendarContract.Events.DTSTART} BETWEEN ? AND ?"
+    val selectionArgs = arrayOf(
+        calendarId.toString(),
+        shipDescriptionText,
+        startTime.toString(),
+        endTime.toString()
+    )
+
+    val contentResolver: ContentResolver = context.contentResolver
+
+    val cursor = contentResolver.query(
+        uri,
+        projection,
+        selection,
+        selectionArgs,
+        null
+    )
+
+    val eventIds = mutableListOf<Long>()
+    cursor?.use {
+        val idColumnIndex = it.getColumnIndex(CalendarContract.Events._ID)
+        while (it.moveToNext()) {
+            val eventId = it.getLong(idColumnIndex)
+            eventIds.add(eventId)
+        }
+    }
+
+    return eventIds
 }

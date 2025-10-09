@@ -15,6 +15,7 @@ import tools.utilities.formatContractData
 import tools.utilities.formatMissionData
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
+import tools.utilities.removeCalendarEvents
 import tools.utilities.scheduleCalendarEvents
 import tools.utilities.updateFuelingMission
 import user.preferences.PreferencesDatastore
@@ -163,6 +164,8 @@ class WidgetUpdater {
                         prefSelectedCalendar,
                         true
                     )
+
+                    removeCalendarEvents(context, prefSelectedCalendar)
                 }
 
                 // Mission data and tank fuels need to get saved back to preferences because they are changing regularly
