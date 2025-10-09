@@ -148,7 +148,7 @@ private fun getEventIdsToDelete(context: Context, calendarId: Int): List<Long> {
     val endTime = now - (24 * 60 * 60 * 1000L)
 
     val selection =
-        "${CalendarContract.Events.CALENDAR_ID} = ? AND ${CalendarContract.Events.TITLE} LIKE ? AND ${CalendarContract.Events.DTSTART} BETWEEN ? AND ?"
+        "${CalendarContract.Events.CALENDAR_ID} = ? AND ${CalendarContract.Events.TITLE} LIKE ? AND ${CalendarContract.Events.DTEND} BETWEEN ? AND ?"
     val selectionArgs = arrayOf(
         calendarId.toString(),
         shipDescriptionText,
