@@ -46,6 +46,10 @@ class WidgetUpdater {
                 val backup = fetchBackupData(prefEid)
 
                 coroutineScope {
+                    // Update the username, in case it has changed
+                    // This is only used in the main activity
+                    preferences.saveEiUserName(backup.userName)
+
                     val jobs = mutableListOf<Job>()
                     val exceptions = mutableListOf<Exception>()
 
@@ -106,7 +110,6 @@ class WidgetUpdater {
         var prefVirtueTankInfo = preferences.getVirtueTankInfo()
 
         val prefEid = preferences.getEid()
-        val prefEiUserName = preferences.getEiUserName()
         val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeMission()
         val prefUseAbsoluteTimePlusDay = preferences.getUseAbsoluteTimePlusDay()
         val prefTargetArtifactNormalWidget = preferences.getTargetArtifactNormalWidget()
@@ -149,14 +152,14 @@ class WidgetUpdater {
                     scheduleCalendarEvents(
                         context,
                         prefMissionInfo,
-                        prefEiUserName,
+                        backup.userName,
                         prefSelectedCalendar
                     )
 
                     scheduleCalendarEvents(
                         context,
                         prefVirtueMissionInfo,
-                        prefEiUserName,
+                        backup.userName,
                         prefSelectedCalendar,
                         true
                     )
@@ -246,7 +249,6 @@ class WidgetUpdater {
         var prefStatsInfo = preferences.getStatsInfo()
 
         val prefEid = preferences.getEid()
-        val prefEiUserName = preferences.getEiUserName()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
         val prefShowCommunityBadges = preferences.getShowCommunityBadges()
@@ -258,7 +260,7 @@ class WidgetUpdater {
                 preferences.saveStatsInfo(prefStatsInfo)
 
                 StatsWidgetDataStore().setEid(context, prefEid)
-                StatsWidgetDataStore().setEiUserName(context, prefEiUserName)
+                StatsWidgetDataStore().setEiUserName(context, backup.userName)
                 StatsWidgetDataStore().setStatsInfo(context, prefStatsInfo)
                 StatsWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
                 StatsWidgetDataStore().setTextColor(context, prefWidgetTextColor)
