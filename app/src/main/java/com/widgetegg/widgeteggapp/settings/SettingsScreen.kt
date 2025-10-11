@@ -58,7 +58,7 @@ fun SettingsScreen(navController: NavController) {
     ) {
         SettingsHeader(
             text = "Back to Home Screen",
-            onClick = { navController.navigate(Routes.mainScreen) }
+            onClick = { navController.popBackStack() }
         )
 
         Column(

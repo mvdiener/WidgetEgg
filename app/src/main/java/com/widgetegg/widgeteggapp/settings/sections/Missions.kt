@@ -95,7 +95,7 @@ fun Missions(navController: NavController, activity: MainActivity) {
     ) {
         SettingsHeader(
             text = "Back to Settings Screen",
-            onClick = { navController.navigate(Routes.settingsScreen) }
+            onClick = { navController.popBackStack() }
         )
 
         Column(
