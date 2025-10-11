@@ -151,6 +151,16 @@ fun getImageNameFromAfxId(afxId: Int): String {
         17 -> "afx_gold_meteorite_3"
         18 -> "afx_tau_ceti_geode_3"
         43 -> "afx_solar_titanium_3"
+        2 -> "afx_tachyon_stone_1"
+        44 -> "afx_dilithium_stone_1"
+        45 -> "afx_shell_stone_1"
+        46 -> "afx_lunar_stone_1"
+        47 -> "afx_soul_stone_1"
+        48 -> "afx_prophecy_stone_1"
+        49 -> "afx_quantum_stone_1"
+        50 -> "afx_terra_stone_1"
+        51 -> "afx_life_stone_1"
+        52 -> "afx_clarity_stone_1"
         else -> ""
     }
 }
