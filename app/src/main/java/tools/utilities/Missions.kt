@@ -83,10 +83,22 @@ fun getMissionEndTimeMilliseconds(mission: MissionInfoEntry): Long {
     return endingTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 }
 
-fun formatMissionData(missionInfo: MissionData, backup: Ei.Backup): List<MissionInfoEntry> {
+fun formatMissionData(
+    missionInfo: MissionData,
+    backup: Ei.Backup,
+    isVirtueMission: Boolean = false
+): List<MissionInfoEntry> {
     var formattedMissions: List<MissionInfoEntry> = emptyList()
-    var missionsWithFueling = missionInfo.missions
-    val fuelingMission = backup.artifactsDb.fuelingMission
+    var missionsWithFueling = if (isVirtueMission) {
+        missionInfo.virtueMissions
+    } else {
+        missionInfo.missions
+    }
+    val fuelingMission = if (isVirtueMission) {
+        backup.artifactsDb.virtueAfxDb.fuelingMission
+    } else {
+        backup.artifactsDb.fuelingMission
+    }
 
     if (fuelingMission.capacity > 0) {
         missionsWithFueling = missionsWithFueling + fuelingMission
@@ -114,10 +126,15 @@ fun formatMissionData(missionInfo: MissionData, backup: Ei.Backup): List<Mission
 
 fun updateFuelingMission(
     missions: List<MissionInfoEntry>,
-    backup: Ei.Backup
+    backup: Ei.Backup,
+    isVirtueMission: Boolean = false
 ): List<MissionInfoEntry> {
     var activeMissions = missions.filter { mission -> mission.identifier.isNotBlank() }
-    val fuelingMission = backup.artifactsDb.fuelingMission
+    val fuelingMission = if (isVirtueMission) {
+        backup.artifactsDb.virtueAfxDb.fuelingMission
+    } else {
+        backup.artifactsDb.fuelingMission
+    }
 
     if (fuelingMission.capacity > 0) {
         activeMissions = activeMissions.plus(
@@ -149,16 +166,33 @@ fun getTankCapacity(tankLevel: Int): Long {
     return TANK_SIZES[tankLevel]
 }
 
-fun formatTankInfo(backup: Ei.Backup): TankInfo {
+fun formatTankInfo(backup: Ei.Backup, isVirtueMission: Boolean = false): TankInfo {
     var formattedFuelLevels: List<FuelLevelInfo> = emptyList()
 
-    backup.artifacts.tankFuelsList.forEachIndexed { index, fuel ->
+    val tankFuelList = if (isVirtueMission) {
+        backup.virtue.afx.tankFuelsList
+    } else {
+        backup.artifacts.tankFuelsList
+    }
+
+    val tankLimitsList = if (isVirtueMission) {
+        backup.virtue.afx.tankLimitsList
+    } else {
+        backup.artifacts.tankLimitsList
+    }
+
+    tankFuelList.forEachIndexed { index, fuel ->
         if (fuel > 0) {
+            val eggId = if (isVirtueMission) {
+                index + 30
+            } else {
+                index + 1
+            }
             formattedFuelLevels = formattedFuelLevels.plus(
                 FuelLevelInfo(
-                    eggId = index + 1,
+                    eggId = eggId,
                     fuelQuantity = fuel,
-                    fuelSlider = backup.artifacts.tankLimitsList[index]
+                    fuelSlider = tankLimitsList[index]
                 )
             )
         }
@@ -229,7 +263,8 @@ fun createMissionCircularProgressBarBitmap(
     isFueling: Boolean
 ): Bitmap {
     val color = getMissionColor(durationType, isFueling)
-    return createCircularProgressBarBitmap(progress, color, size, 8f)
+    val progressData = listOf(CircularProgress(progress, color))
+    return createCircularProgressBarBitmap(progressData, size, 8f)
 }
 
 fun getShipName(shipId: Int): String {

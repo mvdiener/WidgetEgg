@@ -86,12 +86,24 @@ fun getContractGoalPercentComplete(
     }
 }
 
+fun getOfflineEggsDelivered(contract: ContractInfoEntry): Double {
+    return contract.contributors.sumOf { contributor ->
+        contributor.offlineTimeSeconds * contributor.eggRatePerSecond
+    }
+}
+
 fun createContractCircularProgressBarBitmap(
-    progress: Float,
+    totalProgress: Float,
+    offlineProgress: Float?,
     size: Int
 ): Bitmap {
-    val color = "#16ac00".toColorInt()
-    return createCircularProgressBarBitmap(progress, color, size, 4f)
+    val totalProgressColor = "#008531".toColorInt()
+    val offlineProgressColor = "#51dda8".toColorInt()
+    val progressData = mutableListOf(CircularProgress(totalProgress, totalProgressColor))
+    if (offlineProgress != null) {
+        progressData.add(CircularProgress(offlineProgress, offlineProgressColor))
+    }
+    return createCircularProgressBarBitmap(progressData, size, 4f)
 }
 
 // Returns Pair<timeText, isOnTrack>
@@ -111,9 +123,7 @@ fun getContractDurationRemaining(
     var offlineEggsDelivered = 0.0
 
     if (useOfflineTime) {
-        offlineEggsDelivered = contract.contributors.sumOf { contributor ->
-            contributor.offlineTimeSeconds * contributor.eggRatePerSecond
-        }
+        offlineEggsDelivered = getOfflineEggsDelivered(contract)
     }
 
     val remainingEggsNeeded = totalEggsNeeded - totalEggsDelivered - offlineEggsDelivered

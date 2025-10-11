@@ -7,14 +7,19 @@ import android.graphics.Paint
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
+import androidx.core.text.color
 import data.NUMBER_UNITS
 import ei.Ei
 import java.io.InputStream
 import java.util.Locale
 
+data class CircularProgress(
+    val progress: Float,
+    val color: Int,
+)
+
 fun createCircularProgressBarBitmap(
-    progress: Float,
-    color: Int,
+    progressData: List<CircularProgress>,
     size: Int,
     width: Float
 ): Bitmap {
@@ -27,22 +32,52 @@ fun createCircularProgressBarBitmap(
         strokeCap = Paint.Cap.ROUND
     }
 
+    // Background gray circle
     paint.color = "#464646".toColorInt()
     val radius = size / 2f - paint.strokeWidth / 2
     canvas.drawCircle(size / 2f, size / 2f, radius, paint)
 
-    paint.color = color
-    val sweepAngle = 360 * progress
-    canvas.drawArc(
-        paint.strokeWidth / 2,
-        paint.strokeWidth / 2,
-        size - paint.strokeWidth / 2,
-        size - paint.strokeWidth / 2,
-        90f,
-        sweepAngle,
-        false,
-        paint
+    data class SegmentData(
+        val color: Int,
+        val startAngle: Float,
+        val sweepAngle: Float
     )
+
+    val circleBottom = 90f
+    val sortedProgressData = progressData.sortedBy { it.progress }
+    val segmentsToDraw = mutableListOf<SegmentData>()
+    var currentStartAngle = circleBottom
+    var totalProgress = 0f
+
+    for (item in sortedProgressData) {
+        val segmentProgress = item.progress - totalProgress
+        if (segmentProgress > 0) {
+            val sweepAngle = 360 * segmentProgress
+            segmentsToDraw.add(
+                SegmentData(
+                    color = item.color,
+                    startAngle = currentStartAngle,
+                    sweepAngle = sweepAngle
+                )
+            )
+            currentStartAngle += sweepAngle
+        }
+        totalProgress = item.progress
+    }
+
+    segmentsToDraw.asReversed().forEach { segment ->
+        paint.color = segment.color
+        canvas.drawArc(
+            paint.strokeWidth / 2,
+            paint.strokeWidth / 2,
+            size - paint.strokeWidth / 2,
+            size - paint.strokeWidth / 2,
+            segment.startAngle,
+            segment.sweepAngle,
+            false,
+            paint
+        )
+    }
 
     return bitmap
 }
@@ -116,6 +151,16 @@ fun getImageNameFromAfxId(afxId: Int): String {
         17 -> "afx_gold_meteorite_3"
         18 -> "afx_tau_ceti_geode_3"
         43 -> "afx_solar_titanium_3"
+        2 -> "afx_tachyon_stone_1"
+        44 -> "afx_dilithium_stone_1"
+        45 -> "afx_shell_stone_1"
+        46 -> "afx_lunar_stone_1"
+        47 -> "afx_soul_stone_1"
+        48 -> "afx_prophecy_stone_1"
+        49 -> "afx_quantum_stone_1"
+        50 -> "afx_terra_stone_1"
+        51 -> "afx_life_stone_1"
+        52 -> "afx_clarity_stone_1"
         else -> ""
     }
 }

@@ -7,6 +7,7 @@ import data.CURRENT_CLIENT_VERSION
 import data.ContractData
 import data.MISSION_ENDPOINT
 import data.MissionData
+import ei.Ei
 import ei.Ei.AuthenticatedMessage
 import ei.Ei.Backup
 import ei.Ei.BasicRequestInfo
@@ -38,9 +39,11 @@ suspend fun fetchBackupData(eid: String): Backup {
 
 suspend fun fetchMissionData(eid: String): MissionData {
     val basicRequestInfo = getBasicRequestInfo(eid)
-    var activeMissions = fetchActiveMissions(basicRequestInfo)
+    val activeMissions = fetchActiveMissions(basicRequestInfo)
 
-    return MissionData(activeMissions)
+    val (virtueMissions, normalMissions) = activeMissions.partition { mission -> mission.type == MissionInfo.MissionType.VIRTUE }
+
+    return MissionData(normalMissions, virtueMissions)
 }
 
 suspend fun fetchContractData(backup: Backup): ContractData {

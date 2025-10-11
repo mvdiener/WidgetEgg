@@ -60,20 +60,31 @@ import widget.WidgetUpdater
 import widget.missions.MissionWidgetDataStore
 import widget.missions.MissionWidgetDataStorePreferencesKeys
 
-class MissionWidgetLarge : GlanceAppWidget() {
+abstract class BaseWidgetLarge(val isVirtueWidget: Boolean = false) : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             val state = currentState<Preferences>()
             val eid = state[MissionWidgetDataStorePreferencesKeys.EID] ?: ""
-            val missionData =
+            val missionData = if (isVirtueWidget) {
+                MissionWidgetDataStore().decodeMissionInfo(
+                    state[MissionWidgetDataStorePreferencesKeys.VIRTUE_MISSION_INFO] ?: ""
+                )
+            } else {
                 MissionWidgetDataStore().decodeMissionInfo(
                     state[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] ?: ""
                 )
-            val tankInfo = MissionWidgetDataStore().decodeTankInfo(
-                state[MissionWidgetDataStorePreferencesKeys.TANK_INFO] ?: ""
-            )
+            }
+            val tankInfo = if (isVirtueWidget) {
+                MissionWidgetDataStore().decodeTankInfo(
+                    state[MissionWidgetDataStorePreferencesKeys.VIRTUE_TANK_INFO] ?: ""
+                )
+            } else {
+                MissionWidgetDataStore().decodeTankInfo(
+                    state[MissionWidgetDataStorePreferencesKeys.TANK_INFO] ?: ""
+                )
+            }
             val useAbsoluteTime =
                 state[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] == true
             val useAbsoluteTimePlusDay =

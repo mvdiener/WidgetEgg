@@ -40,13 +40,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         MissionWidgetDataStore().setUseAbsoluteTime(context, input)
     }
 
-    var showAbsoluteTimeMissionDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowAbsoluteTimeMissionDialog(input: Boolean) {
-        showAbsoluteTimeMissionDialog = input
-    }
-
     var useAbsoluteTimePlusDay by mutableStateOf(false)
         private set
 
@@ -57,13 +50,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         MissionWidgetDataStore().setUseAbsoluteTimePlusDay(context, input)
     }
 
-    var showAbsoluteTimePlusDayDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowAbsoluteTimePlusDayDialog(input: Boolean) {
-        showAbsoluteTimePlusDayDialog = input
-    }
-
     var openEggInc by mutableStateOf(false)
         private set
 
@@ -72,13 +58,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferences.saveOpenEggInc(input)
         val context = getApplication<Application>().applicationContext
         MissionWidgetDataStore().setOpenEggInc(context, input)
-    }
-
-    var showOpenEggIncDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowOpenEggIncDialog(input: Boolean) {
-        showOpenEggIncDialog = input
     }
 
     var showTargetArtifactNormalWidget by mutableStateOf(false)
@@ -121,13 +100,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         MissionWidgetDataStore().setShowTankLevels(context, input)
     }
 
-    var showTankLevelsDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowTankLevelsDialog(input: Boolean) {
-        showTankLevelsDialog = input
-    }
-
     var isOptimizationDisabled by mutableStateOf(true)
         private set
 
@@ -152,13 +124,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         MissionWidgetDataStore().setUseSliderCapacity(context, input)
     }
 
-    var showSliderCapacityDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowSliderCapacityDialog(input: Boolean) {
-        showSliderCapacityDialog = input
-    }
-
     var hasScheduleEventPermissions by mutableStateOf(false)
         private set
 
@@ -178,13 +143,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 preferences.saveSelectedCalendar(CalendarEntry())
             }
         }
-    }
-
-    var showScheduleEventsDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowScheduleEventsDialog(input: Boolean) {
-        showScheduleEventsDialog = input
     }
 
     var selectedCalendar by mutableStateOf(CalendarEntry())
@@ -252,13 +210,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         ContractWidgetDataStore().setUseAbsoluteTime(context, input)
     }
 
-    var showAbsoluteTimeContractDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowAbsoluteTimeContractDialog(input: Boolean) {
-        showAbsoluteTimeContractDialog = input
-    }
-
     var useOfflineTime by mutableStateOf(false)
         private set
 
@@ -269,13 +220,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         ContractWidgetDataStore().setUseOfflineTime(context, input)
     }
 
-    var showOfflineTimeDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowOfflineTimeDialog(input: Boolean) {
-        showOfflineTimeDialog = input
-    }
-
     var openWasmeggDashboard by mutableStateOf(false)
         private set
 
@@ -284,20 +228,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferences.saveOpenWasmeggDashboard(input)
         val context = getApplication<Application>().applicationContext
         ContractWidgetDataStore().setOpenWasmeggDashboard(context, input)
-    }
-
-    var showOpenWasmeggDashboardDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowOpenWasmeggDashboardDialog(input: Boolean) {
-        showOpenWasmeggDashboardDialog = input
-    }
-
-    var showWidgetColorsDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowWidgetColorsDialog(input: Boolean) {
-        showWidgetColorsDialog = input
     }
 
     var widgetBackgroundColor by mutableStateOf(DEFAULT_WIDGET_BACKGROUND_COLOR)
