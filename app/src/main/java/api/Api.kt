@@ -70,8 +70,12 @@ fun getBasicRequestInfo(eid: String): BasicRequestInfo {
 private suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<MissionInfo> {
     val url = MISSION_ENDPOINT
 
+    val getActiveMissionsRequest = Ei.GetActiveMissionsRequest.newBuilder()
+        .setRinfo(basicRequestInfo)
+        .build()
+
     val authMessage = try {
-        buildSecureAuthMessage(data = basicRequestInfo)
+        buildSecureAuthMessage(data = getActiveMissionsRequest)
     } catch (e: Exception) {
         throw e
     }

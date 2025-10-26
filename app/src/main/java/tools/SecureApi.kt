@@ -1,11 +1,11 @@
 package tools
 
+import com.google.protobuf.MessageLite
 import com.widgetegg.widgeteggapp.BuildConfig
 import ei.Ei.AuthenticatedMessage
-import ei.Ei.BasicRequestInfo
 import java.security.MessageDigest
 
-fun buildSecureAuthMessage(data: BasicRequestInfo): AuthenticatedMessage {
+fun <T : MessageLite> buildSecureAuthMessage(data: T): AuthenticatedMessage {
     val secretKey = BuildConfig.SECRET_KEY
     val secretHash = sha256(secretKey)
     val dataByteArray = data.toByteArray()
