@@ -155,7 +155,7 @@ fun OpenWasmeggDashboardRow(settingsViewModel: SettingsViewModel) {
         ) {
             SettingsHeaderAndDescription(
                 "Open eicoop dashboard",
-                "Tapping any contract widget will your open your eicoop dashboard, instead of manually refreshing all widgets. Uses Chrome if the default browser fails to open.",
+                "Tapping any contract widget will open your eicoop dashboard, instead of manually refreshing all widgets. Uses Chrome if the default browser fails to open.",
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 10.dp)
