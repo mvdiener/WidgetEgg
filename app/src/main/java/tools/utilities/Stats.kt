@@ -5,6 +5,7 @@ import data.ALL_GRADES
 import data.ALL_ROLES
 import data.Badges
 import data.CRAFTING_LEVELS
+import data.SHIP_MAX_LAUNCH_POINTS
 import data.StatsInfo
 import ei.Ei
 import java.util.UUID
@@ -13,6 +14,7 @@ import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.round
 
 fun formatStatsData(backup: Ei.Backup): StatsInfo {
     val eb = calculateEB(backup)
@@ -82,7 +84,7 @@ fun getBadges(backup: Ei.Backup): Badges {
     // Some calculations may need to change, if new elements are added to the game
     return Badges(
         hasAlc = getDistinctLegendaries(allLegendaries) >= 22,
-        hasAsc = totalShipStars(backup) >= 49,
+        hasAsc = hasAsc(backup),
         hasCraftingLegend = getCraftingLevel(backup.artifacts.craftingXp) == 30,
         hasEnd = hasEnded(backup),
         hasNah = hasNah(backup),
@@ -107,12 +109,34 @@ private fun getDistinctLegendaries(inventory: List<Ei.ArtifactInventoryItem>): I
     }.size
 }
 
-private fun totalShipStars(backup: Ei.Backup): Int {
+private fun hasAsc(backup: Ei.Backup): Boolean {
     val allMissions = backup.artifactsDb.missionInfosList + backup.artifactsDb.missionArchiveList
-    val missionsSorted = allMissions.sortedByDescending { ship -> ship.startTimeDerived }
+    val missionsByShip = allMissions.groupBy { it.ship }
 
-    val distinctMissions = missionsSorted.distinctBy { mission -> mission.ship }
-    return distinctMissions.sumOf { mission -> mission.level }
+    if (missionsByShip.size != SHIP_MAX_LAUNCH_POINTS.size) return false
+
+    val launchPointsByShip = missionsByShip.mapValues { (_, missions) ->
+        calculateLaunchPoints(missions)
+    }
+
+    launchPointsByShip.forEach { (ship, launchPoints) ->
+        if (launchPoints < SHIP_MAX_LAUNCH_POINTS[ship.number]) return false
+    }
+
+    return true
+}
+
+private fun calculateLaunchPoints(missions: List<Ei.MissionInfo>): Double {
+    val calculatedPoints = missions.sumOf { mission ->
+        when (mission.durationType) {
+            Ei.MissionInfo.DurationType.SHORT, Ei.MissionInfo.DurationType.TUTORIAL -> 1.0
+            Ei.MissionInfo.DurationType.LONG -> 1.4
+            Ei.MissionInfo.DurationType.EPIC -> 1.8
+            else -> 0.0
+        }
+    }
+
+    return round(calculatedPoints * 10) / 10.0
 }
 
 private fun hasEnded(backup: Ei.Backup): Boolean {

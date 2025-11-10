@@ -574,12 +574,6 @@ fun Badges(statsInfo: StatsInfo, assetManager: AssetManager) {
         if (badges.hasAlc) {
             BadgeComposable("alc", assetManager)
         }
-    }
-
-    Row(
-        modifier = GlanceModifier.statsRowModifier(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
         if (badges.hasAsc) {
             BadgeComposable("asc", assetManager)
         }
@@ -613,5 +607,5 @@ fun BadgeComposable(badgeName: String, assetManager: AssetManager) {
 @Composable
 private fun GlanceModifier.statsRowModifier() =
     this
-        .padding(horizontal = 10.dp)
+        .padding(start = 5.dp, end = 8.dp)
         .fillMaxWidth()

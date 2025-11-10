@@ -26,6 +26,20 @@ val ALL_SHIPS = arrayOf(
     "afx_ship_atreggies"
 )
 
+val SHIP_MAX_LAUNCH_POINTS = arrayOf(
+    0,
+    14,
+    45,
+    85,
+    125,
+    125,
+    185,
+    185,
+    255,
+    435,
+    1420
+)
+
 val TANK_SIZES = arrayOf(
     2000000000,
     200000000000,
