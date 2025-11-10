@@ -103,7 +103,7 @@ fun StatsLegendRow(navController: NavController) {
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(text = "Stats Legend")
+            Text(text = "Stats legend")
         }
 
         Icon(
