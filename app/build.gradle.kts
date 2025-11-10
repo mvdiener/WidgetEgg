@@ -18,7 +18,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 23
-        versionName = "3.0.2"
+        versionName = "3.1.0"
 
         ndk {
             debugSymbolLevel = "SYMBOL_TABLE"
