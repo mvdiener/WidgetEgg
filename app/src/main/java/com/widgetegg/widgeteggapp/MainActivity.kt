@@ -17,6 +17,7 @@ import com.widgetegg.widgeteggapp.settings.sections.Contracts
 import com.widgetegg.widgeteggapp.settings.sections.General
 import com.widgetegg.widgeteggapp.settings.sections.Missions
 import com.widgetegg.widgeteggapp.settings.sections.Stats
+import com.widgetegg.widgeteggapp.settings.sections.StatsLegend
 import com.widgetegg.widgeteggapp.ui.theme.WidgetEggTheme
 import widget.WidgetScheduler
 
@@ -53,6 +54,9 @@ class MainActivity : ComponentActivity() {
                             }
                             composable(Routes.statsSettingsScreen) {
                                 Stats(navController)
+                            }
+                            composable(Routes.statsLegendScreen) {
+                                StatsLegend(navController)
                             }
                         },
                         modifier = Modifier.semantics { contentDescription = "WidgetEgg" })
