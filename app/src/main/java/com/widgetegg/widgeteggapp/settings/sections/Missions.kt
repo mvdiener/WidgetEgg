@@ -35,7 +35,6 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.MainActivity
-import com.widgetegg.widgeteggapp.Routes
 import com.widgetegg.widgeteggapp.settings.ScrollBottomPadding
 import com.widgetegg.widgeteggapp.settings.SettingsHeader
 import com.widgetegg.widgeteggapp.settings.SettingsHeaderAndDescription

@@ -7,5 +7,6 @@ object Routes {
     var contractsSettingsScreen = "contracts_settings_screen"
     var missionsSettingsScreen = "missions_settings_screen"
     var statsSettingsScreen = "stats_settings_screen"
+    var statsLegendScreen = "stats_legend_screen"
 
 }

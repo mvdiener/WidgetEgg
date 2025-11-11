@@ -40,7 +40,8 @@ class WidgetUpdater {
         val hasVirtueMissionWidgets = hasVirtueMissionWidgets(context)
         val hasContractWidgets = hasContractWidgets(context)
         val hasStatsWidgets = hasStatsWidgets(context)
-        val allWidgets = listOf(hasMissionWidgets, hasContractWidgets, hasStatsWidgets)
+        val allWidgets =
+            listOf(hasMissionWidgets, hasVirtueMissionWidgets, hasContractWidgets, hasStatsWidgets)
 
         if (prefEid.isNotBlank() && allWidgets.any { it }) {
             try {
@@ -101,9 +102,7 @@ class WidgetUpdater {
     }
 
     private suspend fun updateMissions(
-        context: Context,
-        preferences: PreferencesDatastore,
-        backup: Ei.Backup
+        context: Context, preferences: PreferencesDatastore, backup: Ei.Backup
     ) {
         var prefMissionInfo = preferences.getMissionInfo()
         var prefVirtueMissionInfo = preferences.getVirtueMissionInfo()
@@ -137,8 +136,12 @@ class WidgetUpdater {
                 ) {
                     val missionInfo = fetchMissionData(prefEid)
                     // Get a new list of active missions and append fueling mission
-                    prefMissionInfo = formatMissionData(missionInfo, backup)
-                    prefVirtueMissionInfo = formatMissionData(missionInfo, backup, true)
+                    if (hasMissionWidgets) {
+                        prefMissionInfo = formatMissionData(missionInfo, backup)
+                    }
+                    if (hasVirtueMissionWidgets) {
+                        prefVirtueMissionInfo = formatMissionData(missionInfo, backup, true)
+                    }
                 } else {
                     // Replace existing formatted missions with most recent fueling mission from backup
                     prefMissionInfo = updateFuelingMission(prefMissionInfo, backup)
@@ -151,18 +154,11 @@ class WidgetUpdater {
 
                 if (prefScheduleEvents) {
                     scheduleCalendarEvents(
-                        context,
-                        prefMissionInfo,
-                        backup.userName,
-                        prefSelectedCalendar
+                        context, prefMissionInfo, backup.userName, prefSelectedCalendar
                     )
 
                     scheduleCalendarEvents(
-                        context,
-                        prefVirtueMissionInfo,
-                        backup.userName,
-                        prefSelectedCalendar,
-                        true
+                        context, prefVirtueMissionInfo, backup.userName, prefSelectedCalendar, true
                     )
 
                     removeCalendarEvents(context, prefSelectedCalendar)
@@ -184,16 +180,13 @@ class WidgetUpdater {
                 MissionWidgetDataStore().setEid(context, prefEid)
                 MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
                 MissionWidgetDataStore().setUseAbsoluteTimePlusDay(
-                    context,
-                    prefUseAbsoluteTimePlusDay
+                    context, prefUseAbsoluteTimePlusDay
                 )
                 MissionWidgetDataStore().setTargetArtifactNormalWidget(
-                    context,
-                    prefTargetArtifactNormalWidget
+                    context, prefTargetArtifactNormalWidget
                 )
                 MissionWidgetDataStore().setTargetArtifactLargeWidget(
-                    context,
-                    prefTargetArtifactLargeWidget
+                    context, prefTargetArtifactLargeWidget
                 )
                 MissionWidgetDataStore().setShowFuelingShip(context, prefShowFuelingShip)
                 MissionWidgetDataStore().setOpenEggInc(context, prefOpenEggInc)
@@ -208,9 +201,7 @@ class WidgetUpdater {
     }
 
     private suspend fun updateContracts(
-        context: Context,
-        preferences: PreferencesDatastore,
-        backup: Ei.Backup
+        context: Context, preferences: PreferencesDatastore, backup: Ei.Backup
     ) {
         var prefContractInfo = preferences.getContractInfo()
 
@@ -233,8 +224,7 @@ class WidgetUpdater {
                 ContractWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
                 ContractWidgetDataStore().setUseOfflineTime(context, prefUseOfflineTime)
                 ContractWidgetDataStore().setOpenWasmeggDashboard(
-                    context,
-                    prefOpenWasmeggDashboard
+                    context, prefOpenWasmeggDashboard
                 )
                 ContractWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
                 ContractWidgetDataStore().setTextColor(context, prefWidgetTextColor)
@@ -245,9 +235,7 @@ class WidgetUpdater {
     }
 
     private suspend fun updateStats(
-        context: Context,
-        preferences: PreferencesDatastore,
-        backup: Ei.Backup
+        context: Context, preferences: PreferencesDatastore, backup: Ei.Backup
     ) {
         var prefStatsInfo = preferences.getStatsInfo()
 
@@ -332,13 +320,11 @@ class WidgetUpdater {
         val missionUpdateNeeded =
             hasMissionWidgets && (numOfActiveMissions(preferencesMissionInfo) < 3 || anyMissionsComplete(
                 preferencesMissionInfo
-            )
-                    )
+            ))
         val virtueMissionUpdateNeeded =
             hasVirtueMissionWidgets && (numOfActiveMissions(preferencesVirtueMissionInfo) < 3 || anyMissionsComplete(
                 preferencesVirtueMissionInfo
-            )
-                    )
+            ))
         return missionUpdateNeeded || virtueMissionUpdateNeeded
     }
 }

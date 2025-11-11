@@ -35,7 +35,6 @@ import com.github.skydoves.colorpicker.compose.AlphaTile
 import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
-import com.widgetegg.widgeteggapp.Routes
 import com.widgetegg.widgeteggapp.settings.ScrollBottomPadding
 import com.widgetegg.widgeteggapp.settings.SettingsHeader
 import com.widgetegg.widgeteggapp.settings.SettingsHeaderAndDescription

@@ -108,9 +108,9 @@ private fun hasEvent(
         CalendarContract.Events._ID
     )
 
-    // Look for events within +/- 5 min of event time to reduce query scope
-    val startTime = eventTime - (5 * 60 * 1000L)
-    val endTime = eventTime + (5 * 60 * 1000L)
+    // Look for events within +/- 2 days of event time to reduce query scope
+    val startTime = eventTime - (2 * 24 * 60 * 60 * 1000L)
+    val endTime = eventTime + (2 * 24 * 60 * 60 * 1000L)
 
     val selection =
         "${CalendarContract.Events.DESCRIPTION} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ? AND ${CalendarContract.Events.CALENDAR_ID} = ?"
