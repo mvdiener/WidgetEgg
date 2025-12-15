@@ -5,6 +5,8 @@ import data.ALL_GRADES
 import data.ALL_ROLES
 import data.Badges
 import data.CRAFTING_LEVELS
+import data.MAX_ENLIGHTEN_FARM_POP
+import data.MAX_FARM_POP
 import data.SHIP_MAX_LAUNCH_POINTS
 import data.StatsInfo
 import ei.Ei
@@ -148,7 +150,7 @@ private fun hasEnded(backup: Ei.Backup): Boolean {
 private fun hasNah(backup: Ei.Backup): Boolean {
     if (backup.game.maxFarmSizeReachedList.size < Ei.Egg.ENLIGHTENMENT.number) return false
 
-    return backup.game.maxFarmSizeReachedList[Ei.Egg.ENLIGHTENMENT.number - 1] >= 19845000000L
+    return backup.game.maxFarmSizeReachedList[Ei.Egg.ENLIGHTENMENT.number - 1] >= MAX_ENLIGHTEN_FARM_POP
 }
 
 private fun hasFed(backup: Ei.Backup): Boolean {
@@ -156,9 +158,9 @@ private fun hasFed(backup: Ei.Backup): Boolean {
     val enlightenEgg = Ei.Egg.ENLIGHTENMENT.number - 1
     return backup.game.maxFarmSizeReachedList.withIndex().firstOrNull { (i, farmSize) ->
         if (i == enlightenEgg) {
-            farmSize < 19845000000L
+            farmSize < MAX_ENLIGHTEN_FARM_POP
         } else {
-            farmSize < 14175000000L
+            farmSize < MAX_FARM_POP
         }
     } == null
 }
