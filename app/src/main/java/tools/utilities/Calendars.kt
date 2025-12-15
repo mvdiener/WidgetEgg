@@ -113,9 +113,9 @@ private fun hasEvent(
     val endTime = eventTime + (2 * 24 * 60 * 60 * 1000L)
 
     val selection =
-        "${CalendarContract.Events.DESCRIPTION} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTEND} <= ? AND ${CalendarContract.Events.CALENDAR_ID} = ?"
+        "${CalendarContract.Events.DESCRIPTION} = ? AND ${CalendarContract.Events.CALENDAR_ID} = ? AND ${CalendarContract.Events.DTSTART} BETWEEN ? AND ?"
     val selectionArgs =
-        arrayOf(identifier, startTime.toString(), endTime.toString(), calendarId.toString())
+        arrayOf(identifier, calendarId.toString(), startTime.toString(), endTime.toString())
 
     val contentResolver: ContentResolver = context.contentResolver
 

@@ -182,3 +182,9 @@ val ALL_GRADES = arrayOf(
     "grade_aa",
     "grade_aaa"
 )
+
+// Pop w/ leggy gusset
+const val MAX_FARM_POP = 14175000000L
+
+// Pop w/ leggy gusset and 3 t4 clarity stones
+const val MAX_ENLIGHTEN_FARM_POP = 19845000000L
