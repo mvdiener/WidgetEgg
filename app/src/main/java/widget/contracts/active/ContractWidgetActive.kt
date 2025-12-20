@@ -37,8 +37,10 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.ContractInfoEntry
+import data.DEFAULT_BROWSER
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.PROBLEMATIC_BROWSERS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -105,8 +107,6 @@ class ContractWidgetActive : GlanceAppWidget() {
                     .background(backgroundColor)
                     .clickable {
                         if (openWasmeggDashboard) {
-                            val problematicBrowsers =
-                                listOf("org.mozilla.firefox", "com.duckduckgo.mobile.android")
                             val packageManager: PackageManager = context.packageManager
                             var browserPackage: String? = packageManager.resolveActivity(
                                 Intent(Intent.ACTION_VIEW, "https://www.example.com".toUri()),
@@ -116,8 +116,8 @@ class ContractWidgetActive : GlanceAppWidget() {
                             if (browserPackage != null) {
                                 // Not all browsers play nicely with opening a link from a widget
                                 // If using any of these browsers, attempt to use chrome instead
-                                if (browserPackage in problematicBrowsers) {
-                                    browserPackage = "com.android.chrome"
+                                if (browserPackage in PROBLEMATIC_BROWSERS) {
+                                    browserPackage = DEFAULT_BROWSER
                                 }
                                 val launchIntent: Intent? =
                                     packageManager.getLaunchIntentForPackage(browserPackage)

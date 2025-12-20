@@ -113,6 +113,18 @@
         </receiver>
 
         <receiver
+            android:name="widget.contracts.large.ContractWidgetLargeReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/contract_widget_large" />
+        </receiver>
+
+        <receiver
             android:name="widget.stats.normal.StatsWidgetNormalReceiver"
             android:enabled="true"
             android:exported="false">

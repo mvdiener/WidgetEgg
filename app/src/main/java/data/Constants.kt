@@ -188,3 +188,10 @@ const val MAX_FARM_POP = 14175000000L
 
 // Pop w/ leggy gusset and 3 t4 clarity stones
 const val MAX_ENLIGHTEN_FARM_POP = 19845000000L
+
+val PROBLEMATIC_BROWSERS = arrayOf(
+    "org.mozilla.firefox",
+    "com.duckduckgo.mobile.android"
+)
+
+const val DEFAULT_BROWSER = "com.android.chrome"
