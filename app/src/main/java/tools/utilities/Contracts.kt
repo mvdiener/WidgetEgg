@@ -4,8 +4,10 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
+import data.ContractArtifact
 import data.ContractData
 import data.ContractInfoEntry
+import data.ContractStone
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
 import ei.Ei
@@ -16,7 +18,7 @@ import java.util.Locale
 import java.util.UUID
 import kotlin.math.abs
 
-fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
+fun formatContractData(contractInfo: ContractData, username: String): List<ContractInfoEntry> {
     var formattedContracts: List<ContractInfoEntry> = emptyList()
 
     contractInfo.contracts.forEach { contract ->
@@ -42,13 +44,37 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
         var formattedContributors: List<ContributorInfoEntry> = emptyList()
         status?.contributorsList?.filterNot { contributor ->
             // Remove any [departed] users stuck from contract creation
-            contributor.userName == "[departed]" && contributor.contributionAmount == 0.0 && contributor.contributionRate == 0.0 && contributor.uuid.isNullOrEmpty()
+            contributor.userName == "[departed]" && contributor.uuid.isNullOrEmpty()
         }?.forEach { contributor ->
             formattedContributors = formattedContributors.plus(
                 ContributorInfoEntry(
                     eggsDelivered = contributor.contributionAmount,
                     eggRatePerSecond = contributor.contributionRate,
                     offlineTimeSeconds = getOfflineTime(contributor)
+                )
+            )
+        }
+
+        var contractArtifacts: List<ContractArtifact> = emptyList()
+        status?.contributorsList?.find { contributor ->
+            contributor.userName == username
+        }?.farmInfo?.equippedArtifactsList?.forEach { artifact ->
+            var stones: List<ContractStone> = emptyList()
+            artifact.stonesList.forEach { stone ->
+                stones = stones.plus(
+                    ContractStone(
+                        stoneName = stone.name.number,
+                        stoneLevel = stone.level.number
+                    )
+                )
+            }
+
+            contractArtifacts = contractArtifacts.plus(
+                ContractArtifact(
+                    artifactName = artifact.spec.name.number,
+                    artifactRarity = artifact.spec.rarity.number,
+                    artifactLevel = artifact.spec.level.number,
+                    stoneList = stones
                 )
             )
         }
@@ -60,14 +86,17 @@ fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
                 eggId = contract.contract.egg.number,
                 customEggId = contract.contract.customEggId,
                 name = contract.contract.name,
+                coopName = contract.coopIdentifier,
                 seasonName = formatSeasonName(contract.contract.seasonId),
                 isLegacy = contract.contract.leggacy,
                 eggsDelivered = status?.totalAmount ?: 0.0,
                 timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
                 allGoalsAchieved = status?.allGoalsAchieved == true,
                 clearedForExit = status?.clearedForExit == true,
+                grade = contract.grade.number,
                 goals = formattedGoals,
-                contributors = formattedContributors
+                contributors = formattedContributors,
+                contractArtifacts = contractArtifacts
             )
         )
     }

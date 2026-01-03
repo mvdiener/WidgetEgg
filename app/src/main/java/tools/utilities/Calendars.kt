@@ -127,9 +127,8 @@ private fun hasEvent(
         null
     )
 
-    val hasEvent = cursor?.moveToFirst() == true
+    val hasEvent = cursor == null || cursor.use { it.moveToFirst() }
 
-    cursor?.close()
     return hasEvent
 }
 

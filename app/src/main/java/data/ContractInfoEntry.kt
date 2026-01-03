@@ -9,15 +9,18 @@ data class ContractInfoEntry(
     var stateId: String,
     var eggId: Int,
     var customEggId: String?,
-    var name: String,
+    var name: String, // EI name of contract
+    var coopName: String, // User created name of coop
     var seasonName: String?,
     var isLegacy: Boolean,
     var eggsDelivered: Double,
     var timeRemainingSeconds: Double,
     var allGoalsAchieved: Boolean,
     var clearedForExit: Boolean,
+    var grade: Int,
     var goals: List<GoalInfoEntry>,
-    var contributors: List<ContributorInfoEntry>
+    var contributors: List<ContributorInfoEntry>,
+    var contractArtifacts: List<ContractArtifact>
 )
 
 @Serializable
@@ -32,4 +35,18 @@ data class ContributorInfoEntry(
     var eggsDelivered: Double,
     var eggRatePerSecond: Double,
     var offlineTimeSeconds: Double
+)
+
+@Serializable
+data class ContractArtifact(
+    var artifactName: Int,
+    var artifactRarity: Int,
+    var artifactLevel: Int,
+    var stoneList: List<ContractStone>
+)
+
+@Serializable
+data class ContractStone(
+    var stoneName: Int,
+    var stoneLevel: Int
 )

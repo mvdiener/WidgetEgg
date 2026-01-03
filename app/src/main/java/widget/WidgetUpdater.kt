@@ -21,6 +21,7 @@ import tools.utilities.updateFuelingMission
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.active.ContractWidgetActive
+import widget.contracts.large.ContractWidgetLarge
 import widget.missions.MissionWidgetDataStore
 import widget.missions.large.MissionWidgetLarge
 import widget.missions.large.VirtueMissionWidgetLarge
@@ -215,7 +216,7 @@ class WidgetUpdater {
         try {
             if (prefEid.isNotBlank()) {
                 val contractInfo = fetchContractData(backup)
-                prefContractInfo = formatContractData(contractInfo)
+                prefContractInfo = formatContractData(contractInfo, backup.userName)
 
                 preferences.saveContractInfo(prefContractInfo)
 
@@ -297,6 +298,8 @@ class WidgetUpdater {
     private suspend fun hasContractWidgets(context: Context): Boolean {
         return GlanceAppWidgetManager(context).getGlanceIds(
             ContractWidgetActive::class.java
+        ).isNotEmpty() || GlanceAppWidgetManager(context).getGlanceIds(
+            ContractWidgetLarge::class.java
         ).isNotEmpty()
     }
 

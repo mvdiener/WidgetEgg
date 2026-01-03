@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
+import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -13,6 +14,8 @@ import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.lazy.LazyColumn
@@ -20,9 +23,13 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.Row
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -35,6 +42,10 @@ import data.PROBLEMATIC_BROWSERS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import tools.utilities.bitmapResize
+import tools.utilities.getAsset
+import tools.utilities.getContractGradeName
+import tools.utilities.getEggName
 import widget.WidgetUpdater
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
@@ -162,7 +173,53 @@ fun ContractContentLarge(
     useOfflineTime: Boolean,
     textColor: Color
 ) {
+    EggAndGrade(assetManager, contract, textColor)
+}
 
+@Composable
+fun EggAndGrade(
+    assetManager: AssetManager,
+    contract: ContractInfoEntry,
+    textColor: Color
+) {
+    Row(
+        modifier = GlanceModifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val eggName = if (contract.customEggId.isNullOrBlank()) {
+            getEggName(contract.eggId)
+        } else {
+            "egg_${contract.customEggId}"
+        }
+        val eggBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
+
+        val grade = getContractGradeName(contract.grade)
+        val gradeBitmap = bitmapResize(
+            BitmapFactory.decodeStream(
+                getAsset(
+                    assetManager,
+                    "grades/contract_$grade.png"
+                )
+            )
+        )
+
+        Image(
+            provider = ImageProvider(eggBitmap),
+            contentDescription = "Egg Icon",
+            modifier = GlanceModifier.size(30.dp).padding(end = 5.dp)
+        )
+        Text(
+            text = contract.name,
+            style = TextStyle(color = ColorProvider(textColor))
+        )
+        Box(modifier = GlanceModifier.defaultWeight()) {}
+        Image(
+            provider = ImageProvider(gradeBitmap),
+            contentDescription = "Contract Grade Icon",
+            modifier = GlanceModifier.size(30.dp).padding(end = 5.dp)
+        )
+    }
 }
 
 @Composable
