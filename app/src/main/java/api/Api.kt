@@ -7,6 +7,8 @@ import data.CURRENT_CLIENT_VERSION
 import data.ContractData
 import data.MISSION_ENDPOINT
 import data.MissionData
+import data.PERIODICALS_ENDPOINT
+import data.PeriodicalsData
 import ei.Ei
 import ei.Ei.AuthenticatedMessage
 import ei.Ei.Backup
@@ -17,6 +19,7 @@ import ei.Ei.EggIncFirstContactRequest
 import ei.Ei.EggIncFirstContactResponse
 import ei.Ei.GetActiveMissionsResponse
 import ei.Ei.MissionInfo
+import ei.Ei.PeriodicalsResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.parameter
@@ -57,6 +60,14 @@ suspend fun fetchContractData(backup: Backup): ContractData {
         )
     }
     return ContractData(backup.contracts.contractsList, statuses)
+}
+
+suspend fun fetchPeriodicalsData(eid: String): PeriodicalsData {
+    val periodicals = fetchPeriodicals(eid)
+    return PeriodicalsData(
+        periodicals.contracts.contractsList,
+        periodicals.contracts.customEggsList
+    )
 }
 
 fun getBasicRequestInfo(eid: String): BasicRequestInfo {
@@ -135,6 +146,37 @@ private suspend fun fetchContractStatus(
                 val contractResponse =
                     ContractCoopStatusResponse.parseFrom(authMessageResponse)
                 return contractResponse
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+
+        else -> throw Exception("Error retrieving data")
+    }
+}
+
+private suspend fun fetchPeriodicals(eid: String): PeriodicalsResponse {
+    val url = PERIODICALS_ENDPOINT
+
+    val getPeriodicalsRequest = Ei.GetPeriodicalsRequest.newBuilder()
+        .setUserId(eid)
+        .setCurrentClientVersion(CURRENT_CLIENT_VERSION)
+        .build()
+
+    val encodedRequest = getPeriodicalsRequest.toByteArray().encodeBase64()
+    val client = createHttpClient()
+    val response = makeRequest(client, url, encodedRequest)
+
+    when (response.status.value) {
+        in 200..299 -> {
+            try {
+                val authMessageResponse =
+                    AuthenticatedMessage.parseFrom(
+                        response.bodyAsText().decodeBase64Bytes()
+                    ).message
+                val periodicalsResponse =
+                    PeriodicalsResponse.parseFrom(authMessageResponse)
+                return periodicalsResponse
             } catch (e: Exception) {
                 throw e
             }

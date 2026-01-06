@@ -6,8 +6,9 @@ const val API_ROOT = "https://www.auxbrain.com"
 const val MISSION_ENDPOINT = "${API_ROOT}/ei_afx/get_active_missions_v2"
 const val BACKUP_ENDPOINT = "${API_ROOT}/ei/bot_first_contact"
 const val CONTRACT_ENDPOINT = "${API_ROOT}/ei/coop_status"
+const val PERIODICALS_ENDPOINT = "${API_ROOT}/ei/get_periodicals"
 
-const val CURRENT_CLIENT_VERSION = 71
+const val CURRENT_CLIENT_VERSION = 99
 
 val DEFAULT_WIDGET_BACKGROUND_COLOR = Color(0xff181818)
 val DEFAULT_WIDGET_TEXT_COLOR = Color.White
