@@ -9,6 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
@@ -43,9 +45,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
+import tools.utilities.formatTokenTimeText
 import tools.utilities.getAsset
 import tools.utilities.getContractGradeName
 import tools.utilities.getEggName
+import tools.utilities.truncateString
 import widget.WidgetUpdater
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
@@ -62,6 +66,10 @@ class ContractWidgetLarge : GlanceAppWidget() {
             val contractData =
                 ContractWidgetDataStore().decodeContractInfo(
                     state[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] ?: ""
+                )
+            val periodicalsContractData =
+                ContractWidgetDataStore().decodePeriodicalsContractInfo(
+                    state[ContractWidgetDataStorePreferencesKeys.PERIODICALS_CONTRACT_INFO] ?: ""
                 )
             val useAbsoluteTime =
                 state[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] == true
@@ -174,6 +182,7 @@ fun ContractContentLarge(
     textColor: Color
 ) {
     EggAndGrade(assetManager, contract, textColor)
+    CoopNameAndInfo(assetManager, contract, textColor)
 }
 
 @Composable
@@ -183,9 +192,9 @@ fun EggAndGrade(
     textColor: Color
 ) {
     Row(
-        modifier = GlanceModifier.fillMaxWidth(),
+        modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         val eggName = if (contract.customEggId.isNullOrBlank()) {
             getEggName(contract.eggId)
@@ -211,14 +220,62 @@ fun EggAndGrade(
         )
         Text(
             text = contract.name,
-            style = TextStyle(color = ColorProvider(textColor))
+            style = TextStyle(
+                color = ColorProvider(textColor),
+                fontSize = TextUnit(18f, TextUnitType.Sp)
+            )
         )
         Box(modifier = GlanceModifier.defaultWeight()) {}
         Image(
             provider = ImageProvider(gradeBitmap),
             contentDescription = "Contract Grade Icon",
-            modifier = GlanceModifier.size(30.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(30.dp)
         )
+    }
+}
+
+@Composable
+fun CoopNameAndInfo(
+    assetManager: AssetManager,
+    contract: ContractInfoEntry,
+    textColor: Color
+) {
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 8.dp, end = 5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val coopBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_coop.png"))
+        val tokenBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_token.png"))
+
+        Image(
+            provider = ImageProvider(coopBitmap),
+            contentDescription = "Coop Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
+        Text(
+            modifier = GlanceModifier.padding(end = 5.dp),
+            text = truncateString(contract.coopName, 20),
+            style = TextStyle(color = ColorProvider(textColor))
+        )
+        if (contract.maxCoopSize != 0) {
+            Text(
+                text = "(${contract.contributors.size}/${contract.maxCoopSize})",
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
+        Box(modifier = GlanceModifier.defaultWeight()) {}
+        if (contract.tokenTimerMinutes > 0) {
+            Image(
+                provider = ImageProvider(tokenBitmap),
+                contentDescription = "Token Icon",
+                modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            )
+            Text(
+                text = formatTokenTimeText(contract.tokenTimerMinutes),
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
     }
 }
 

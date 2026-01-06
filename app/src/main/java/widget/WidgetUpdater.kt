@@ -235,6 +235,10 @@ class WidgetUpdater {
 
                 ContractWidgetDataStore().setEid(context, prefEid)
                 ContractWidgetDataStore().setContractInfo(context, prefContractInfo)
+                ContractWidgetDataStore().setPeriodicalsContractInfo(
+                    context,
+                    prefPeriodicalsContractInfo
+                )
                 ContractWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
                 ContractWidgetDataStore().setUseOfflineTime(context, prefUseOfflineTime)
                 ContractWidgetDataStore().setOpenWasmeggDashboard(

@@ -43,6 +43,7 @@ import tools.utilities.getContractGradeName
 import tools.utilities.getEggName
 import tools.utilities.getFarmerRole
 import tools.utilities.getShortenedFarmerRole
+import tools.utilities.truncateString
 import widget.WidgetUpdater
 import widget.stats.StatsWidgetDataStore
 import widget.stats.StatsWidgetDataStorePreferencesKeys
@@ -184,7 +185,7 @@ fun NameAndRole(
         )
         Text(
             modifier = GlanceModifier.defaultWeight(),
-            text = eiUserName,
+            text = truncateString(eiUserName, 15),
             style = TextStyle(color = ColorProvider(textColor))
         )
         val farmerRole = getFarmerRole(statsInfo.farmerRoleId)

@@ -7,7 +7,6 @@ import android.graphics.Paint
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
-import androidx.core.text.color
 import data.NUMBER_UNITS
 import ei.Ei
 import java.io.InputStream
@@ -184,7 +183,7 @@ fun numberToString(amount: Double): String {
         units = units.drop(1).toTypedArray()
     }
 
-    var formatted = String.Companion.format(Locale.ROOT, "%.3g", number)
+    var formatted = String.format(Locale.ROOT, "%.3g", number)
 
     // If using %.3g for the string format it _sometimes_ ends up in sci. notation
     // It seems to only be cases where it's right below the threshold of the next power of ten
@@ -200,4 +199,10 @@ fun numberToString(amount: Double): String {
     }
 
     return "$formatted$unit"
+}
+
+fun truncateString(text: String, maxLength: Int): String {
+    if (text.length <= maxLength) return text
+
+    return text.take(maxLength - 3) + "..."
 }
