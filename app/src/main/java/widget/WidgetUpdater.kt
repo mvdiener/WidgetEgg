@@ -135,7 +135,7 @@ class WidgetUpdater {
                         hasVirtueMissionWidgets
                     )
                 ) {
-                    val missionInfo = fetchMissionData(prefEid)
+                    val missionInfo = fetchMissionData(prefEid, backup.virtue.resets)
                     // Get a new list of active missions and append fueling mission
                     if (hasMissionWidgets) {
                         prefMissionInfo = formatMissionData(missionInfo, backup)

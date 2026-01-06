@@ -37,9 +37,9 @@ suspend fun fetchBackupData(eid: String): Backup {
     return backup
 }
 
-suspend fun fetchMissionData(eid: String): MissionData {
+suspend fun fetchMissionData(eid: String, resetIndex: Int): MissionData {
     val basicRequestInfo = getBasicRequestInfo(eid)
-    val activeMissions = fetchActiveMissions(basicRequestInfo)
+    val activeMissions = fetchActiveMissions(basicRequestInfo, resetIndex)
 
     val (virtueMissions, normalMissions) = activeMissions.partition { mission -> mission.type == MissionInfo.MissionType.VIRTUE }
 
@@ -67,11 +67,15 @@ fun getBasicRequestInfo(eid: String): BasicRequestInfo {
         .build()
 }
 
-private suspend fun fetchActiveMissions(basicRequestInfo: BasicRequestInfo): List<MissionInfo> {
+private suspend fun fetchActiveMissions(
+    basicRequestInfo: BasicRequestInfo,
+    resetIndex: Int
+): List<MissionInfo> {
     val url = MISSION_ENDPOINT
 
     val getActiveMissionsRequest = Ei.GetActiveMissionsRequest.newBuilder()
         .setRinfo(basicRequestInfo)
+        .setResetIndex(resetIndex)
         .build()
 
     val authMessage = try {
