@@ -15,6 +15,7 @@ import data.ContractInfoEntry
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
+import data.PeriodicalsContractInfoEntry
 import data.StatsInfo
 import data.TankInfo
 import kotlinx.coroutines.flow.first
@@ -46,6 +47,7 @@ class PreferencesDatastore(context: Context) {
         private val SCHEDULE_EVENTS = booleanPreferencesKey("scheduleEvents")
         private val SELECTED_CALENDAR = stringPreferencesKey("selectedCalendar")
         private val CONTRACT_INFO = stringPreferencesKey("contractInfo")
+        private val PERIODICALS_CONTRACT_INFO = stringPreferencesKey("periodicalsContractInfo")
         private val USE_ABSOLUTE_TIME_CONTRACT = booleanPreferencesKey("useAbsoluteTimeContract")
         private val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
         private val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
@@ -71,6 +73,7 @@ class PreferencesDatastore(context: Context) {
             SCHEDULE_EVENTS,
             SELECTED_CALENDAR,
             CONTRACT_INFO,
+            PERIODICALS_CONTRACT_INFO,
             USE_ABSOLUTE_TIME_CONTRACT,
             USE_OFFLINE_TIME,
             OPEN_WASMEGG_DASHBOARD,
@@ -296,6 +299,24 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveContractInfo(contractInfo: List<ContractInfoEntry>) {
         dataStore.edit {
             it[CONTRACT_INFO] = Json.encodeToString(contractInfo)
+        }
+    }
+
+    suspend fun getPeriodicalsContractInfo(): List<PeriodicalsContractInfoEntry> {
+        return dataStore.data.map {
+            it[PERIODICALS_CONTRACT_INFO]?.let { contractJson ->
+                try {
+                    Json.decodeFromString<List<PeriodicalsContractInfoEntry>>(contractJson)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList()
+        }.first()
+    }
+
+    suspend fun savePeriodicalsContractInfo(contractInfo: List<PeriodicalsContractInfoEntry>) {
+        dataStore.edit {
+            it[PERIODICALS_CONTRACT_INFO] = Json.encodeToString(contractInfo)
         }
     }
 

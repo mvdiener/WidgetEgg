@@ -11,6 +11,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.ContractInfoEntry
+import data.PeriodicalsContractInfoEntry
 import kotlinx.serialization.json.Json
 import widget.contracts.active.ContractWidgetActive
 import widget.contracts.large.ContractWidgetLarge
@@ -18,6 +19,7 @@ import widget.contracts.large.ContractWidgetLarge
 data object ContractWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")
     val CONTRACT_INFO = stringPreferencesKey("widgetContractInfo")
+    val PERIODICALS_CONTRACT_INFO = stringPreferencesKey("widgetPeriodicalsContractInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
     val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
     val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
@@ -27,8 +29,8 @@ data object ContractWidgetDataStorePreferencesKeys {
 
 class ContractWidgetDataStore {
     suspend fun setEid(context: Context, eid: String) {
-        val contractWidgetActiveIds = getContractWidgetIds(context)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.EID] = eid
@@ -40,8 +42,8 @@ class ContractWidgetDataStore {
 
     suspend fun setContractInfo(context: Context, contractInfo: List<ContractInfoEntry>) {
         val contractString = Json.encodeToString(contractInfo)
-        val contractWidgetActiveIds = getContractWidgetIds(context)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] = contractString
@@ -59,9 +61,34 @@ class ContractWidgetDataStore {
         }
     }
 
+    suspend fun setPeriodicalsContractInfo(
+        context: Context,
+        contractInfo: List<PeriodicalsContractInfoEntry>
+    ) {
+        val contractString = Json.encodeToString(contractInfo)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[ContractWidgetDataStorePreferencesKeys.PERIODICALS_CONTRACT_INFO] =
+                        contractString
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    fun decodePeriodicalsContractInfo(contractJson: String): List<PeriodicalsContractInfoEntry> {
+        return try {
+            Json.decodeFromString<List<PeriodicalsContractInfoEntry>>(contractJson)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
-        val contractWidgetActiveIds = getContractWidgetIds(context)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] =
@@ -73,8 +100,8 @@ class ContractWidgetDataStore {
     }
 
     suspend fun setUseOfflineTime(context: Context, useOfflineTime: Boolean) {
-        val contractWidgetActiveIds = getContractWidgetIds(context)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] =
@@ -86,8 +113,8 @@ class ContractWidgetDataStore {
     }
 
     suspend fun setOpenWasmeggDashboard(context: Context, openWasmeggDashboard: Boolean) {
-        val contractWidgetActiveIds = getContractWidgetIds(context)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] =
@@ -99,8 +126,8 @@ class ContractWidgetDataStore {
     }
 
     suspend fun setBackgroundColor(context: Context, backgroundColor: Color) {
-        val contractWidgetActiveIds = getContractWidgetIds(context)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
@@ -112,8 +139,8 @@ class ContractWidgetDataStore {
     }
 
     suspend fun setTextColor(context: Context, textColor: Color) {
-        val contractWidgetActiveIds = getContractWidgetIds(context)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
@@ -125,8 +152,8 @@ class ContractWidgetDataStore {
     }
 
     suspend fun clearAllData(context: Context) {
-        val contractWidgetActiveIds = getContractWidgetIds(context)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs.clear()

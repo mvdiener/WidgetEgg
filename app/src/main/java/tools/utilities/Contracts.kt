@@ -10,7 +10,10 @@ import data.ContractInfoEntry
 import data.ContractStone
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
+import data.PeriodicalsContractInfoEntry
+import data.PeriodicalsData
 import ei.Ei
+import ei.Ei.Backup
 import ei.Ei.ContractCoopStatusResponse.ContributionInfo
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -18,7 +21,11 @@ import java.util.Locale
 import java.util.UUID
 import kotlin.math.abs
 
-fun formatContractData(contractInfo: ContractData, username: String): List<ContractInfoEntry> {
+fun formatContractData(
+    contractInfo: ContractData,
+    userName: String,
+    periodicalsContracts: List<PeriodicalsContractInfoEntry>
+): List<ContractInfoEntry> {
     var formattedContracts: List<ContractInfoEntry> = emptyList()
 
     contractInfo.contracts.forEach { contract ->
@@ -50,14 +57,15 @@ fun formatContractData(contractInfo: ContractData, username: String): List<Contr
                 ContributorInfoEntry(
                     eggsDelivered = contributor.contributionAmount,
                     eggRatePerSecond = contributor.contributionRate,
-                    offlineTimeSeconds = getOfflineTime(contributor)
+                    offlineTimeSeconds = getOfflineTime(contributor),
+                    isSelf = contributor.userName == userName
                 )
             )
         }
 
         var contractArtifacts: List<ContractArtifact> = emptyList()
         status?.contributorsList?.find { contributor ->
-            contributor.userName == username
+            contributor.userName == userName
         }?.farmInfo?.equippedArtifactsList?.forEach { artifact ->
             var stones: List<ContractStone> = emptyList()
             artifact.stonesList.forEach { stone ->
@@ -79,6 +87,9 @@ fun formatContractData(contractInfo: ContractData, username: String): List<Contr
             )
         }
 
+        val periodicalContract =
+            periodicalsContracts.find { it.identifier == contract.contract.identifier }
+
         formattedContracts = formattedContracts.plus(
             ContractInfoEntry(
                 stateId = UUID.randomUUID()
@@ -86,6 +97,7 @@ fun formatContractData(contractInfo: ContractData, username: String): List<Contr
                 eggId = contract.contract.egg.number,
                 customEggId = contract.contract.customEggId,
                 name = contract.contract.name,
+                identifier = contract.contract.identifier,
                 coopName = contract.coopIdentifier,
                 seasonName = formatSeasonName(contract.contract.seasonId),
                 isLegacy = contract.contract.leggacy,
@@ -94,9 +106,54 @@ fun formatContractData(contractInfo: ContractData, username: String): List<Contr
                 allGoalsAchieved = status?.allGoalsAchieved == true,
                 clearedForExit = status?.clearedForExit == true,
                 grade = contract.grade.number,
+                maxCoopSize = periodicalContract?.maxCoopSize ?: 0,
+                tokenTimerMinutes = periodicalContract?.tokenTimerMinutes ?: 0.0,
                 goals = formattedGoals,
                 contributors = formattedContributors,
                 contractArtifacts = contractArtifacts
+            )
+        )
+    }
+
+    return formattedContracts
+}
+
+fun formatPeriodicalsContracts(
+    periodicalsData: PeriodicalsData,
+    backup: Backup
+): List<PeriodicalsContractInfoEntry> {
+    var formattedContracts: List<PeriodicalsContractInfoEntry> = emptyList()
+    val contracts =
+        periodicalsData.contracts.filter { contract -> contract.identifier != "first-contract" }
+    contracts.forEach { contract ->
+        var formattedGoals: List<GoalInfoEntry> = emptyList()
+        val gradeSpecsList = contract.gradeSpecsList
+        val gradeSpecs =
+            gradeSpecsList.find { gradeSpec -> gradeSpec.grade == backup.contracts.lastCpi.grade }
+
+        gradeSpecs?.goalsList?.forEach { goal ->
+            formattedGoals = formattedGoals.plus(
+                GoalInfoEntry(
+                    goalAmount = goal.targetAmount,
+                    reward = goal.rewardType,
+                    rewardSubType = goal.rewardSubType
+                )
+            )
+        }
+
+        formattedContracts = formattedContracts.plus(
+            PeriodicalsContractInfoEntry(
+                stateId = UUID.randomUUID().toString(),
+                eggId = contract.egg.number,
+                customEggId = contract.customEggId,
+                name = contract.name,
+                identifier = contract.identifier,
+                seasonName = formatSeasonName(contract.seasonId),
+                isLegacy = contract.leggacy,
+                maxCoopSize = contract.maxCoopSize,
+                coopLengthSeconds = contract.lengthSeconds,
+                tokenTimerMinutes = contract.minutesPerToken,
+                goals = formattedGoals,
             )
         )
     }
@@ -198,6 +255,10 @@ fun getContractTimeTextColor(
     } else {
         textColor.toArgb()
     }
+}
+
+fun formatTokenTimeText(tokenTimerMinutes: Double): String {
+    return "${tokenTimerMinutes.toInt()}m"
 }
 
 fun getRewardIconPath(goal: GoalInfoEntry): String {

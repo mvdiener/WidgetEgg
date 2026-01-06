@@ -9,10 +9,12 @@ import androidx.lifecycle.viewModelScope
 import api.fetchBackupData
 import api.fetchContractData
 import api.fetchMissionData
+import api.fetchPeriodicalsData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
 import tools.utilities.formatMissionData
+import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import user.preferences.PreferencesDatastore
@@ -114,19 +116,27 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     val backupResult = fetchBackupData(prefEid)
                     val missionResult = fetchMissionData(prefEid, backupResult.virtue.resets)
                     val contractResult = fetchContractData(backupResult)
+                    val periodicalsResult = fetchPeriodicalsData(prefEid)
                     val formattedMissionData = formatMissionData(missionResult, backupResult)
                     val formattedVirtueMissionData =
                         formatMissionData(missionResult, backupResult, true)
                     val formattedTankInfo = formatTankInfo(backupResult)
                     val formattedVirtueTankInfo = formatTankInfo(backupResult, true)
+                    val formattedPeriodicalsContracts =
+                        formatPeriodicalsContracts(periodicalsResult, backupResult)
                     val formattedContractData =
-                        formatContractData(contractResult, backupResult.userName)
+                        formatContractData(
+                            contractResult,
+                            backupResult.userName,
+                            formattedPeriodicalsContracts
+                        )
                     val formattedStatsData = formatStatsData(backupResult)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
                     preferences.saveTankInfo(formattedTankInfo)
                     preferences.saveVirtueTankInfo(formattedVirtueTankInfo)
                     preferences.saveContractInfo(formattedContractData)
+                    preferences.savePeriodicalsContractInfo(formattedPeriodicalsContracts)
                     preferences.saveStatsInfo(formattedStatsData)
                     MissionWidgetDataStore().setMissionInfo(context, formattedMissionData)
                     MissionWidgetDataStore().setVirtueMissionInfo(
@@ -136,6 +146,10 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     MissionWidgetDataStore().setTankInfo(context, formattedTankInfo)
                     MissionWidgetDataStore().setVirtueTankInfo(context, formattedVirtueTankInfo)
                     ContractWidgetDataStore().setContractInfo(context, formattedContractData)
+                    ContractWidgetDataStore().setPeriodicalsContractInfo(
+                        context,
+                        formattedPeriodicalsContracts
+                    )
                     StatsWidgetDataStore().setStatsInfo(context, formattedStatsData)
                 }
             } catch (_: Exception) {

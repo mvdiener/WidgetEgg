@@ -5,6 +5,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import api.fetchBackupData
 import api.fetchContractData
 import api.fetchMissionData
+import api.fetchPeriodicalsData
 import data.MissionInfoEntry
 import ei.Ei
 import kotlinx.coroutines.Job
@@ -13,6 +14,7 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
 import tools.utilities.formatMissionData
+import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import tools.utilities.removeCalendarEvents
@@ -81,7 +83,12 @@ class WidgetUpdater {
                     if (hasStatsWidgets) {
                         val job = launch {
                             try {
-                                updateStats(context, preferences, backup)
+                                // The contract widget update process will update periodicals data, which includes colleggtibles.
+                                // In the scenario where a user doesn't have contract widgets but has stats widgets,
+                                // we need to make the stats update process also update periodicals. The only purpose
+                                // for this is to make sure colleggtible egg data is up to date so that FED/NAH badge
+                                // calculations can utilize colleggtibles that may increase hab space
+                                updateStats(context, preferences, backup, !hasContractWidgets)
                             } catch (e: Exception) {
                                 exceptions.add(e)
                             }
@@ -205,6 +212,7 @@ class WidgetUpdater {
         context: Context, preferences: PreferencesDatastore, backup: Ei.Backup
     ) {
         var prefContractInfo = preferences.getContractInfo()
+        var prefPeriodicalsContractInfo = preferences.getPeriodicalsContractInfo()
 
         val prefEid = preferences.getEid()
         val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeContract()
@@ -216,9 +224,14 @@ class WidgetUpdater {
         try {
             if (prefEid.isNotBlank()) {
                 val contractInfo = fetchContractData(backup)
-                prefContractInfo = formatContractData(contractInfo, backup.userName)
+                val periodicalsInfo = fetchPeriodicalsData(prefEid)
+
+                prefPeriodicalsContractInfo = formatPeriodicalsContracts(periodicalsInfo, backup)
+                prefContractInfo =
+                    formatContractData(contractInfo, backup.userName, prefPeriodicalsContractInfo)
 
                 preferences.saveContractInfo(prefContractInfo)
+                preferences.savePeriodicalsContractInfo(prefPeriodicalsContractInfo)
 
                 ContractWidgetDataStore().setEid(context, prefEid)
                 ContractWidgetDataStore().setContractInfo(context, prefContractInfo)
@@ -236,7 +249,10 @@ class WidgetUpdater {
     }
 
     private suspend fun updateStats(
-        context: Context, preferences: PreferencesDatastore, backup: Ei.Backup
+        context: Context,
+        preferences: PreferencesDatastore,
+        backup: Ei.Backup,
+        needsPeriodicalsUpdate: Boolean
     ) {
         var prefStatsInfo = preferences.getStatsInfo()
 

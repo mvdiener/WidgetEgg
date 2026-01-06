@@ -10,6 +10,7 @@ data class ContractInfoEntry(
     var eggId: Int,
     var customEggId: String?,
     var name: String, // EI name of contract
+    var identifier: String, // EI identifier of contract
     var coopName: String, // User created name of coop
     var seasonName: String?,
     var isLegacy: Boolean,
@@ -18,6 +19,8 @@ data class ContractInfoEntry(
     var allGoalsAchieved: Boolean,
     var clearedForExit: Boolean,
     var grade: Int,
+    var maxCoopSize: Int,
+    var tokenTimerMinutes: Double,
     var goals: List<GoalInfoEntry>,
     var contributors: List<ContributorInfoEntry>,
     var contractArtifacts: List<ContractArtifact>
@@ -34,7 +37,8 @@ data class GoalInfoEntry(
 data class ContributorInfoEntry(
     var eggsDelivered: Double,
     var eggRatePerSecond: Double,
-    var offlineTimeSeconds: Double
+    var offlineTimeSeconds: Double,
+    var isSelf: Boolean
 )
 
 @Serializable
@@ -49,4 +53,20 @@ data class ContractArtifact(
 data class ContractStone(
     var stoneName: Int,
     var stoneLevel: Int
+)
+
+// Data class used to save periodicals contract information to preferences
+@Serializable
+data class PeriodicalsContractInfoEntry(
+    var stateId: String,
+    var eggId: Int,
+    var customEggId: String?,
+    var name: String,
+    var identifier: String,
+    var seasonName: String?,
+    var isLegacy: Boolean,
+    var maxCoopSize: Int,
+    var coopLengthSeconds: Double,
+    var tokenTimerMinutes: Double,
+    var goals: List<GoalInfoEntry>,
 )
