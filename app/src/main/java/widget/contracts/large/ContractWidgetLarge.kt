@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
+import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,8 +48,15 @@ import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
 import tools.utilities.formatTokenTimeText
 import tools.utilities.getAsset
+import tools.utilities.getContractDurationRemaining
 import tools.utilities.getContractGradeName
+import tools.utilities.getContractTimeTextColor
+import tools.utilities.getCoopEggsPerHour
 import tools.utilities.getEggName
+import tools.utilities.getIndividualEggsPerHour
+import tools.utilities.getOfflineTimeHoursAndMinutes
+import tools.utilities.getScrollName
+import tools.utilities.numberToString
 import tools.utilities.truncateString
 import widget.WidgetUpdater
 import widget.contracts.ContractWidgetDataStore
@@ -140,14 +148,18 @@ class ContractWidgetLarge : GlanceAppWidget() {
                 ) {
                     for (contract in contractData) {
                         item {
-                            ContractContentLarge(
-                                assetManager,
-                                context,
-                                contract,
-                                useAbsoluteTime,
-                                useOfflineTime,
-                                textColor
-                            )
+                            Column(
+                                modifier = GlanceModifier.fillMaxWidth().padding(vertical = 5.dp)
+                            ) {
+                                ContractContentLarge(
+                                    assetManager,
+                                    context,
+                                    contract,
+                                    useAbsoluteTime,
+                                    useOfflineTime,
+                                    textColor
+                                )
+                            }
                         }
                     }
                 }
@@ -183,6 +195,16 @@ fun ContractContentLarge(
 ) {
     EggAndGrade(assetManager, contract, textColor)
     CoopNameAndInfo(assetManager, contract, textColor)
+    Shipping(assetManager, contract, textColor)
+    TimeRemainingAndOfflineTime(
+        assetManager,
+        context,
+        contract,
+        useAbsoluteTime,
+        useOfflineTime,
+        textColor
+    )
+    Artifacts(assetManager, contract, textColor)
 }
 
 @Composable
@@ -201,7 +223,8 @@ fun EggAndGrade(
         } else {
             "egg_${contract.customEggId}"
         }
-        val eggBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
+        val eggBitmap =
+            bitmapResize(BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png")))
 
         val grade = getContractGradeName(contract.grade)
         val gradeBitmap = bitmapResize(
@@ -246,8 +269,6 @@ fun CoopNameAndInfo(
         verticalAlignment = Alignment.CenterVertically
     ) {
         val coopBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_coop.png"))
-        val tokenBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_token.png"))
-
         Image(
             provider = ImageProvider(coopBitmap),
             contentDescription = "Coop Icon",
@@ -255,17 +276,33 @@ fun CoopNameAndInfo(
         )
         Text(
             modifier = GlanceModifier.padding(end = 5.dp),
-            text = truncateString(contract.coopName, 20),
+            text = truncateString(contract.coopName, 15),
             style = TextStyle(color = ColorProvider(textColor))
         )
         if (contract.maxCoopSize != 0) {
             Text(
+                modifier = GlanceModifier.padding(end = 5.dp),
                 text = "(${contract.contributors.size}/${contract.maxCoopSize})",
                 style = TextStyle(color = ColorProvider(textColor))
             )
         }
+        if (!contract.seasonName.isNullOrBlank()) {
+            Text(
+                modifier = GlanceModifier.padding(end = 5.dp),
+                text = contract.seasonName!!,
+                style = TextStyle(color = ColorProvider(Color(0xFF03D0A8.toInt())))
+            )
+        }
+        if (contract.isLegacy) {
+            Text(
+                text = "Leggacy",
+                style = TextStyle(color = ColorProvider(Color(0xFFFE9B00.toInt())))
+            )
+        }
         Box(modifier = GlanceModifier.defaultWeight()) {}
         if (contract.tokenTimerMinutes > 0) {
+            val tokenBitmap =
+                BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_token.png"))
             Image(
                 provider = ImageProvider(tokenBitmap),
                 contentDescription = "Token Icon",
@@ -275,6 +312,165 @@ fun CoopNameAndInfo(
                 text = formatTokenTimeText(contract.tokenTimerMinutes),
                 style = TextStyle(color = ColorProvider(textColor))
             )
+        }
+    }
+}
+
+@Composable
+fun Shipping(
+    assetManager: AssetManager,
+    contract: ContractInfoEntry,
+    textColor: Color
+) {
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 8.dp, end = 5.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val shippingBitmap =
+            BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_shipping.png"))
+        val playerContributorInfo = contract.contributors.find { contributor -> contributor.isSelf }
+
+        Image(
+            provider = ImageProvider(shippingBitmap),
+            contentDescription = "Shipping Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
+
+        if (playerContributorInfo != null) {
+            val playerBitmap =
+                BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_player.png"))
+            Image(
+                provider = ImageProvider(playerBitmap),
+                contentDescription = "Player Icon",
+                modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            )
+            Text(
+                modifier = GlanceModifier.padding(end = 5.dp),
+                text = "${numberToString(playerContributorInfo.eggsDelivered)}, ${
+                    getIndividualEggsPerHour(
+                        playerContributorInfo
+                    )
+                }",
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
+        val coopBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_coop.png"))
+        Image(
+            provider = ImageProvider(coopBitmap),
+            contentDescription = "Coop Icon",
+            modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+        )
+        Text(
+            text = "${numberToString(contract.contributors.sumOf { it.eggsDelivered })}, ${
+                getCoopEggsPerHour(
+                    contract.contributors
+                )
+            }",
+            style = TextStyle(color = ColorProvider(textColor))
+        )
+    }
+}
+
+@Composable
+fun TimeRemainingAndOfflineTime(
+    assetManager: AssetManager,
+    context: Context,
+    contract: ContractInfoEntry,
+    useAbsoluteTime: Boolean,
+    useOfflineTime: Boolean,
+    textColor: Color
+) {
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 8.dp, end = 5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val playerContributorInfo = contract.contributors.find { contributor -> contributor.isSelf }
+
+        TimeTextAndScrollLarge(
+            assetManager,
+            context,
+            contract,
+            useAbsoluteTime,
+            useOfflineTime,
+            textColor
+        )
+        Box(modifier = GlanceModifier.defaultWeight()) {}
+        if (playerContributorInfo != null) {
+            val offlineBitmap =
+                BitmapFactory.decodeStream(getAsset(assetManager, "other/icon_zzz.png"))
+            Image(
+                provider = ImageProvider(offlineBitmap),
+                contentDescription = "Offline Icon",
+                modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            )
+            Text(
+                text = getOfflineTimeHoursAndMinutes(playerContributorInfo),
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
+    }
+}
+
+@Composable
+fun TimeTextAndScrollLarge(
+    assetManager: AssetManager,
+    context: Context,
+    contract: ContractInfoEntry,
+    useAbsoluteTime: Boolean,
+    useOfflineTime: Boolean,
+    textColor: Color,
+) {
+    val use24HrFormat = DateFormat.is24HourFormat(context)
+    val (timeText, isOnTrack) = getContractDurationRemaining(
+        contract,
+        useAbsoluteTime,
+        use24HrFormat,
+        useOfflineTime
+    )
+
+    Text(
+        text = timeText,
+        style = TextStyle(
+            color = ColorProvider(
+                Color(
+                    getContractTimeTextColor(
+                        contract,
+                        isOnTrack,
+                        textColor
+                    )
+                )
+            )
+        )
+    )
+
+    val scrollName = getScrollName(contract, timeText)
+    if (scrollName.isNotEmpty()) {
+        val scrollBitmap =
+            BitmapFactory.decodeStream(getAsset(assetManager, "other/$scrollName.png"))
+
+        Image(
+            provider = ImageProvider(scrollBitmap),
+            contentDescription = "Contract Scroll",
+            modifier = GlanceModifier.size(20.dp).padding(start = 2.dp)
+        )
+    }
+}
+
+@Composable
+fun Artifacts(
+    assetManager: AssetManager,
+    contract: ContractInfoEntry,
+    textColor: Color
+) {
+    if (contract.contractArtifacts.isNotEmpty()) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth().padding(start = 8.dp, end = 5.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
         }
     }
 }

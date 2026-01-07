@@ -426,7 +426,7 @@ fun TimeTextAndScroll(
             Image(
                 provider = ImageProvider(scrollBitmap),
                 contentDescription = "Contract Scroll",
-                modifier = GlanceModifier.size(scrollSize.dp).padding(start = 1.dp)
+                modifier = GlanceModifier.size(scrollSize.dp).padding(start = 2.dp)
             )
         }
     }

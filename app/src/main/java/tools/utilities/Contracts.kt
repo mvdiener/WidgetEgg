@@ -231,6 +231,32 @@ fun getContractDurationRemaining(
     return Pair(timeText, isOnTrack)
 }
 
+fun getIndividualEggsPerHour(contributor: ContributorInfoEntry): String {
+    val eggsPerHour = contributor.eggRatePerSecond * 60 * 60
+    return "${numberToString(eggsPerHour)}/h"
+}
+
+fun getCoopEggsPerHour(contributors: List<ContributorInfoEntry>): String {
+    val totalEggRatePerSecond = contributors.sumOf { contributor -> contributor.eggRatePerSecond }
+    val totalEggRatePerHour = totalEggRatePerSecond * 60 * 60
+    return "${numberToString(totalEggRatePerHour)}/h"
+}
+
+fun getOfflineTimeHoursAndMinutes(contributor: ContributorInfoEntry): String {
+    val offlineTimeSeconds = contributor.offlineTimeSeconds
+
+    if (offlineTimeSeconds <= 0) return "0m"
+
+    val hours = (offlineTimeSeconds / 3600).toInt()
+    val minutes = ((offlineTimeSeconds % 3600) / 60).toInt()
+
+    return when {
+        hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+        hours > 0 -> "${hours}h"
+        else -> "${minutes}m"
+    }
+}
+
 fun getScrollName(contract: ContractInfoEntry, timeText: String): String {
     return if (contract.allGoalsAchieved && contract.clearedForExit) {
         "green_scroll"
