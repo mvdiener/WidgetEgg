@@ -43,16 +43,16 @@ data class ContributorInfoEntry(
 
 @Serializable
 data class ContractArtifact(
-    var artifactName: Int,
-    var artifactRarity: Int,
-    var artifactLevel: Int,
-    var stoneList: List<ContractStone>
+    var name: Int,
+    var rarity: Int,
+    var level: Int,
+    var stones: List<ContractStone>
 )
 
 @Serializable
 data class ContractStone(
-    var stoneName: Int,
-    var stoneLevel: Int
+    var name: Int,
+    var level: Int
 )
 
 // Data class used to save periodicals contract information to preferences

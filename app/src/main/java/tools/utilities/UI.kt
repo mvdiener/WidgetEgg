@@ -114,8 +114,8 @@ fun getEggName(eggId: Int): String {
     }
 }
 
-fun getImageNameFromAfxId(afxId: Int): String {
-    return when (afxId) {
+fun getImageNameFromAfxId(afxId: Int, level: Int? = null): String {
+    val name = when (afxId) {
         23 -> "afx_puzzle_cube_4"
         0 -> "afx_lunar_totem_4"
         6 -> "afx_demeters_necklace_4"
@@ -150,6 +150,7 @@ fun getImageNameFromAfxId(afxId: Int): String {
         17 -> "afx_gold_meteorite_3"
         18 -> "afx_tau_ceti_geode_3"
         43 -> "afx_solar_titanium_3"
+        // Fragments
         2 -> "afx_tachyon_stone_1"
         44 -> "afx_dilithium_stone_1"
         45 -> "afx_shell_stone_1"
@@ -162,6 +163,14 @@ fun getImageNameFromAfxId(afxId: Int): String {
         52 -> "afx_clarity_stone_1"
         else -> ""
     }
+
+    return getImageNameWithAfxLevel(name, level)
+}
+
+private fun getImageNameWithAfxLevel(afxName: String, level: Int? = null): String {
+    if (level == null || afxName.isBlank()) return afxName
+    val afxBaseName = afxName.substringBeforeLast("_")
+    return "${afxBaseName}_${level + 1}"
 }
 
 fun numberToString(amount: Double): String {

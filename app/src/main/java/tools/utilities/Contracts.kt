@@ -1,8 +1,12 @@
 package tools.utilities
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RadialGradient
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import data.ContractArtifact
 import data.ContractData
@@ -71,18 +75,18 @@ fun formatContractData(
             artifact.stonesList.forEach { stone ->
                 stones = stones.plus(
                     ContractStone(
-                        stoneName = stone.name.number,
-                        stoneLevel = stone.level.number
+                        name = stone.name.number,
+                        level = stone.level.number
                     )
                 )
             }
 
             contractArtifacts = contractArtifacts.plus(
                 ContractArtifact(
-                    artifactName = artifact.spec.name.number,
-                    artifactRarity = artifact.spec.rarity.number,
-                    artifactLevel = artifact.spec.level.number,
-                    stoneList = stones
+                    name = artifact.spec.name.number,
+                    rarity = artifact.spec.rarity.number,
+                    level = artifact.spec.level.number,
+                    stones = stones
                 )
             )
         }
@@ -190,6 +194,26 @@ fun createContractCircularProgressBarBitmap(
         progressData.add(CircularProgress(offlineProgress, offlineProgressColor))
     }
     return createCircularProgressBarBitmap(progressData, size, 4f)
+}
+
+fun createGlowBitmap(rarity: Int, sizePx: Int = 100): Bitmap {
+    val bitmap = createBitmap(sizePx, sizePx)
+    val canvas = Canvas(bitmap)
+    val center = sizePx / 2f
+    val color = getRarityColor(rarity)
+    val stops = floatArrayOf(0.0f, 0.8f, 1.0f)
+
+    val paint = Paint().apply {
+        isAntiAlias = true
+        shader = RadialGradient(
+            center, center, center,
+            intArrayOf(color, (color and 0x00FFFFFF) or (0x66 shl 24), Color.Transparent.toArgb()),
+            stops,
+            android.graphics.Shader.TileMode.CLAMP
+        )
+    }
+    canvas.drawCircle(center, center, center, paint)
+    return bitmap
 }
 
 // Returns Pair<timeText, isOnTrack>
@@ -398,5 +422,18 @@ private fun formatSeasonName(seasonId: String): String {
                 Locale.ROOT
             ) else it.toString()
         }
+    }
+}
+
+private fun getRarityColor(rarity: Int): Int {
+    return when (rarity) {
+        //rare
+        1 -> android.graphics.Color.rgb(141, 217, 255) //light blue
+        //epic
+        2 -> android.graphics.Color.rgb(253, 64, 253) //purple
+        //legendary
+        3 -> android.graphics.Color.rgb(246, 216, 63) //yellow
+        //common
+        else -> android.graphics.Color.rgb(255, 255, 255) //white
     }
 }

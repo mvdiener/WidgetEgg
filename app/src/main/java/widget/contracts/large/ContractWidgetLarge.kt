@@ -46,6 +46,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
+import tools.utilities.createGlowBitmap
 import tools.utilities.formatTokenTimeText
 import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
@@ -53,6 +54,7 @@ import tools.utilities.getContractGradeName
 import tools.utilities.getContractTimeTextColor
 import tools.utilities.getCoopEggsPerHour
 import tools.utilities.getEggName
+import tools.utilities.getImageNameFromAfxId
 import tools.utilities.getIndividualEggsPerHour
 import tools.utilities.getOfflineTimeHoursAndMinutes
 import tools.utilities.getScrollName
@@ -204,7 +206,7 @@ fun ContractContentLarge(
         useOfflineTime,
         textColor
     )
-    Artifacts(assetManager, contract, textColor)
+    Artifacts(assetManager, contract)
 }
 
 @Composable
@@ -252,7 +254,7 @@ fun EggAndGrade(
         Image(
             provider = ImageProvider(gradeBitmap),
             contentDescription = "Contract Grade Icon",
-            modifier = GlanceModifier.size(30.dp)
+            modifier = GlanceModifier.size(25.dp)
         )
     }
 }
@@ -347,7 +349,7 @@ fun Shipping(
             )
             Text(
                 modifier = GlanceModifier.padding(end = 5.dp),
-                text = "${numberToString(playerContributorInfo.eggsDelivered)}, ${
+                text = "${numberToString(playerContributorInfo.eggsDelivered)} ${
                     getIndividualEggsPerHour(
                         playerContributorInfo
                     )
@@ -362,7 +364,7 @@ fun Shipping(
             modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
         )
         Text(
-            text = "${numberToString(contract.contributors.sumOf { it.eggsDelivered })}, ${
+            text = "${numberToString(contract.contributors.sumOf { it.eggsDelivered })} ${
                 getCoopEggsPerHour(
                     contract.contributors
                 )
@@ -462,15 +464,65 @@ fun TimeTextAndScrollLarge(
 fun Artifacts(
     assetManager: AssetManager,
     contract: ContractInfoEntry,
-    textColor: Color
 ) {
     if (contract.contractArtifacts.isNotEmpty()) {
         Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(start = 8.dp, end = 5.dp),
+            modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp),
             horizontalAlignment = Alignment.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
+            contract.contractArtifacts.forEachIndexed { index, artifact ->
+                val artifactName =
+                    getImageNameFromAfxId(artifact.name, artifact.level)
+                val artifactBitmap = BitmapFactory.decodeStream(
+                    getAsset(
+                        assetManager,
+                        "artifacts/$artifactName.png"
+                    )
+                )
+                Box(
+                    modifier = GlanceModifier.size(40.dp).padding(start = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (artifact.rarity > 0) {
+                        Image(
+                            provider = ImageProvider(createGlowBitmap(artifact.rarity)),
+                            contentDescription = null,
+                            modifier = GlanceModifier.fillMaxSize()
+                        )
+                    }
+                    Image(
+                        provider = ImageProvider(artifactBitmap),
+                        contentDescription = "Contract Artifact $index",
+                        modifier = GlanceModifier.size(30.dp)
+                    )
+                    if (artifact.stones.isNotEmpty()) {
+                        Box(
+                            modifier = GlanceModifier.fillMaxSize().padding(end = 2.dp),
+                            contentAlignment = Alignment.BottomEnd
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                artifact.stones.forEachIndexed { index, stone ->
+                                    val stoneName =
+                                        getImageNameFromAfxId(stone.name, stone.level + 1)
+                                    val stoneBitmap = bitmapResize(
+                                        BitmapFactory.decodeStream(
+                                            getAsset(assetManager, "artifacts/$stoneName.png")
+                                        )
+                                    )
+                                    Image(
+                                        provider = ImageProvider(stoneBitmap),
+                                        contentDescription = "Stone Icon $index",
+                                        modifier = GlanceModifier.size(10.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
