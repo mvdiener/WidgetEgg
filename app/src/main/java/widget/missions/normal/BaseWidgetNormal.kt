@@ -128,7 +128,7 @@ abstract class BaseWidgetNormal(val isVirtueWidget: Boolean = false) : GlanceApp
                     }
             ) {
                 val assetManager = context.assets
-                if (eid.isBlank() || missionData.isEmpty()) {
+                if (eid.isBlank() || missionData.isEmpty() || (missionData.size == 1 && missionData.first().identifier.isBlank() && !showFuelingShip)) {
                     NoMissionsContent(assetManager, textColor)
                 } else {
                     Row(
@@ -215,10 +215,10 @@ fun MissionProgress(
         }
 
     Box(
-        modifier = GlanceModifier.fillMaxWidth().padding(bottom = 5.dp),
+        modifier = GlanceModifier.size(80.dp).padding(bottom = 0.dp),
     ) {
         Box(
-            modifier = GlanceModifier.fillMaxWidth(),
+            modifier = GlanceModifier.size(80.dp),
             contentAlignment = Alignment.Center
         ) {
             val bitmap = createMissionCircularProgressBarBitmap(
@@ -246,7 +246,7 @@ fun MissionProgress(
         }
 
         Box(
-            modifier = GlanceModifier.fillMaxWidth(),
+            modifier = GlanceModifier.size(80.dp),
             contentAlignment = Alignment.TopEnd
         ) {
             val artifactName = getImageNameFromAfxId(mission.targetArtifact)
