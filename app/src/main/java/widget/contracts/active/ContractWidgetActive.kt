@@ -350,14 +350,14 @@ fun EggAndProgressBars(
         "egg_${contract.customEggId}"
     }
 
-    contract.goals.sortedBy { goal -> goal.goalAmount }.forEachIndexed { index, goal ->
+    contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
         val percentComplete =
-            getContractGoalPercentComplete(contract.eggsDelivered, goal.goalAmount)
+            getContractGoalPercentComplete(contract.eggsDelivered, goal.amount)
         var offlinePercentComplete: Float? = null
         if (useOfflineTime) {
             val totalEggsDelivered = contract.eggsDelivered + getOfflineEggsDelivered(contract)
             offlinePercentComplete =
-                getContractGoalPercentComplete(totalEggsDelivered, goal.goalAmount)
+                getContractGoalPercentComplete(totalEggsDelivered, goal.amount)
         }
 
         val bitmap = createContractCircularProgressBarBitmap(
@@ -368,7 +368,7 @@ fun EggAndProgressBars(
 
         Image(
             provider = ImageProvider(bitmap),
-            contentDescription = "Circular Progress",
+            contentDescription = "Circular Progress $index",
             modifier = GlanceModifier.size(((index + progressSize) * 10).dp)
         )
     }

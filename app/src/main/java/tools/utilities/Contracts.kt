@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
+import data.CONTRACT_OFFLINE_PROGRESS_COLOR
+import data.CONTRACT_PROGRESS_COLOR
 import data.ContractArtifact
 import data.ContractData
 import data.ContractInfoEntry
@@ -40,9 +42,10 @@ fun formatContractData(
         gradeSpecs?.goalsList?.forEach { goal ->
             formattedGoals = formattedGoals.plus(
                 GoalInfoEntry(
-                    goalAmount = goal.targetAmount,
+                    amount = goal.targetAmount,
                     reward = goal.rewardType,
-                    rewardSubType = goal.rewardSubType
+                    rewardSubType = goal.rewardSubType,
+                    rewardAmount = goal.rewardAmount
                 )
             )
         }
@@ -138,9 +141,10 @@ fun formatPeriodicalsContracts(
         gradeSpecs?.goalsList?.forEach { goal ->
             formattedGoals = formattedGoals.plus(
                 GoalInfoEntry(
-                    goalAmount = goal.targetAmount,
+                    amount = goal.targetAmount,
                     reward = goal.rewardType,
-                    rewardSubType = goal.rewardSubType
+                    rewardSubType = goal.rewardSubType,
+                    rewardAmount = goal.rewardAmount
                 )
             )
         }
@@ -187,11 +191,11 @@ fun createContractCircularProgressBarBitmap(
     offlineProgress: Float?,
     size: Int
 ): Bitmap {
-    val totalProgressColor = "#008531".toColorInt()
-    val offlineProgressColor = "#51dda8".toColorInt()
-    val progressData = mutableListOf(CircularProgress(totalProgress, totalProgressColor))
+    val totalProgressColor = CONTRACT_PROGRESS_COLOR.toColorInt()
+    val offlineProgressColor = CONTRACT_OFFLINE_PROGRESS_COLOR.toColorInt()
+    val progressData = mutableListOf(ProgressData(totalProgress, totalProgressColor))
     if (offlineProgress != null) {
-        progressData.add(CircularProgress(offlineProgress, offlineProgressColor))
+        progressData.add(ProgressData(offlineProgress, offlineProgressColor))
     }
     return createCircularProgressBarBitmap(progressData, size, 4f)
 }
@@ -228,7 +232,7 @@ fun getContractDurationRemaining(
         return Pair("Finished!", isOnTrack)
     }
 
-    val totalEggsNeeded = contract.goals.maxOf { goal -> goal.goalAmount }
+    val totalEggsNeeded = contract.goals.maxOf { goal -> goal.amount }
     val totalEggsDelivered = contract.eggsDelivered
     var offlineEggsDelivered = 0.0
 

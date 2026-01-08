@@ -8,17 +8,18 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
 import data.NUMBER_UNITS
+import data.PROGRESS_BACKGROUND_COLOR
 import ei.Ei
 import java.io.InputStream
 import java.util.Locale
 
-data class CircularProgress(
+data class ProgressData(
     val progress: Float,
     val color: Int,
 )
 
 fun createCircularProgressBarBitmap(
-    progressData: List<CircularProgress>,
+    progressData: List<ProgressData>,
     size: Int,
     width: Float
 ): Bitmap {
@@ -32,7 +33,7 @@ fun createCircularProgressBarBitmap(
     }
 
     // Background gray circle
-    paint.color = "#464646".toColorInt()
+    paint.color = PROGRESS_BACKGROUND_COLOR.toColorInt()
     val radius = size / 2f - paint.strokeWidth / 2
     canvas.drawCircle(size / 2f, size / 2f, radius, paint)
 

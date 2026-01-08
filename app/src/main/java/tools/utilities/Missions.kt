@@ -271,7 +271,7 @@ fun createMissionCircularProgressBarBitmap(
     isFueling: Boolean
 ): Bitmap {
     val color = getMissionColor(durationType, isFueling)
-    val progressData = listOf(CircularProgress(progress, color))
+    val progressData = listOf(ProgressData(progress, color))
     return createCircularProgressBarBitmap(progressData, size, 8f)
 }
 

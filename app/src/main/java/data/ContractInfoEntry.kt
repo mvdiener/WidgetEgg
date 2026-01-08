@@ -28,9 +28,10 @@ data class ContractInfoEntry(
 
 @Serializable
 data class GoalInfoEntry(
-    var goalAmount: Double,
+    var amount: Double,
     var reward: RewardType,
-    var rewardSubType: String
+    var rewardSubType: String,
+    var rewardAmount: Double
 )
 
 @Serializable
