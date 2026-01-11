@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import api.fetchBackupData
+import api.fetchContractsArchive
 import api.fetchContractData
 import api.fetchMissionData
 import api.fetchPeriodicalsData
@@ -117,18 +118,24 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     val missionResult = fetchMissionData(prefEid, backupResult.virtue.resets)
                     val contractResult = fetchContractData(backupResult)
                     val periodicalsResult = fetchPeriodicalsData(prefEid)
+                    val contractsArchiveResult = fetchContractsArchive(prefEid)
                     val formattedMissionData = formatMissionData(missionResult, backupResult)
                     val formattedVirtueMissionData =
                         formatMissionData(missionResult, backupResult, true)
                     val formattedTankInfo = formatTankInfo(backupResult)
                     val formattedVirtueTankInfo = formatTankInfo(backupResult, true)
                     val formattedPeriodicalsContracts =
-                        formatPeriodicalsContracts(periodicalsResult, backupResult)
+                        formatPeriodicalsContracts(
+                            periodicalsResult,
+                            backupResult,
+                            contractsArchiveResult
+                        )
                     val formattedContractData =
                         formatContractData(
                             contractResult,
                             backupResult.userName,
-                            formattedPeriodicalsContracts
+                            formattedPeriodicalsContracts,
+                            contractsArchiveResult
                         )
                     val formattedStatsData = formatStatsData(backupResult)
                     preferences.saveMissionInfo(formattedMissionData)

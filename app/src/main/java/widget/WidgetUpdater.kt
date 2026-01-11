@@ -3,6 +3,7 @@ package widget
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import api.fetchBackupData
+import api.fetchContractsArchive
 import api.fetchContractData
 import api.fetchMissionData
 import api.fetchPeriodicalsData
@@ -217,6 +218,7 @@ class WidgetUpdater {
         val prefEid = preferences.getEid()
         val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeContract()
         val prefUseOfflineTime = preferences.getUseOfflineTime()
+        val prefShowAvailableContracts = preferences.getShowAvailableContracts()
         val prefOpenWasmeggDashboard = preferences.getOpenWasmeggDashboard()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
@@ -225,10 +227,17 @@ class WidgetUpdater {
             if (prefEid.isNotBlank()) {
                 val contractInfo = fetchContractData(backup)
                 val periodicalsInfo = fetchPeriodicalsData(prefEid)
+                val contractsArchiveInfo = fetchContractsArchive(prefEid)
 
-                prefPeriodicalsContractInfo = formatPeriodicalsContracts(periodicalsInfo, backup)
+                prefPeriodicalsContractInfo =
+                    formatPeriodicalsContracts(periodicalsInfo, backup, contractsArchiveInfo)
                 prefContractInfo =
-                    formatContractData(contractInfo, backup.userName, prefPeriodicalsContractInfo)
+                    formatContractData(
+                        contractInfo,
+                        backup.userName,
+                        prefPeriodicalsContractInfo,
+                        contractsArchiveInfo
+                    )
 
                 preferences.saveContractInfo(prefContractInfo)
                 preferences.savePeriodicalsContractInfo(prefPeriodicalsContractInfo)
@@ -241,6 +250,7 @@ class WidgetUpdater {
                 )
                 ContractWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
                 ContractWidgetDataStore().setUseOfflineTime(context, prefUseOfflineTime)
+                ContractWidgetDataStore().setShowAvailableContracts(context, prefShowAvailableContracts)
                 ContractWidgetDataStore().setOpenWasmeggDashboard(
                     context, prefOpenWasmeggDashboard
                 )

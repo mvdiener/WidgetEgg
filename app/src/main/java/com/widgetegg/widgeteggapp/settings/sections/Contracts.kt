@@ -61,6 +61,7 @@ fun Contracts(navController: NavController) {
         ) {
             Text(text = "Contract Settings", fontSize = TextUnit(24f, TextUnitType.Sp))
             ContractsGeneralGroup(settingsViewModel)
+            LargeContractWidgetGroup(settingsViewModel)
             ScrollBottomPadding()
         }
     }
@@ -165,6 +166,50 @@ fun OpenWasmeggDashboardRow(settingsViewModel: SettingsViewModel) {
                 onCheckedChange = {
                     scope.launch {
                         settingsViewModel.updateOpenWasmeggDashboard(!settingsViewModel.openWasmeggDashboard)
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun LargeContractWidgetGroup(
+    settingsViewModel: SettingsViewModel
+) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(text = "Large Contract Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
+        ShowAvailableContractsRow(settingsViewModel)
+    }
+}
+
+@Composable
+fun ShowAvailableContractsRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Show available contracts",
+                "Vertically scroll through available contracts, in addition to active contracts.",
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.showAvailableContracts,
+                onCheckedChange = {
+                    scope.launch {
+                        settingsViewModel.updateShowAvailableContracts(!settingsViewModel.showAvailableContracts)
                     }
                 }
             )

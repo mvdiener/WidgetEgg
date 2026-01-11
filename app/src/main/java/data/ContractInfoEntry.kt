@@ -21,9 +21,11 @@ data class ContractInfoEntry(
     var grade: Int,
     var maxCoopSize: Int,
     var tokenTimerMinutes: Double,
+    var isUltra: Boolean,
     var goals: List<GoalInfoEntry>,
     var contributors: List<ContributorInfoEntry>,
-    var contractArtifacts: List<ContractArtifact>
+    var contractArtifacts: List<ContractArtifact>,
+    var archivedContractInfo: ArchivedContractInfoEntry?
 )
 
 @Serializable
@@ -66,8 +68,17 @@ data class PeriodicalsContractInfoEntry(
     var identifier: String,
     var seasonName: String?,
     var isLegacy: Boolean,
+    var grade: Int,
     var maxCoopSize: Int,
     var coopLengthSeconds: Double,
     var tokenTimerMinutes: Double,
+    var isUltra: Boolean,
     var goals: List<GoalInfoEntry>,
+    var archivedContractInfo: ArchivedContractInfoEntry?
+)
+
+@Serializable
+data class ArchivedContractInfoEntry(
+    var numOfGoalsAchieved: Int,
+    var pointsReplay: Boolean
 )

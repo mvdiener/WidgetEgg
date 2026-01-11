@@ -30,6 +30,68 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferences = PreferencesDatastore(context)
     }
 
+    // General
+
+    var isOptimizationDisabled by mutableStateOf(true)
+        private set
+
+    fun updateIsOptimizationDisabled(input: Boolean) {
+        isOptimizationDisabled = input
+    }
+
+    var showBatteryOptimizationDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowBatteryOptimizationDialog(input: Boolean) {
+        showBatteryOptimizationDialog = input
+    }
+
+    var widgetBackgroundColor by mutableStateOf(DEFAULT_WIDGET_BACKGROUND_COLOR)
+        private set
+
+    fun updateWidgetBackgroundColor(input: Color) {
+        widgetBackgroundColor = input
+        // Color updates need runBlocking to ensure proper widget state updates
+        runBlocking {
+            preferences.saveWidgetBackgroundColor(input)
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setBackgroundColor(context, input)
+            ContractWidgetDataStore().setBackgroundColor(context, input)
+            StatsWidgetDataStore().setBackgroundColor(context, input)
+        }
+    }
+
+    var showBackgroundColorPickerDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowBackgroundColorPickerDialog(input: Boolean) {
+        showBackgroundColorPickerDialog = input
+    }
+
+    var widgetTextColor by mutableStateOf(DEFAULT_WIDGET_TEXT_COLOR)
+        private set
+
+    fun updateWidgetTextColor(input: Color) {
+        widgetTextColor = input
+        // Color updates need runBlocking to ensure proper widget state updates
+        runBlocking {
+            preferences.saveWidgetTextColor(input)
+            val context = getApplication<Application>().applicationContext
+            MissionWidgetDataStore().setTextColor(context, input)
+            ContractWidgetDataStore().setTextColor(context, input)
+            StatsWidgetDataStore().setTextColor(context, input)
+        }
+    }
+
+    var showTextColorPickerDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowTextColorPickerDialog(input: Boolean) {
+        showTextColorPickerDialog = input
+    }
+
+    // Missions
+
     var useAbsoluteTimeMission by mutableStateOf(false)
         private set
 
@@ -98,20 +160,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferences.saveShowTankLevels(input)
         val context = getApplication<Application>().applicationContext
         MissionWidgetDataStore().setShowTankLevels(context, input)
-    }
-
-    var isOptimizationDisabled by mutableStateOf(true)
-        private set
-
-    fun updateIsOptimizationDisabled(input: Boolean) {
-        isOptimizationDisabled = input
-    }
-
-    var showBatteryOptimizationDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowBatteryOptimizationDialog(input: Boolean) {
-        showBatteryOptimizationDialog = input
     }
 
     var useSliderCapacity by mutableStateOf(false)
@@ -200,6 +248,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    // Contracts
+
     var useAbsoluteTimeContract by mutableStateOf(false)
         private set
 
@@ -230,49 +280,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         ContractWidgetDataStore().setOpenWasmeggDashboard(context, input)
     }
 
-    var widgetBackgroundColor by mutableStateOf(DEFAULT_WIDGET_BACKGROUND_COLOR)
+    var showAvailableContracts by mutableStateOf(false)
         private set
 
-    fun updateWidgetBackgroundColor(input: Color) {
-        widgetBackgroundColor = input
-        // Color updates need runBlocking to ensure proper widget state updates
-        runBlocking {
-            preferences.saveWidgetBackgroundColor(input)
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setBackgroundColor(context, input)
-            ContractWidgetDataStore().setBackgroundColor(context, input)
-            StatsWidgetDataStore().setBackgroundColor(context, input)
-        }
+    suspend fun updateShowAvailableContracts(input: Boolean) {
+        showAvailableContracts = input
+        preferences.saveShowAvailableContracts(input)
+        val context = getApplication<Application>().applicationContext
+        ContractWidgetDataStore().setShowAvailableContracts(context, input)
     }
 
-    var showBackgroundColorPickerDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowBackgroundColorPickerDialog(input: Boolean) {
-        showBackgroundColorPickerDialog = input
-    }
-
-    var widgetTextColor by mutableStateOf(DEFAULT_WIDGET_TEXT_COLOR)
-        private set
-
-    fun updateWidgetTextColor(input: Color) {
-        widgetTextColor = input
-        // Color updates need runBlocking to ensure proper widget state updates
-        runBlocking {
-            preferences.saveWidgetTextColor(input)
-            val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setTextColor(context, input)
-            ContractWidgetDataStore().setTextColor(context, input)
-            StatsWidgetDataStore().setTextColor(context, input)
-        }
-    }
-
-    var showTextColorPickerDialog by mutableStateOf(false)
-        private set
-
-    fun updateShowTextColorPickerDialog(input: Boolean) {
-        showTextColorPickerDialog = input
-    }
+    // Stats
 
     var showCommunityBadges by mutableStateOf(false)
         private set

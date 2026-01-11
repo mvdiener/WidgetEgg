@@ -355,7 +355,8 @@ fun EggAndProgressBars(
             getContractGoalPercentComplete(contract.eggsDelivered, goal.amount)
         var offlinePercentComplete: Float? = null
         if (useOfflineTime) {
-            val totalEggsDelivered = contract.eggsDelivered + getOfflineEggsDelivered(contract)
+            val totalEggsDelivered =
+                contract.eggsDelivered + getOfflineEggsDelivered(contract.contributors)
             offlinePercentComplete =
                 getContractGoalPercentComplete(totalEggsDelivered, goal.amount)
         }

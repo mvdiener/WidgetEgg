@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
+import data.ArchivedContractInfoEntry
 import data.CONTRACT_OFFLINE_PROGRESS_COLOR
 import data.CONTRACT_PROGRESS_COLOR
 import data.ContractArtifact
@@ -21,6 +22,7 @@ import data.PeriodicalsData
 import ei.Ei
 import ei.Ei.Backup
 import ei.Ei.ContractCoopStatusResponse.ContributionInfo
+import ei.Ei.LocalContract
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -30,7 +32,8 @@ import kotlin.math.abs
 fun formatContractData(
     contractInfo: ContractData,
     userName: String,
-    periodicalsContracts: List<PeriodicalsContractInfoEntry>
+    periodicalsContracts: List<PeriodicalsContractInfoEntry>,
+    contractsArchive: List<LocalContract>
 ): List<ContractInfoEntry> {
     var formattedContracts: List<ContractInfoEntry> = emptyList()
 
@@ -97,6 +100,8 @@ fun formatContractData(
         val periodicalContract =
             periodicalsContracts.find { it.identifier == contract.contract.identifier }
 
+        val archivedContract = getArchivedContract(contract.contract.identifier, contractsArchive)
+
         formattedContracts = formattedContracts.plus(
             ContractInfoEntry(
                 stateId = UUID.randomUUID()
@@ -115,9 +120,11 @@ fun formatContractData(
                 grade = contract.grade.number,
                 maxCoopSize = periodicalContract?.maxCoopSize ?: 0,
                 tokenTimerMinutes = periodicalContract?.tokenTimerMinutes ?: 0.0,
+                isUltra = contract.contract.ccOnly,
                 goals = formattedGoals,
                 contributors = formattedContributors,
-                contractArtifacts = contractArtifacts
+                contractArtifacts = contractArtifacts,
+                archivedContractInfo = archivedContract
             )
         )
     }
@@ -127,12 +134,11 @@ fun formatContractData(
 
 fun formatPeriodicalsContracts(
     periodicalsData: PeriodicalsData,
-    backup: Backup
+    backup: Backup,
+    contractsArchive: List<LocalContract>
 ): List<PeriodicalsContractInfoEntry> {
     var formattedContracts: List<PeriodicalsContractInfoEntry> = emptyList()
-    val contracts =
-        periodicalsData.contracts.filter { contract -> contract.identifier != "first-contract" }
-    contracts.forEach { contract ->
+    periodicalsData.contracts.forEach { contract ->
         var formattedGoals: List<GoalInfoEntry> = emptyList()
         val gradeSpecsList = contract.gradeSpecsList
         val gradeSpecs =
@@ -149,6 +155,8 @@ fun formatPeriodicalsContracts(
             )
         }
 
+        val archivedContract = getArchivedContract(contract.identifier, contractsArchive)
+
         formattedContracts = formattedContracts.plus(
             PeriodicalsContractInfoEntry(
                 stateId = UUID.randomUUID().toString(),
@@ -158,15 +166,35 @@ fun formatPeriodicalsContracts(
                 identifier = contract.identifier,
                 seasonName = formatSeasonName(contract.seasonId),
                 isLegacy = contract.leggacy,
+                grade = gradeSpecs?.grade?.number ?: 0,
                 maxCoopSize = contract.maxCoopSize,
                 coopLengthSeconds = contract.lengthSeconds,
                 tokenTimerMinutes = contract.minutesPerToken,
+                isUltra = contract.ccOnly,
                 goals = formattedGoals,
+                archivedContractInfo = archivedContract
             )
         )
     }
 
     return formattedContracts
+}
+
+fun getArchivedContract(
+    contractIdentifier: String,
+    contractsArchive: List<LocalContract>
+): ArchivedContractInfoEntry? {
+    val archivedContract =
+        contractsArchive.find { it.contract.identifier == contractIdentifier }
+
+    return if (archivedContract != null) {
+        ArchivedContractInfoEntry(
+            numOfGoalsAchieved = archivedContract.numGoalsAchieved,
+            pointsReplay = archivedContract.pointsReplay
+        )
+    } else {
+        null
+    }
 }
 
 fun getContractGoalPercentComplete(
@@ -180,8 +208,8 @@ fun getContractGoalPercentComplete(
     }
 }
 
-fun getOfflineEggsDelivered(contract: ContractInfoEntry): Double {
-    return contract.contributors.sumOf { contributor ->
+fun getOfflineEggsDelivered(contributors: List<ContributorInfoEntry>): Double {
+    return contributors.sumOf { contributor ->
         contributor.offlineTimeSeconds * contributor.eggRatePerSecond
     }
 }
@@ -237,7 +265,7 @@ fun getContractDurationRemaining(
     var offlineEggsDelivered = 0.0
 
     if (useOfflineTime) {
-        offlineEggsDelivered = getOfflineEggsDelivered(contract)
+        offlineEggsDelivered = getOfflineEggsDelivered(contract.contributors)
     }
 
     val remainingEggsNeeded = totalEggsNeeded - totalEggsDelivered - offlineEggsDelivered
@@ -283,6 +311,23 @@ fun getOfflineTimeHoursAndMinutes(contributor: ContributorInfoEntry): String {
         hours > 0 -> "${hours}h"
         else -> "${minutes}m"
     }
+}
+
+fun getContractTotalTimeText(seconds: Double): String {
+    if (seconds <= 0) return "0s"
+
+    val days = (seconds / 86400).toInt()
+    val hours = ((seconds % 86400) / 3600).toInt()
+    val minutes = ((seconds % 3600) / 60).toInt()
+    val remainingSeconds = (seconds % 60).toInt()
+
+    val parts = mutableListOf<String>()
+    if (days > 0) parts.add("${days}d")
+    if (hours > 0) parts.add("${hours}h")
+    if (minutes > 0) parts.add("${minutes}m")
+    if (remainingSeconds > 0 || parts.isEmpty()) parts.add("${remainingSeconds}s")
+
+    return parts.joinToString(" ")
 }
 
 fun getScrollName(contract: ContractInfoEntry, timeText: String): String {

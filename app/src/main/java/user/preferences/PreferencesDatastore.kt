@@ -50,6 +50,7 @@ class PreferencesDatastore(context: Context) {
         private val PERIODICALS_CONTRACT_INFO = stringPreferencesKey("periodicalsContractInfo")
         private val USE_ABSOLUTE_TIME_CONTRACT = booleanPreferencesKey("useAbsoluteTimeContract")
         private val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
+        private val SHOW_AVAILABLE_CONTRACTS = booleanPreferencesKey("showAvailableContracts")
         private val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
         private val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
         private val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
@@ -76,6 +77,7 @@ class PreferencesDatastore(context: Context) {
             PERIODICALS_CONTRACT_INFO,
             USE_ABSOLUTE_TIME_CONTRACT,
             USE_OFFLINE_TIME,
+            SHOW_AVAILABLE_CONTRACTS,
             OPEN_WASMEGG_DASHBOARD,
             WIDGET_BACKGROUND_COLOR,
             WIDGET_TEXT_COLOR,
@@ -337,6 +339,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveUseOfflineTime(useOfflineTime: Boolean) {
         dataStore.edit {
             it[USE_OFFLINE_TIME] = useOfflineTime
+        }
+    }
+
+    suspend fun getShowAvailableContracts() = dataStore.data.map {
+        it[SHOW_AVAILABLE_CONTRACTS] == true
+    }.first()
+
+    suspend fun saveShowAvailableContracts(showAvailableContracts: Boolean) {
+        dataStore.edit {
+            it[SHOW_AVAILABLE_CONTRACTS] = showAvailableContracts
         }
     }
 

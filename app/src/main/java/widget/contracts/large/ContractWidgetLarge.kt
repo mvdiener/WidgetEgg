@@ -44,11 +44,13 @@ import androidx.glance.unit.ColorProvider
 import data.CONTRACT_OFFLINE_PROGRESS_COLOR
 import data.CONTRACT_PROGRESS_COLOR
 import data.ContractInfoEntry
+import data.ContributorInfoEntry
 import data.DEFAULT_BROWSER
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.PROBLEMATIC_BROWSERS
 import data.PROGRESS_BACKGROUND_COLOR
+import data.PeriodicalsContractInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -60,6 +62,7 @@ import tools.utilities.getContractDurationRemaining
 import tools.utilities.getContractGoalPercentComplete
 import tools.utilities.getContractGradeName
 import tools.utilities.getContractTimeTextColor
+import tools.utilities.getContractTotalTimeText
 import tools.utilities.getCoopEggsPerHour
 import tools.utilities.getEggName
 import tools.utilities.getImageNameFromAfxId
@@ -95,6 +98,8 @@ class ContractWidgetLarge : GlanceAppWidget() {
                 state[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] == true
             val useOfflineTime =
                 state[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] == true
+            val showAvailableContracts =
+                state[ContractWidgetDataStorePreferencesKeys.SHOW_AVAILABLE_CONTRACTS] == true
             val openWasmeggDashboard =
                 state[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] == true
             val backgroundColor =
@@ -121,7 +126,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
 
             val scope = rememberCoroutineScope()
             val assetManager = context.assets
-            if (eid.isBlank() || contractData.isEmpty() /*&& !showAvailableContracts*/) {
+            if (eid.isBlank() || (contractData.isEmpty() && !showAvailableContracts)) {
                 Column(
                     modifier = GlanceModifier
                         .background(backgroundColor)
@@ -132,7 +137,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
                 ) {
                     NoContractsContentLarge(assetManager, textColor)
                 }
-            } else if (contractData.size == 1) {
+            } else if (contractData.size == 1 && !showAvailableContracts) {
                 Column(
                     modifier = GlanceModifier
                         .background(backgroundColor)
@@ -151,6 +156,8 @@ class ContractWidgetLarge : GlanceAppWidget() {
                     )
                 }
             } else {
+                val filteredPeriodicalsContracts =
+                    periodicalsContractData.filter { periodical -> (periodical.identifier !in contractData.map { it.identifier }) && periodical.identifier != "first-contract" }
                 LazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = GlanceModifier.fillMaxSize().background(backgroundColor)
@@ -172,6 +179,28 @@ class ContractWidgetLarge : GlanceAppWidget() {
                                     useOfflineTime,
                                     textColor
                                 )
+                            }
+                        }
+                    }
+                    if (showAvailableContracts) {
+                        for (contract in filteredPeriodicalsContracts) {
+                            item {
+                                Column(
+                                    modifier = GlanceModifier.fillMaxWidth()
+                                        .padding(vertical = 5.dp)
+                                        .contractWidgetClick(
+                                            context,
+                                            scope,
+                                            eid,
+                                            openWasmeggDashboard
+                                        )
+                                ) {
+                                    PeriodicalsContractContent(
+                                        assetManager,
+                                        contract,
+                                        textColor
+                                    )
+                                }
                             }
                         }
                     }
@@ -200,6 +229,24 @@ fun NoContractsContentLarge(assetManager: AssetManager, textColor: Color) {
     }
 }
 
+data class EggAndGrade(
+    val customEggId: String?,
+    val eggId: Int,
+    val grade: Int,
+    val name: String,
+    val isUltra: Boolean
+)
+
+data class CoopInfo(
+    val coopName: String?,
+    val maxCoopSize: Int,
+    val coopLength: Double?,
+    val contributors: List<ContributorInfoEntry>,
+    val seasonName: String?,
+    val isLegacy: Boolean,
+    val tokenTimerMinutes: Double
+)
+
 @Composable
 fun ContractContentLarge(
     assetManager: AssetManager,
@@ -209,8 +256,28 @@ fun ContractContentLarge(
     useOfflineTime: Boolean,
     textColor: Color
 ) {
-    EggAndGrade(assetManager, contract, textColor)
-    CoopNameAndInfo(assetManager, contract, textColor)
+    EggAndGrade(
+        assetManager,
+        EggAndGrade(
+            contract.customEggId,
+            contract.eggId,
+            contract.grade,
+            contract.name,
+            contract.isUltra
+        ),
+        textColor
+    )
+    CoopNameAndInfo(
+        assetManager, CoopInfo(
+            contract.coopName,
+            contract.maxCoopSize,
+            null,
+            contract.contributors,
+            contract.seasonName,
+            contract.isLegacy,
+            contract.tokenTimerMinutes
+        ), textColor
+    )
     Shipping(assetManager, contract, textColor)
     TimeRemainingAndOfflineTime(
         assetManager,
@@ -225,9 +292,42 @@ fun ContractContentLarge(
 }
 
 @Composable
+fun PeriodicalsContractContent(
+    assetManager: AssetManager,
+    contract: PeriodicalsContractInfoEntry,
+    textColor: Color
+) {
+    EggAndGrade(
+        assetManager,
+        EggAndGrade(
+            contract.customEggId,
+            contract.eggId,
+            contract.grade,
+            contract.name,
+            contract.isUltra
+        ),
+        textColor
+    )
+    CoopNameAndInfo(
+        assetManager,
+        CoopInfo(
+            null,
+            contract.maxCoopSize,
+            contract.coopLengthSeconds,
+            listOf(),
+            contract.seasonName,
+            contract.isLegacy,
+            contract.tokenTimerMinutes
+        ),
+        textColor
+    )
+    PeriodicalGoals(assetManager, contract, textColor)
+}
+
+@Composable
 fun EggAndGrade(
     assetManager: AssetManager,
-    contract: ContractInfoEntry,
+    data: EggAndGrade,
     textColor: Color
 ) {
     Row(
@@ -235,15 +335,44 @@ fun EggAndGrade(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val eggName = if (contract.customEggId.isNullOrBlank()) {
-            getEggName(contract.eggId)
+        val eggName = if (data.customEggId.isNullOrBlank()) {
+            getEggName(data.eggId)
         } else {
-            "egg_${contract.customEggId}"
+            "egg_${data.customEggId}"
         }
         val eggBitmap =
             bitmapResize(BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png")))
 
-        val grade = getContractGradeName(contract.grade)
+        Image(
+            provider = ImageProvider(eggBitmap),
+            contentDescription = "Egg Icon",
+            modifier = GlanceModifier.size(30.dp).padding(end = 5.dp)
+        )
+        Text(
+            text = data.name,
+            style = TextStyle(
+                color = ColorProvider(textColor),
+                fontSize = TextUnit(18f, TextUnitType.Sp)
+            )
+        )
+        Box(modifier = GlanceModifier.defaultWeight()) {}
+        if (data.isUltra) {
+            val ultraBitmap =
+                bitmapResize(
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            "other/icon_ultra.png"
+                        )
+                    )
+                )
+            Image(
+                provider = ImageProvider(ultraBitmap),
+                contentDescription = "Ultra Icon",
+                modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            )
+        }
+        val grade = getContractGradeName(data.grade)
         val gradeBitmap = bitmapResize(
             BitmapFactory.decodeStream(
                 getAsset(
@@ -252,20 +381,6 @@ fun EggAndGrade(
                 )
             )
         )
-
-        Image(
-            provider = ImageProvider(eggBitmap),
-            contentDescription = "Egg Icon",
-            modifier = GlanceModifier.size(30.dp).padding(end = 5.dp)
-        )
-        Text(
-            text = contract.name,
-            style = TextStyle(
-                color = ColorProvider(textColor),
-                fontSize = TextUnit(18f, TextUnitType.Sp)
-            )
-        )
-        Box(modifier = GlanceModifier.defaultWeight()) {}
         Image(
             provider = ImageProvider(gradeBitmap),
             contentDescription = "Contract Grade Icon",
@@ -277,7 +392,7 @@ fun EggAndGrade(
 @Composable
 fun CoopNameAndInfo(
     assetManager: AssetManager,
-    contract: ContractInfoEntry,
+    data: CoopInfo,
     textColor: Color
 ) {
     Row(
@@ -292,33 +407,58 @@ fun CoopNameAndInfo(
             contentDescription = "Coop Icon",
             modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
         )
-        Text(
-            modifier = GlanceModifier.padding(end = 5.dp),
-            text = truncateString(contract.coopName, 15),
-            style = TextStyle(color = ColorProvider(textColor))
-        )
-        if (contract.maxCoopSize != 0) {
+        if (!data.coopName.isNullOrBlank()) {
             Text(
                 modifier = GlanceModifier.padding(end = 5.dp),
-                text = "(${contract.contributors.size}/${contract.maxCoopSize})",
+                text = truncateString(data.coopName, 15),
                 style = TextStyle(color = ColorProvider(textColor))
             )
         }
-        if (!contract.seasonName.isNullOrBlank()) {
+        if (data.maxCoopSize != 0) {
+            val text =
+                if (data.contributors.isEmpty()) data.maxCoopSize.toString() else "(${data.contributors.size}/${data.maxCoopSize})"
             Text(
                 modifier = GlanceModifier.padding(end = 5.dp),
-                text = contract.seasonName!!,
+                text = text,
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
+        if (data.coopLength != null) {
+            val timerBitmap =
+                bitmapResize(
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            "other/icon_timer.png"
+                        )
+                    )
+                )
+            Image(
+                provider = ImageProvider(timerBitmap),
+                contentDescription = "Timer Icon",
+                modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+            )
+            Text(
+                modifier = GlanceModifier.padding(end = 5.dp),
+                text = getContractTotalTimeText(data.coopLength),
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
+        if (!data.seasonName.isNullOrBlank()) {
+            Text(
+                modifier = GlanceModifier.padding(end = 5.dp),
+                text = data.seasonName,
                 style = TextStyle(color = ColorProvider(Color(0xFF03D0A8.toInt())))
             )
         }
-        if (contract.isLegacy) {
+        if (data.isLegacy) {
             Text(
                 text = "Leggacy",
                 style = TextStyle(color = ColorProvider(Color(0xFFFE9B00.toInt())))
             )
         }
         Box(modifier = GlanceModifier.defaultWeight()) {}
-        if (contract.tokenTimerMinutes > 0) {
+        if (data.tokenTimerMinutes > 0) {
             val tokenBitmap =
                 bitmapResize(
                     BitmapFactory.decodeStream(
@@ -334,7 +474,7 @@ fun CoopNameAndInfo(
                 modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
             )
             Text(
-                text = formatTokenTimeText(contract.tokenTimerMinutes),
+                text = formatTokenTimeText(data.tokenTimerMinutes),
                 style = TextStyle(color = ColorProvider(textColor))
             )
         }
@@ -661,7 +801,7 @@ fun Goals(
                     ) {
                         if (useOfflineTime) {
                             val totalEggsDelivered =
-                                contract.eggsDelivered + getOfflineEggsDelivered(contract)
+                                contract.eggsDelivered + getOfflineEggsDelivered(contract.contributors)
                             val offlinePercentComplete =
                                 getContractGoalPercentComplete(totalEggsDelivered, goal.amount)
                             LinearProgressIndicator(
@@ -682,6 +822,78 @@ fun Goals(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun PeriodicalGoals(
+    assetManager: AssetManager,
+    contract: PeriodicalsContractInfoEntry,
+    textColor: Color
+) {
+    Column(
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if ((contract.archivedContractInfo?.numOfGoalsAchieved ?: 0) == contract.goals.size) {
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Points replay only",
+                    style = TextStyle(color = ColorProvider(textColor))
+                )
+            }
+        }
+        contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
+            val isComplete = (contract.archivedContractInfo?.numOfGoalsAchieved ?: 0) >= (index + 1)
+
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val status = if (isComplete) "complete" else "incomplete"
+                val completedBitmap = bitmapResize(
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            "other/icon_goal_$status.png"
+                        )
+                    )
+                )
+                Image(
+                    provider = ImageProvider(completedBitmap),
+                    contentDescription = "Completed Icon $index",
+                    modifier = GlanceModifier.size(25.dp).padding(end = 5.dp)
+                )
+                Text(
+                    text = numberToString(goal.amount),
+                    style = TextStyle(color = ColorProvider(textColor))
+                )
+                Box(modifier = GlanceModifier.defaultWeight()) {}
+                val rewardBitmap = bitmapResize(
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            getRewardIconPath(goal)
+                        )
+                    )
+                )
+                Image(
+                    provider = ImageProvider(rewardBitmap),
+                    contentDescription = "Reward Icon $index",
+                    modifier = GlanceModifier.size(25.dp).padding(end = 5.dp)
+                )
+                Text(
+                    text = numberToString(goal.rewardAmount),
+                    style = TextStyle(color = ColorProvider(textColor))
+                )
             }
         }
     }

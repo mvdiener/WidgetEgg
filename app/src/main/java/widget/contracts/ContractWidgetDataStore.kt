@@ -22,6 +22,7 @@ data object ContractWidgetDataStorePreferencesKeys {
     val PERIODICALS_CONTRACT_INFO = stringPreferencesKey("widgetPeriodicalsContractInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
     val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
+    val SHOW_AVAILABLE_CONTRACTS = booleanPreferencesKey("showAvailableContracts")
     val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
@@ -106,6 +107,20 @@ class ContractWidgetDataStore {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] =
                         useOfflineTime
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setShowAvailableContracts(context: Context, showAvailableContracts: Boolean) {
+        val contractWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetLarge::class.java)
+        (contractWidgetLargeIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[ContractWidgetDataStorePreferencesKeys.SHOW_AVAILABLE_CONTRACTS] =
+                        showAvailableContracts
                 }
             }
 
