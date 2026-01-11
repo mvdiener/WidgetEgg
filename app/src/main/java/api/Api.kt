@@ -2,6 +2,7 @@ package api
 
 import com.widgetegg.widgeteggapp.BuildConfig
 import data.BACKUP_ENDPOINT
+import data.CONTRACTS_ARCHIVE_ENDPOINT
 import data.CONTRACT_ENDPOINT
 import data.CURRENT_CLIENT_VERSION
 import data.ContractData
@@ -13,11 +14,13 @@ import ei.Ei
 import ei.Ei.AuthenticatedMessage
 import ei.Ei.Backup
 import ei.Ei.BasicRequestInfo
+import ei.Ei.ContractsArchive
 import ei.Ei.ContractCoopStatusRequest
 import ei.Ei.ContractCoopStatusResponse
 import ei.Ei.EggIncFirstContactRequest
 import ei.Ei.EggIncFirstContactResponse
 import ei.Ei.GetActiveMissionsResponse
+import ei.Ei.LocalContract
 import ei.Ei.MissionInfo
 import ei.Ei.PeriodicalsResponse
 import io.ktor.client.HttpClient
@@ -68,6 +71,12 @@ suspend fun fetchPeriodicalsData(eid: String): PeriodicalsData {
         periodicals.contracts.contractsList,
         periodicals.contracts.customEggsList
     )
+}
+
+suspend fun fetchContractsArchive(eid: String): List<LocalContract> {
+    val basicRequestInfo = getBasicRequestInfo(eid)
+    val contractsArchive = fetchContractsArchive(basicRequestInfo)
+    return contractsArchive.archiveList
 }
 
 fun getBasicRequestInfo(eid: String): BasicRequestInfo {
@@ -177,6 +186,32 @@ private suspend fun fetchPeriodicals(eid: String): PeriodicalsResponse {
                 val periodicalsResponse =
                     PeriodicalsResponse.parseFrom(authMessageResponse)
                 return periodicalsResponse
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+
+        else -> throw Exception("Error retrieving data")
+    }
+}
+
+private suspend fun fetchContractsArchive(basicRequestInfo: BasicRequestInfo): ContractsArchive {
+    val url = CONTRACTS_ARCHIVE_ENDPOINT
+
+    val encodedRequest = basicRequestInfo.toByteArray().encodeBase64()
+    val client = createHttpClient()
+    val response = makeRequest(client, url, encodedRequest)
+
+    when (response.status.value) {
+        in 200..299 -> {
+            try {
+                val authMessageResponse =
+                    AuthenticatedMessage.parseFrom(
+                        response.bodyAsText().decodeBase64Bytes()
+                    ).message
+                val contractsArchiveResponse =
+                    ContractsArchive.parseFrom(authMessageResponse)
+                return contractsArchiveResponse
             } catch (e: Exception) {
                 throw e
             }
