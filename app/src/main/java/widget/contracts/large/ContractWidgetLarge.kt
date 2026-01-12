@@ -311,8 +311,8 @@ fun ContractContentLarge(
             contract.tokenTimerMinutes
         ), textColor
     )
-    Shipping(assetManager, contract, textColor)
-    TimeRemainingAndOfflineTime(
+    ShippingAndOfflineTime(assetManager, contract, textColor)
+    ArtifactsAndTimeRemaining(
         assetManager,
         context,
         contract,
@@ -320,7 +320,6 @@ fun ContractContentLarge(
         useOfflineTime,
         textColor
     )
-    Artifacts(assetManager, contract)
     Goals(assetManager, contract, useOfflineTime, textColor)
 }
 
@@ -515,7 +514,7 @@ fun CoopNameAndInfo(
 }
 
 @Composable
-fun Shipping(
+fun ShippingAndOfflineTime(
     assetManager: AssetManager,
     contract: ContractInfoEntry,
     textColor: Color
@@ -582,33 +581,6 @@ fun Shipping(
             }",
             style = TextStyle(color = ColorProvider(textColor))
         )
-    }
-}
-
-@Composable
-fun TimeRemainingAndOfflineTime(
-    assetManager: AssetManager,
-    context: Context,
-    contract: ContractInfoEntry,
-    useAbsoluteTime: Boolean,
-    useOfflineTime: Boolean,
-    textColor: Color
-) {
-    Row(
-        modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val playerContributorInfo = contract.contributors.find { contributor -> contributor.isSelf }
-
-        TimeTextAndScrollLarge(
-            assetManager,
-            context,
-            contract,
-            useAbsoluteTime,
-            useOfflineTime,
-            textColor
-        )
         Box(modifier = GlanceModifier.defaultWeight()) {}
         if (playerContributorInfo != null) {
             val offlineBitmap =
@@ -628,6 +600,88 @@ fun TimeRemainingAndOfflineTime(
             Text(
                 text = getOfflineTimeHoursAndMinutes(playerContributorInfo.offlineTimeSecondsIgnoringSilos),
                 style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
+    }
+}
+
+@Composable
+fun ArtifactsAndTimeRemaining(
+    assetManager: AssetManager,
+    context: Context,
+    contract: ContractInfoEntry,
+    useAbsoluteTime: Boolean,
+    useOfflineTime: Boolean,
+    textColor: Color
+) {
+    if (contract.contractArtifacts.isNotEmpty()) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 5.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            contract.contractArtifacts.forEachIndexed { index, artifact ->
+                val artifactName =
+                    getImageNameFromAfxId(artifact.name, artifact.level)
+                val artifactBitmap = bitmapResize(
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            "artifacts/$artifactName.png"
+                        )
+                    )
+                )
+                Box(
+                    modifier = GlanceModifier.size(35.dp).padding(start = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (artifact.rarity > 0) {
+                        Image(
+                            provider = ImageProvider(createGlowBitmap(artifact.rarity)),
+                            contentDescription = null,
+                            modifier = GlanceModifier.fillMaxSize()
+                        )
+                    }
+                    Image(
+                        provider = ImageProvider(artifactBitmap),
+                        contentDescription = "Contract Artifact $index",
+                        modifier = GlanceModifier.size(25.dp)
+                    )
+                    if (artifact.stones.isNotEmpty()) {
+                        Box(
+                            modifier = GlanceModifier.fillMaxSize().padding(end = 2.dp),
+                            contentAlignment = Alignment.BottomEnd
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                artifact.stones.forEachIndexed { index, stone ->
+                                    val stoneName =
+                                        getImageNameFromAfxId(stone.name, stone.level + 1)
+                                    val stoneBitmap = bitmapResize(
+                                        BitmapFactory.decodeStream(
+                                            getAsset(assetManager, "artifacts/$stoneName.png")
+                                        )
+                                    )
+                                    Image(
+                                        provider = ImageProvider(stoneBitmap),
+                                        contentDescription = "Stone Icon $index",
+                                        modifier = GlanceModifier.size(9.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Box(modifier = GlanceModifier.defaultWeight()) {}
+            TimeTextAndScrollLarge(
+                assetManager,
+                context,
+                contract,
+                useAbsoluteTime,
+                useOfflineTime,
+                textColor
             )
         }
     }
@@ -686,75 +740,6 @@ fun TimeTextAndScrollLarge(
             contentDescription = "Contract Scroll",
             modifier = GlanceModifier.size(20.dp).padding(start = 2.dp)
         )
-    }
-}
-
-@Composable
-fun Artifacts(
-    assetManager: AssetManager,
-    contract: ContractInfoEntry,
-) {
-    if (contract.contractArtifacts.isNotEmpty()) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 5.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            contract.contractArtifacts.forEachIndexed { index, artifact ->
-                val artifactName =
-                    getImageNameFromAfxId(artifact.name, artifact.level)
-                val artifactBitmap = bitmapResize(
-                    BitmapFactory.decodeStream(
-                        getAsset(
-                            assetManager,
-                            "artifacts/$artifactName.png"
-                        )
-                    )
-                )
-                Box(
-                    modifier = GlanceModifier.size(40.dp).padding(start = 2.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (artifact.rarity > 0) {
-                        Image(
-                            provider = ImageProvider(createGlowBitmap(artifact.rarity)),
-                            contentDescription = null,
-                            modifier = GlanceModifier.fillMaxSize()
-                        )
-                    }
-                    Image(
-                        provider = ImageProvider(artifactBitmap),
-                        contentDescription = "Contract Artifact $index",
-                        modifier = GlanceModifier.size(30.dp)
-                    )
-                    if (artifact.stones.isNotEmpty()) {
-                        Box(
-                            modifier = GlanceModifier.fillMaxSize().padding(end = 2.dp),
-                            contentAlignment = Alignment.BottomEnd
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                artifact.stones.forEachIndexed { index, stone ->
-                                    val stoneName =
-                                        getImageNameFromAfxId(stone.name, stone.level + 1)
-                                    val stoneBitmap = bitmapResize(
-                                        BitmapFactory.decodeStream(
-                                            getAsset(assetManager, "artifacts/$stoneName.png")
-                                        )
-                                    )
-                                    Image(
-                                        provider = ImageProvider(stoneBitmap),
-                                        contentDescription = "Stone Icon $index",
-                                        modifier = GlanceModifier.size(10.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
