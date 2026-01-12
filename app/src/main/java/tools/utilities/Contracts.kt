@@ -19,6 +19,7 @@ import data.ContributorInfoEntry
 import data.GoalInfoEntry
 import data.PeriodicalsContractInfoEntry
 import data.PeriodicalsData
+import data.SeasonGradeAndGoals
 import ei.Ei
 import ei.Ei.Backup
 import ei.Ei.ContractCoopStatusResponse.ContributionInfo
@@ -67,7 +68,8 @@ fun formatContractData(
                 ContributorInfoEntry(
                     eggsDelivered = contributor.contributionAmount,
                     eggRatePerSecond = contributor.contributionRate,
-                    offlineTimeSeconds = getOfflineTime(contributor),
+                    offlineTimeSeconds = getOfflineTime(contributor, true),
+                    offlineTimeSecondsIgnoringSilos = getOfflineTime(contributor, false),
                     isSelf = contributor.userName == userName
                 )
             )
@@ -180,6 +182,40 @@ fun formatPeriodicalsContracts(
     return formattedContracts
 }
 
+fun formatSeasonInfo(
+    periodicalsData: PeriodicalsData,
+    backup: Backup,
+): SeasonGradeAndGoals {
+    val seasonInfo = periodicalsData.seasonInfo
+    val startingGrade =
+        backup.contracts.lastCpi.seasonProgressList.find { it.seasonId == seasonInfo.id }?.startingGrade
+
+    val goalSet = if (startingGrade != null) {
+        seasonInfo.gradeGoalsList.find { it.grade == startingGrade }
+    } else {
+        null
+    }
+
+    var formattedGoals: List<GoalInfoEntry> = emptyList()
+    goalSet?.goalsList?.forEach { goal ->
+        formattedGoals = formattedGoals.plus(
+            GoalInfoEntry(
+                amount = goal.cxp,
+                reward = goal.rewardType,
+                rewardSubType = goal.rewardSubType,
+                rewardAmount = goal.rewardAmount
+            )
+        )
+    }
+
+    return SeasonGradeAndGoals(
+        seasonName = seasonInfo.name,
+        seasonScore = backup.contracts.lastCpi.seasonCxp,
+        startingSeasonGrade = startingGrade,
+        goals = formattedGoals
+    )
+}
+
 fun getArchivedContract(
     contractIdentifier: String,
     contractsArchive: List<LocalContract>
@@ -197,14 +233,14 @@ fun getArchivedContract(
     }
 }
 
-fun getContractGoalPercentComplete(
-    delivered: Double,
+fun getGoalPercentComplete(
+    progress: Double,
     goal: Double
 ): Float {
-    return if (delivered >= goal) {
+    return if (progress >= goal) {
         1F
     } else {
-        (delivered / goal).toFloat()
+        (progress / goal).toFloat()
     }
 }
 
@@ -298,9 +334,7 @@ fun getCoopEggsPerHour(contributors: List<ContributorInfoEntry>): String {
     return "${numberToString(totalEggRatePerHour)}/h"
 }
 
-fun getOfflineTimeHoursAndMinutes(contributor: ContributorInfoEntry): String {
-    val offlineTimeSeconds = contributor.offlineTimeSeconds
-
+fun getOfflineTimeHoursAndMinutes(offlineTimeSeconds: Double): String {
     if (offlineTimeSeconds <= 0) return "0m"
 
     val hours = (offlineTimeSeconds / 3600).toInt()
@@ -394,9 +428,13 @@ private fun getBoostImagePath(goal: GoalInfoEntry): String {
     return "boosts/b_icon_$id.png"
 }
 
-private fun getOfflineTime(contributor: ContributionInfo): Double {
+private fun getOfflineTime(contributor: ContributionInfo, accountForSilos: Boolean): Double {
     val currentOfflineTime = abs(contributor.farmInfo?.timestamp ?: 0.0)
     if (currentOfflineTime == 0.0) return currentOfflineTime // farm is probably private
+
+    if (!accountForSilos) {
+        return currentOfflineTime
+    }
 
     val baseSiloTimeSeconds = 3600.0
     val siloResearchLevel =

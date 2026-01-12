@@ -69,7 +69,8 @@ suspend fun fetchPeriodicalsData(eid: String): PeriodicalsData {
     val periodicals = fetchPeriodicals(eid)
     return PeriodicalsData(
         periodicals.contracts.contractsList,
-        periodicals.contracts.customEggsList
+        periodicals.contracts.customEggsList,
+        periodicals.contracts.currentSeason
     )
 }
 

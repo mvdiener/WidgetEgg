@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
 import tools.utilities.formatMissionData
 import tools.utilities.formatPeriodicalsContracts
+import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import tools.utilities.removeCalendarEvents
@@ -214,11 +215,13 @@ class WidgetUpdater {
     ) {
         var prefContractInfo = preferences.getContractInfo()
         var prefPeriodicalsContractInfo = preferences.getPeriodicalsContractInfo()
+        var prefSeasonInfo = preferences.getSeasonInfo()
 
         val prefEid = preferences.getEid()
         val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeContract()
         val prefUseOfflineTime = preferences.getUseOfflineTime()
         val prefShowAvailableContracts = preferences.getShowAvailableContracts()
+        val prefShowSeasonInfo = preferences.getShowSeasonInfo()
         val prefOpenWasmeggDashboard = preferences.getOpenWasmeggDashboard()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
@@ -238,9 +241,12 @@ class WidgetUpdater {
                         prefPeriodicalsContractInfo,
                         contractsArchiveInfo
                     )
+                prefSeasonInfo = formatSeasonInfo(periodicalsInfo, backup)
+
 
                 preferences.saveContractInfo(prefContractInfo)
                 preferences.savePeriodicalsContractInfo(prefPeriodicalsContractInfo)
+                preferences.saveSeasonInfo(prefSeasonInfo)
 
                 ContractWidgetDataStore().setEid(context, prefEid)
                 ContractWidgetDataStore().setContractInfo(context, prefContractInfo)
@@ -248,9 +254,14 @@ class WidgetUpdater {
                     context,
                     prefPeriodicalsContractInfo
                 )
+                ContractWidgetDataStore().setSeasonInfo(context, prefSeasonInfo)
                 ContractWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
                 ContractWidgetDataStore().setUseOfflineTime(context, prefUseOfflineTime)
-                ContractWidgetDataStore().setShowAvailableContracts(context, prefShowAvailableContracts)
+                ContractWidgetDataStore().setShowAvailableContracts(
+                    context,
+                    prefShowAvailableContracts
+                )
+                ContractWidgetDataStore().setShowSeasonInfo(context, prefShowSeasonInfo)
                 ContractWidgetDataStore().setOpenWasmeggDashboard(
                     context, prefOpenWasmeggDashboard
                 )

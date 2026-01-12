@@ -51,6 +51,7 @@ import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.PROBLEMATIC_BROWSERS
 import data.PROGRESS_BACKGROUND_COLOR
 import data.PeriodicalsContractInfoEntry
+import data.SeasonGradeAndGoals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,7 +60,7 @@ import tools.utilities.createGlowBitmap
 import tools.utilities.formatTokenTimeText
 import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
-import tools.utilities.getContractGoalPercentComplete
+import tools.utilities.getGoalPercentComplete
 import tools.utilities.getContractGradeName
 import tools.utilities.getContractTimeTextColor
 import tools.utilities.getContractTotalTimeText
@@ -94,12 +95,17 @@ class ContractWidgetLarge : GlanceAppWidget() {
                 ContractWidgetDataStore().decodePeriodicalsContractInfo(
                     state[ContractWidgetDataStorePreferencesKeys.PERIODICALS_CONTRACT_INFO] ?: ""
                 )
+            val seasonData = ContractWidgetDataStore().decodeSeasonInfo(
+                state[ContractWidgetDataStorePreferencesKeys.SEASON_INFO] ?: ""
+            )
             val useAbsoluteTime =
                 state[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] == true
             val useOfflineTime =
                 state[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] == true
             val showAvailableContracts =
                 state[ContractWidgetDataStorePreferencesKeys.SHOW_AVAILABLE_CONTRACTS] == true
+            val showSeasonInfo =
+                state[ContractWidgetDataStorePreferencesKeys.SHOW_SEASON_INFO] == true
             val openWasmeggDashboard =
                 state[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] == true
             val backgroundColor =
@@ -126,7 +132,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
 
             val scope = rememberCoroutineScope()
             val assetManager = context.assets
-            if (eid.isBlank() || (contractData.isEmpty() && !showAvailableContracts)) {
+            if (eid.isBlank() || (contractData.isEmpty() && !showAvailableContracts && !showSeasonInfo)) {
                 Column(
                     modifier = GlanceModifier
                         .background(backgroundColor)
@@ -137,7 +143,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
                 ) {
                     NoContractsContentLarge(assetManager, textColor)
                 }
-            } else if (contractData.size == 1 && !showAvailableContracts) {
+            } else if (contractData.size == 1 && !showAvailableContracts && !showSeasonInfo) {
                 Column(
                     modifier = GlanceModifier
                         .background(backgroundColor)
@@ -154,6 +160,17 @@ class ContractWidgetLarge : GlanceAppWidget() {
                         useOfflineTime,
                         textColor
                     )
+                }
+            } else if (showSeasonInfo && seasonData.goals.isNotEmpty() && !showAvailableContracts && contractData.isEmpty()) {
+                Column(
+                    modifier = GlanceModifier
+                        .background(backgroundColor)
+                        .fillMaxSize()
+                        .contractWidgetClick(context, scope, eid, openWasmeggDashboard),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    SeasonContent(assetManager, seasonData, textColor)
                 }
             } else {
                 val filteredPeriodicalsContracts =
@@ -204,6 +221,22 @@ class ContractWidgetLarge : GlanceAppWidget() {
                             }
                         }
                     }
+                    if (showSeasonInfo && seasonData.goals.isNotEmpty()) {
+                        item {
+                            Column(
+                                modifier = GlanceModifier.fillMaxWidth()
+                                    .padding(vertical = 5.dp)
+                                    .contractWidgetClick(
+                                        context,
+                                        scope,
+                                        eid,
+                                        openWasmeggDashboard
+                                    )
+                            ) {
+                                SeasonContent(assetManager, seasonData, textColor)
+                            }
+                        }
+                    }
                     item {
                         Spacer(modifier = GlanceModifier.height(10.dp))
                     }
@@ -222,7 +255,7 @@ fun NoContractsContentLarge(assetManager: AssetManager, textColor: Color) {
     ) {
         LogoContentContracts(assetManager)
         Text(
-            text = "No active contracts...",
+            text = "Waiting for contract data...",
             style = TextStyle(color = ColorProvider(textColor)),
             modifier = GlanceModifier.padding(top = 5.dp)
         )
@@ -314,7 +347,7 @@ fun PeriodicalsContractContent(
             null,
             contract.maxCoopSize,
             contract.coopLengthSeconds,
-            listOf(),
+            emptyList(),
             contract.seasonName,
             contract.isLegacy,
             contract.tokenTimerMinutes
@@ -590,10 +623,10 @@ fun TimeRemainingAndOfflineTime(
             Image(
                 provider = ImageProvider(offlineBitmap),
                 contentDescription = "Offline Icon",
-                modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+                modifier = GlanceModifier.size(25.dp).padding(end = 5.dp)
             )
             Text(
-                text = getOfflineTimeHoursAndMinutes(playerContributorInfo),
+                text = getOfflineTimeHoursAndMinutes(playerContributorInfo.offlineTimeSecondsIgnoringSilos),
                 style = TextStyle(color = ColorProvider(textColor))
             )
         }
@@ -739,11 +772,11 @@ fun Goals(
     ) {
         val activeGoal = contract.goals
             .sortedBy { it.amount }
-            .firstOrNull { getContractGoalPercentComplete(contract.eggsDelivered, it.amount) < 1f }
+            .firstOrNull { getGoalPercentComplete(contract.eggsDelivered, it.amount) < 1f }
 
         contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
             val percentComplete =
-                getContractGoalPercentComplete(contract.eggsDelivered, goal.amount)
+                getGoalPercentComplete(contract.eggsDelivered, goal.amount)
 
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
@@ -803,7 +836,7 @@ fun Goals(
                             val totalEggsDelivered =
                                 contract.eggsDelivered + getOfflineEggsDelivered(contract.contributors)
                             val offlinePercentComplete =
-                                getContractGoalPercentComplete(totalEggsDelivered, goal.amount)
+                                getGoalPercentComplete(totalEggsDelivered, goal.amount)
                             LinearProgressIndicator(
                                 modifier = GlanceModifier.fillMaxSize(),
                                 progress = offlinePercentComplete,
@@ -894,6 +927,135 @@ fun PeriodicalGoals(
                     text = numberToString(goal.rewardAmount),
                     style = TextStyle(color = ColorProvider(textColor))
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun SeasonContent(
+    assetManager: AssetManager,
+    seasonData: SeasonGradeAndGoals,
+    textColor: Color
+) {
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = seasonData.seasonName,
+            style = TextStyle(
+                color = ColorProvider(textColor),
+                fontSize = TextUnit(18f, TextUnitType.Sp)
+            )
+        )
+        Box(modifier = GlanceModifier.defaultWeight()) {}
+        if ((seasonData.startingSeasonGrade?.number ?: 0) != 0) {
+            val grade = getContractGradeName(seasonData.startingSeasonGrade?.number ?: 0)
+            val gradeBitmap = bitmapResize(
+                BitmapFactory.decodeStream(
+                    getAsset(
+                        assetManager,
+                        "grades/contract_$grade.png"
+                    )
+                )
+            )
+            Image(
+                provider = ImageProvider(gradeBitmap),
+                contentDescription = "Season Grade Icon",
+                modifier = GlanceModifier.size(25.dp)
+            )
+        }
+    }
+
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val scoreText = numberToString(seasonData.seasonScore)
+        Text(
+            text = "Current score: $scoreText",
+            style = TextStyle(color = ColorProvider(textColor))
+        )
+    }
+
+    Column(
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val activeGoal = seasonData.goals
+            .sortedBy { it.amount }
+            .firstOrNull { getGoalPercentComplete(seasonData.seasonScore, it.amount) < 1f }
+
+        seasonData.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
+            val percentComplete =
+                getGoalPercentComplete(seasonData.seasonScore, goal.amount)
+
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val status = if (percentComplete == 1F) "complete" else "incomplete"
+                val completedBitmap = bitmapResize(
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            "other/icon_goal_$status.png"
+                        )
+                    )
+                )
+                Image(
+                    provider = ImageProvider(completedBitmap),
+                    contentDescription = "Completed Icon $index",
+                    modifier = GlanceModifier.size(25.dp).padding(end = 5.dp)
+                )
+                Text(
+                    text = numberToString(goal.amount),
+                    style = TextStyle(color = ColorProvider(textColor))
+                )
+                Box(modifier = GlanceModifier.defaultWeight()) {}
+                val rewardBitmap = bitmapResize(
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            getRewardIconPath(goal)
+                        )
+                    )
+                )
+                Image(
+                    provider = ImageProvider(rewardBitmap),
+                    contentDescription = "Reward Icon $index",
+                    modifier = GlanceModifier.size(25.dp).padding(end = 5.dp)
+                )
+                Text(
+                    text = numberToString(goal.rewardAmount),
+                    style = TextStyle(color = ColorProvider(textColor))
+                )
+            }
+            if (activeGoal != null && activeGoal.amount == goal.amount) {
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth().padding(start = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = GlanceModifier
+                            .fillMaxWidth()
+                            .height(7.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        LinearProgressIndicator(
+                            modifier = GlanceModifier.fillMaxSize(),
+                            progress = percentComplete,
+                            color = ColorProvider(Color(CONTRACT_PROGRESS_COLOR.toColorInt())),
+                            backgroundColor = ColorProvider(Color(PROGRESS_BACKGROUND_COLOR.toColorInt()))
+                        )
+                    }
+                }
             }
         }
     }

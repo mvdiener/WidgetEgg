@@ -48,7 +48,7 @@ import tools.utilities.bitmapResize
 import tools.utilities.createContractCircularProgressBarBitmap
 import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
-import tools.utilities.getContractGoalPercentComplete
+import tools.utilities.getGoalPercentComplete
 import tools.utilities.getContractTimeTextColor
 import tools.utilities.getEggName
 import tools.utilities.getOfflineEggsDelivered
@@ -352,13 +352,13 @@ fun EggAndProgressBars(
 
     contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
         val percentComplete =
-            getContractGoalPercentComplete(contract.eggsDelivered, goal.amount)
+            getGoalPercentComplete(contract.eggsDelivered, goal.amount)
         var offlinePercentComplete: Float? = null
         if (useOfflineTime) {
             val totalEggsDelivered =
                 contract.eggsDelivered + getOfflineEggsDelivered(contract.contributors)
             offlinePercentComplete =
-                getContractGoalPercentComplete(totalEggsDelivered, goal.amount)
+                getGoalPercentComplete(totalEggsDelivered, goal.amount)
         }
 
         val bitmap = createContractCircularProgressBarBitmap(

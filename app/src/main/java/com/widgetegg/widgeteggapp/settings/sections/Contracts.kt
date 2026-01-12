@@ -41,6 +41,8 @@ fun Contracts(navController: NavController) {
         settingsViewModel.updateUseAbsoluteTimeContract(preferences.getUseAbsoluteTimeContract())
         settingsViewModel.updateUseOfflineTime(preferences.getUseOfflineTime())
         settingsViewModel.updateOpenWasmeggDashboard(preferences.getOpenWasmeggDashboard())
+        settingsViewModel.updateShowAvailableContracts(preferences.getShowAvailableContracts())
+        settingsViewModel.updateShowSeasonInfo(preferences.getShowSeasonInfo())
     }
 
     Column(
@@ -184,6 +186,7 @@ fun LargeContractWidgetGroup(
     ) {
         Text(text = "Large Contract Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
         ShowAvailableContractsRow(settingsViewModel)
+        ShowSeasonInfoRow(settingsViewModel)
     }
 }
 
@@ -210,6 +213,36 @@ fun ShowAvailableContractsRow(settingsViewModel: SettingsViewModel) {
                 onCheckedChange = {
                     scope.launch {
                         settingsViewModel.updateShowAvailableContracts(!settingsViewModel.showAvailableContracts)
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ShowSeasonInfoRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Show season progress",
+                null,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.showSeasonInfo,
+                onCheckedChange = {
+                    scope.launch {
+                        settingsViewModel.updateShowSeasonInfo(!settingsViewModel.showSeasonInfo)
                     }
                 }
             )

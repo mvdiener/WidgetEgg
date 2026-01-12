@@ -290,6 +290,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         ContractWidgetDataStore().setShowAvailableContracts(context, input)
     }
 
+    var showSeasonInfo by mutableStateOf(false)
+        private set
+
+    suspend fun updateShowSeasonInfo(input: Boolean) {
+        showSeasonInfo = input
+        preferences.saveShowSeasonInfo(input)
+        val context = getApplication<Application>().applicationContext
+        ContractWidgetDataStore().setShowSeasonInfo(context, input)
+    }
+
     // Stats
 
     var showCommunityBadges by mutableStateOf(false)

@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
 import tools.utilities.formatMissionData
 import tools.utilities.formatPeriodicalsContracts
+import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import user.preferences.PreferencesDatastore
@@ -137,6 +138,10 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                             formattedPeriodicalsContracts,
                             contractsArchiveResult
                         )
+                    val formattedSeasonInfo = formatSeasonInfo(
+                        periodicalsResult,
+                        backupResult
+                    )
                     val formattedStatsData = formatStatsData(backupResult)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
@@ -144,6 +149,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     preferences.saveVirtueTankInfo(formattedVirtueTankInfo)
                     preferences.saveContractInfo(formattedContractData)
                     preferences.savePeriodicalsContractInfo(formattedPeriodicalsContracts)
+                    preferences.saveSeasonInfo(formattedSeasonInfo)
                     preferences.saveStatsInfo(formattedStatsData)
                     MissionWidgetDataStore().setMissionInfo(context, formattedMissionData)
                     MissionWidgetDataStore().setVirtueMissionInfo(
@@ -157,6 +163,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         context,
                         formattedPeriodicalsContracts
                     )
+                    ContractWidgetDataStore().setSeasonInfo(context, formattedSeasonInfo)
                     StatsWidgetDataStore().setStatsInfo(context, formattedStatsData)
                 }
             } catch (_: Exception) {

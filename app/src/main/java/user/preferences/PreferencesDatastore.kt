@@ -16,6 +16,7 @@ import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import data.PeriodicalsContractInfoEntry
+import data.SeasonGradeAndGoals
 import data.StatsInfo
 import data.TankInfo
 import kotlinx.coroutines.flow.first
@@ -48,42 +49,16 @@ class PreferencesDatastore(context: Context) {
         private val SELECTED_CALENDAR = stringPreferencesKey("selectedCalendar")
         private val CONTRACT_INFO = stringPreferencesKey("contractInfo")
         private val PERIODICALS_CONTRACT_INFO = stringPreferencesKey("periodicalsContractInfo")
+        private val SEASON_INFO = stringPreferencesKey("seasonInfo")
         private val USE_ABSOLUTE_TIME_CONTRACT = booleanPreferencesKey("useAbsoluteTimeContract")
         private val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
         private val SHOW_AVAILABLE_CONTRACTS = booleanPreferencesKey("showAvailableContracts")
+        private val SHOW_SEASON_INFO = booleanPreferencesKey("showSeasonInfo")
         private val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
         private val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
         private val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
         private val STATS_INFO = stringPreferencesKey("statsInfo")
         private val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
-        private val ALL_KEYS = listOf(
-            EID,
-            EI_USER_NAME,
-            MISSION_INFO,
-            VIRTUE_MISSION_INFO,
-            TANK_INFO,
-            VIRTUE_TANK_INFO,
-            USE_ABSOLUTE_TIME,
-            USE_ABSOLUTE_TIME_PLUS_DAY,
-            TARGET_ARTIFACT_NORMAL_WIDGET,
-            TARGET_ARTIFACT_LARGE_WIDGET,
-            SHOW_FUELING_SHIP,
-            SHOW_TANK_LEVELS,
-            USE_SLIDER_CAPACITY,
-            OPEN_EGG_INC,
-            SCHEDULE_EVENTS,
-            SELECTED_CALENDAR,
-            CONTRACT_INFO,
-            PERIODICALS_CONTRACT_INFO,
-            USE_ABSOLUTE_TIME_CONTRACT,
-            USE_OFFLINE_TIME,
-            SHOW_AVAILABLE_CONTRACTS,
-            OPEN_WASMEGG_DASHBOARD,
-            WIDGET_BACKGROUND_COLOR,
-            WIDGET_TEXT_COLOR,
-            STATS_INFO,
-            SHOW_COMMUNITY_BADGES
-        )
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -322,6 +297,24 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
+    suspend fun getSeasonInfo(): SeasonGradeAndGoals {
+        return dataStore.data.map {
+            it[SEASON_INFO]?.let { seasonInfoJson ->
+                try {
+                    Json.decodeFromString<SeasonGradeAndGoals>(seasonInfoJson)
+                } catch (e: Exception) {
+                    SeasonGradeAndGoals()
+                }
+            } ?: SeasonGradeAndGoals()
+        }.first()
+    }
+
+    suspend fun saveSeasonInfo(seasonInfo: SeasonGradeAndGoals) {
+        dataStore.edit {
+            it[SEASON_INFO] = Json.encodeToString(seasonInfo)
+        }
+    }
+
     suspend fun getUseAbsoluteTimeContract() = dataStore.data.map {
         it[USE_ABSOLUTE_TIME_CONTRACT] == true
     }.first()
@@ -349,6 +342,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveShowAvailableContracts(showAvailableContracts: Boolean) {
         dataStore.edit {
             it[SHOW_AVAILABLE_CONTRACTS] = showAvailableContracts
+        }
+    }
+
+    suspend fun getShowSeasonInfo() = dataStore.data.map {
+        it[SHOW_SEASON_INFO] == true
+    }.first()
+
+    suspend fun saveShowSeasonInfo(showSeasonInfo: Boolean) {
+        dataStore.edit {
+            it[SHOW_SEASON_INFO] = showSeasonInfo
         }
     }
 
@@ -413,9 +416,7 @@ class PreferencesDatastore(context: Context) {
 
     suspend fun clearPreferences() {
         dataStore.edit { preferences ->
-            ALL_KEYS.forEach { key ->
-                preferences.remove(key)
-            }
+            preferences.clear()
         }
     }
 }

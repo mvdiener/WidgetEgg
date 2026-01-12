@@ -12,6 +12,7 @@ import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.ContractInfoEntry
 import data.PeriodicalsContractInfoEntry
+import data.SeasonGradeAndGoals
 import kotlinx.serialization.json.Json
 import widget.contracts.active.ContractWidgetActive
 import widget.contracts.large.ContractWidgetLarge
@@ -20,9 +21,11 @@ data object ContractWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")
     val CONTRACT_INFO = stringPreferencesKey("widgetContractInfo")
     val PERIODICALS_CONTRACT_INFO = stringPreferencesKey("widgetPeriodicalsContractInfo")
+    val SEASON_INFO = stringPreferencesKey("widgetSeasonInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
     val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
     val SHOW_AVAILABLE_CONTRACTS = booleanPreferencesKey("showAvailableContracts")
+    val SHOW_SEASON_INFO = booleanPreferencesKey("showSeasonInfo")
     val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
@@ -87,6 +90,32 @@ class ContractWidgetDataStore {
         }
     }
 
+    suspend fun setSeasonInfo(
+        context: Context,
+        seasonInfo: SeasonGradeAndGoals
+    ) {
+        val seasonInfoString = Json.encodeToString(seasonInfo)
+        val contractWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetLarge::class.java)
+        (contractWidgetLargeIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[ContractWidgetDataStorePreferencesKeys.SEASON_INFO] =
+                        seasonInfoString
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    fun decodeSeasonInfo(seasonInfoJson: String): SeasonGradeAndGoals {
+        return try {
+            Json.decodeFromString<SeasonGradeAndGoals>(seasonInfoJson)
+        } catch (e: Exception) {
+            SeasonGradeAndGoals()
+        }
+    }
+
     suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
         val contractWidgetIds = getContractWidgetIds(context)
         (contractWidgetIds)
@@ -121,6 +150,20 @@ class ContractWidgetDataStore {
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs[ContractWidgetDataStorePreferencesKeys.SHOW_AVAILABLE_CONTRACTS] =
                         showAvailableContracts
+                }
+            }
+
+        updateAllWidgets(context)
+    }
+
+    suspend fun setShowSeasonInfo(context: Context, showSeasonInfo: Boolean) {
+        val contractWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetLarge::class.java)
+        (contractWidgetLargeIds)
+            .forEach { glanceId ->
+                updateAppWidgetState(context, glanceId) { prefs ->
+                    prefs[ContractWidgetDataStorePreferencesKeys.SHOW_SEASON_INFO] =
+                        showSeasonInfo
                 }
             }
 
