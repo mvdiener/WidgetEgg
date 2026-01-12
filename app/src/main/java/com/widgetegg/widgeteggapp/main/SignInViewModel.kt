@@ -172,12 +172,18 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun signOut() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
             val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().clearAllData(context)
-            ContractWidgetDataStore().clearAllData(context)
-            StatsWidgetDataStore().clearAllData(context)
-            preferences.clearPreferences()
+
+            val clearJob = launch(Dispatchers.IO) {
+                MissionWidgetDataStore().clearAllData(context)
+                ContractWidgetDataStore().clearAllData(context)
+                StatsWidgetDataStore().clearAllData(context)
+                preferences.clearPreferences()
+            }
+
+            clearJob.join()
+
             updateHasSubmitted(false)
             updateHasError(false)
             updateEid("")
