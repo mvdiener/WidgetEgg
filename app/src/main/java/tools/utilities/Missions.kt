@@ -96,12 +96,6 @@ fun formatMissionData(
         missionInfo.missions
     }
 
-    // For whatever reason, sometimes get_active_missions doesn't return active missions, or unclaimed missions (EI bug??)
-    // If this is the case, get the active missions from the backup
-    if (missionsWithFueling.isEmpty()) {
-        missionsWithFueling = getBackupMissions(backup, isVirtueMission)
-    }
-
     val fuelingMission = if (isVirtueMission) {
         backup.artifactsDb.virtueAfxDb.fuelingMission
     } else {
@@ -302,27 +296,4 @@ fun getMissionColor(durationType: Int, isFueling: Boolean): Int {
 fun getFuelPercentFilled(capacity: Long, fuelQuantity: Double): Float {
     if (capacity == 0L) return 0f
     return fuelQuantity.toFloat() / capacity.toFloat()
-}
-
-private fun getBackupMissions(
-    backup: Ei.Backup,
-    isVirtueMission: Boolean
-): List<MissionInfo> {
-    val missions = backup.artifactsDb.missionInfosList.filter { mission ->
-        if (isVirtueMission) {
-            mission.type == MissionInfo.MissionType.VIRTUE
-        } else {
-            mission.type == MissionInfo.MissionType.STANDARD
-        }
-    }
-
-    // The seconds remaining for a mission needs to be adjusted based on the last backup date
-    val lastBackupTime = backup.settings.lastBackupTime
-    val secondsSinceBackup = Instant.now().epochSecond - lastBackupTime
-
-    return missions.map { mission ->
-        mission.toBuilder()
-            .setSecondsRemaining(mission.secondsRemaining - secondsSinceBackup)
-            .build()
-    }
 }
