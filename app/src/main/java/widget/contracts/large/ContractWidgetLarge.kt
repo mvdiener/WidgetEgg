@@ -632,7 +632,7 @@ fun ArtifactsAndTimeRemaining(
                     )
                 )
                 Box(
-                    modifier = GlanceModifier.size(35.dp).padding(start = 2.dp),
+                    modifier = GlanceModifier.size(30.dp).padding(start = 2.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     if (artifact.rarity > 0) {
@@ -666,7 +666,7 @@ fun ArtifactsAndTimeRemaining(
                                     Image(
                                         provider = ImageProvider(stoneBitmap),
                                         contentDescription = "Stone Icon $index",
-                                        modifier = GlanceModifier.size(9.dp)
+                                        modifier = GlanceModifier.size(8.dp)
                                     )
                                 }
                             }
