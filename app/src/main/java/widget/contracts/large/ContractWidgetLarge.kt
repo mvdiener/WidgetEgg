@@ -732,7 +732,7 @@ fun TimeTextAndScrollLarge(
                         assetManager,
                         "other/$scrollName.png"
                     )
-                )
+                ), true
             )
 
         Image(
@@ -856,16 +856,29 @@ fun PeriodicalGoals(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if ((contract.archivedContractInfo?.numOfGoalsAchieved ?: 0) == contract.goals.size) {
+        val pointsReplay = contract.archivedContractInfo?.pointsReplay ?: false
+        val numOfGoalsAchieved = contract.archivedContractInfo?.numOfGoalsAchieved ?: 0
+        val lastScore = contract.archivedContractInfo?.lastScore ?: 0.0
+        if (pointsReplay || numOfGoalsAchieved == contract.goals.size || lastScore != 0.0) {
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Points replay only",
-                    style = TextStyle(color = ColorProvider(textColor))
-                )
+                if (pointsReplay || numOfGoalsAchieved == contract.goals.size) {
+                    Text(
+                        text = "Points replay only",
+                        style = TextStyle(color = ColorProvider(textColor))
+                    )
+                    Box(modifier = GlanceModifier.defaultWeight()) {}
+                }
+                if (lastScore != 0.0) {
+                    val lastScore = numberToString(lastScore)
+                    Text(
+                        text = "Last score: $lastScore",
+                        style = TextStyle(color = ColorProvider(textColor))
+                    )
+                }
             }
         }
         contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->

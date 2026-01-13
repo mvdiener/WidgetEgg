@@ -82,7 +82,8 @@ data class PeriodicalsContractInfoEntry(
 @Serializable
 data class ArchivedContractInfoEntry(
     var numOfGoalsAchieved: Int,
-    var pointsReplay: Boolean
+    var pointsReplay: Boolean,
+    var lastScore: Double
 )
 
 @Serializable

@@ -226,7 +226,8 @@ fun getArchivedContract(
     return if (archivedContract != null) {
         ArchivedContractInfoEntry(
             numOfGoalsAchieved = archivedContract.numGoalsAchieved,
-            pointsReplay = archivedContract.pointsReplay
+            pointsReplay = archivedContract.pointsReplay,
+            lastScore = archivedContract.evaluation.cxp
         )
     } else {
         null
