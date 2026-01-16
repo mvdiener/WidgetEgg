@@ -55,9 +55,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         runBlocking {
             preferences.saveWidgetBackgroundColor(input)
             val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setBackgroundColor(context, input)
-            ContractWidgetDataStore().setBackgroundColor(context, input)
-            StatsWidgetDataStore().setBackgroundColor(context, input)
+            MissionWidgetDataStore().updateMissionWidgetDataStore(context, backgroundColor = input)
+            ContractWidgetDataStore().updateContractWidgetDataStore(
+                context,
+                backgroundColor = input
+            )
+            StatsWidgetDataStore().updateStatsWidgetDataStore(context, backgroundColor = input)
         }
     }
 
@@ -77,9 +80,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         runBlocking {
             preferences.saveWidgetTextColor(input)
             val context = getApplication<Application>().applicationContext
-            MissionWidgetDataStore().setTextColor(context, input)
-            ContractWidgetDataStore().setTextColor(context, input)
-            StatsWidgetDataStore().setTextColor(context, input)
+            MissionWidgetDataStore().updateMissionWidgetDataStore(context, textColor = input)
+            ContractWidgetDataStore().updateContractWidgetDataStore(context, textColor = input)
+            StatsWidgetDataStore().updateStatsWidgetDataStore(context, textColor = input)
         }
     }
 
@@ -99,7 +102,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         useAbsoluteTimeMission = input
         preferences.saveUseAbsoluteTimeMission(input)
         val context = getApplication<Application>().applicationContext
-        MissionWidgetDataStore().setUseAbsoluteTime(context, input)
+        MissionWidgetDataStore().updateMissionWidgetDataStore(context, useAbsoluteTime = input)
     }
 
     var useAbsoluteTimePlusDay by mutableStateOf(false)
@@ -109,7 +112,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         useAbsoluteTimePlusDay = input
         preferences.saveUseAbsoluteTimePlusDay(input)
         val context = getApplication<Application>().applicationContext
-        MissionWidgetDataStore().setUseAbsoluteTimePlusDay(context, input)
+        MissionWidgetDataStore().updateMissionWidgetDataStore(
+            context,
+            useAbsoluteTimePlusDay = input
+        )
     }
 
     var openEggInc by mutableStateOf(false)
@@ -119,7 +125,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         openEggInc = input
         preferences.saveOpenEggInc(input)
         val context = getApplication<Application>().applicationContext
-        MissionWidgetDataStore().setOpenEggInc(context, input)
+        MissionWidgetDataStore().updateMissionWidgetDataStore(context, openEggInc = input)
     }
 
     var showTargetArtifactNormalWidget by mutableStateOf(false)
@@ -129,7 +135,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showTargetArtifactNormalWidget = input
         preferences.saveTargetArtifactNormalWidget(input)
         val context = getApplication<Application>().applicationContext
-        MissionWidgetDataStore().setTargetArtifactNormalWidget(context, input)
+        MissionWidgetDataStore().updateMissionWidgetDataStore(
+            context,
+            targetArtifactNormalWidget = input
+        )
     }
 
     var showFuelingShip by mutableStateOf(false)
@@ -139,7 +148,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showFuelingShip = input
         preferences.saveShowFuelingShip(input)
         val context = getApplication<Application>().applicationContext
-        MissionWidgetDataStore().setShowFuelingShip(context, input)
+        MissionWidgetDataStore().updateMissionWidgetDataStore(context, showFuelingShip = input)
     }
 
     var showTargetArtifactLargeWidget by mutableStateOf(false)
@@ -149,7 +158,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showTargetArtifactLargeWidget = input
         preferences.saveTargetArtifactLargeWidget(input)
         val context = getApplication<Application>().applicationContext
-        MissionWidgetDataStore().setTargetArtifactLargeWidget(context, input)
+        MissionWidgetDataStore().updateMissionWidgetDataStore(
+            context,
+            targetArtifactLargeWidget = input
+        )
     }
 
     var showTankLevels by mutableStateOf(false)
@@ -159,7 +171,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showTankLevels = input
         preferences.saveShowTankLevels(input)
         val context = getApplication<Application>().applicationContext
-        MissionWidgetDataStore().setShowTankLevels(context, input)
+        MissionWidgetDataStore().updateMissionWidgetDataStore(context, showTankLevels = input)
     }
 
     var useSliderCapacity by mutableStateOf(false)
@@ -169,7 +181,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         useSliderCapacity = input
         preferences.saveUseSliderCapacity(input)
         val context = getApplication<Application>().applicationContext
-        MissionWidgetDataStore().setUseSliderCapacity(context, input)
+        MissionWidgetDataStore().updateMissionWidgetDataStore(context, useSliderCapacity = input)
     }
 
     var hasScheduleEventPermissions by mutableStateOf(false)
@@ -257,7 +269,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         useAbsoluteTimeContract = input
         preferences.saveUseAbsoluteTimeContract(input)
         val context = getApplication<Application>().applicationContext
-        ContractWidgetDataStore().setUseAbsoluteTime(context, input)
+        ContractWidgetDataStore().updateContractWidgetDataStore(context, useAbsoluteTime = input)
     }
 
     var useOfflineTime by mutableStateOf(false)
@@ -267,7 +279,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         useOfflineTime = input
         preferences.saveUseOfflineTime(input)
         val context = getApplication<Application>().applicationContext
-        ContractWidgetDataStore().setUseOfflineTime(context, input)
+        ContractWidgetDataStore().updateContractWidgetDataStore(context, useOfflineTime = input)
     }
 
     var openWasmeggDashboard by mutableStateOf(false)
@@ -277,7 +289,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         openWasmeggDashboard = input
         preferences.saveOpenWasmeggDashboard(input)
         val context = getApplication<Application>().applicationContext
-        ContractWidgetDataStore().setOpenWasmeggDashboard(context, input)
+        ContractWidgetDataStore().updateContractWidgetDataStore(
+            context,
+            openWasmeggDashboard = input
+        )
     }
 
     var showAvailableContracts by mutableStateOf(false)
@@ -287,7 +302,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showAvailableContracts = input
         preferences.saveShowAvailableContracts(input)
         val context = getApplication<Application>().applicationContext
-        ContractWidgetDataStore().setShowAvailableContracts(context, input)
+        ContractWidgetDataStore().updateContractWidgetDataStore(
+            context,
+            showAvailableContracts = input
+        )
     }
 
     var showSeasonInfo by mutableStateOf(false)
@@ -297,7 +315,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showSeasonInfo = input
         preferences.saveShowSeasonInfo(input)
         val context = getApplication<Application>().applicationContext
-        ContractWidgetDataStore().setShowSeasonInfo(context, input)
+        ContractWidgetDataStore().updateContractWidgetDataStore(context, showSeasonInfo = input)
     }
 
     // Stats
@@ -309,6 +327,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showCommunityBadges = input
         preferences.saveShowCommunityBadges(input)
         val context = getApplication<Application>().applicationContext
-        StatsWidgetDataStore().setShowCommunityBadges(context, input)
+        StatsWidgetDataStore().updateStatsWidgetDataStore(context, showCommunityBadges = input)
     }
 }

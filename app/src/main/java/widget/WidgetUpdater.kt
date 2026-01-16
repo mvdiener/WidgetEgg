@@ -8,12 +8,14 @@ import api.fetchContractData
 import api.fetchMissionData
 import api.fetchPeriodicalsData
 import data.MissionInfoEntry
+import data.PeriodicalsData
 import ei.Ei
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
+import tools.utilities.formatCustomEggs
 import tools.utilities.formatMissionData
 import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatSeasonInfo
@@ -52,6 +54,9 @@ class WidgetUpdater {
             try {
                 val backup = fetchBackupData(prefEid)
 
+                val periodicalsInfo =
+                    if (hasContractWidgets || hasStatsWidgets) fetchPeriodicalsData(prefEid) else null
+
                 coroutineScope {
                     // Update the username, in case it has changed
                     // This is only used in the main activity
@@ -74,7 +79,7 @@ class WidgetUpdater {
                     if (hasContractWidgets) {
                         val job = launch {
                             try {
-                                updateContracts(context, preferences, backup)
+                                updateContracts(context, preferences, backup, periodicalsInfo!!)
                             } catch (e: Exception) {
                                 exceptions.add(e)
                             }
@@ -85,12 +90,7 @@ class WidgetUpdater {
                     if (hasStatsWidgets) {
                         val job = launch {
                             try {
-                                // The contract widget update process will update periodicals data, which includes colleggtibles.
-                                // In the scenario where a user doesn't have contract widgets but has stats widgets,
-                                // we need to make the stats update process also update periodicals. The only purpose
-                                // for this is to make sure colleggtible egg data is up to date so that FED/NAH badge
-                                // calculations can utilize colleggtibles that may increase hab space
-                                updateStats(context, preferences, backup, !hasContractWidgets)
+                                updateStats(context, preferences, backup, periodicalsInfo!!)
                             } catch (e: Exception) {
                                 exceptions.add(e)
                             }
@@ -182,28 +182,24 @@ class WidgetUpdater {
                 preferences.saveVirtueMissionInfo(prefVirtueMissionInfo)
                 preferences.saveTankInfo(prefTankInfo)
                 preferences.saveVirtueTankInfo(prefVirtueTankInfo)
-                MissionWidgetDataStore().setMissionInfo(context, prefMissionInfo)
-                MissionWidgetDataStore().setVirtueMissionInfo(context, prefVirtueMissionInfo)
-                MissionWidgetDataStore().setTankInfo(context, prefTankInfo)
-                MissionWidgetDataStore().setVirtueTankInfo(context, prefVirtueTankInfo)
-
-                MissionWidgetDataStore().setEid(context, prefEid)
-                MissionWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
-                MissionWidgetDataStore().setUseAbsoluteTimePlusDay(
-                    context, prefUseAbsoluteTimePlusDay
+                MissionWidgetDataStore().updateMissionWidgetDataStore(
+                    context,
+                    eid = prefEid,
+                    missionInfo = prefMissionInfo,
+                    virtueMissionInfo = prefVirtueMissionInfo,
+                    tankInfo = prefTankInfo,
+                    virtueTankInfo = prefVirtueTankInfo,
+                    useAbsoluteTime = prefUseAbsoluteTime,
+                    useAbsoluteTimePlusDay = prefUseAbsoluteTimePlusDay,
+                    targetArtifactNormalWidget = prefTargetArtifactNormalWidget,
+                    targetArtifactLargeWidget = prefTargetArtifactLargeWidget,
+                    showFuelingShip = prefShowFuelingShip,
+                    openEggInc = prefOpenEggInc,
+                    showTankLevels = prefShowTankLevels,
+                    useSliderCapacity = prefUseSliderCapacity,
+                    backgroundColor = prefWidgetBackgroundColor,
+                    textColor = prefWidgetTextColor
                 )
-                MissionWidgetDataStore().setTargetArtifactNormalWidget(
-                    context, prefTargetArtifactNormalWidget
-                )
-                MissionWidgetDataStore().setTargetArtifactLargeWidget(
-                    context, prefTargetArtifactLargeWidget
-                )
-                MissionWidgetDataStore().setShowFuelingShip(context, prefShowFuelingShip)
-                MissionWidgetDataStore().setOpenEggInc(context, prefOpenEggInc)
-                MissionWidgetDataStore().setShowTankLevels(context, prefShowTankLevels)
-                MissionWidgetDataStore().setUseSliderCapacity(context, prefUseSliderCapacity)
-                MissionWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
-                MissionWidgetDataStore().setTextColor(context, prefWidgetTextColor)
             }
         } catch (e: Exception) {
             throw e
@@ -211,11 +207,15 @@ class WidgetUpdater {
     }
 
     private suspend fun updateContracts(
-        context: Context, preferences: PreferencesDatastore, backup: Ei.Backup
+        context: Context,
+        preferences: PreferencesDatastore,
+        backup: Ei.Backup,
+        periodicalsInfo: PeriodicalsData
     ) {
         var prefContractInfo = preferences.getContractInfo()
         var prefPeriodicalsContractInfo = preferences.getPeriodicalsContractInfo()
         var prefSeasonInfo = preferences.getSeasonInfo()
+        var prefCustomEggsInfo = preferences.getCustomEggs()
 
         val prefEid = preferences.getEid()
         val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeContract()
@@ -229,7 +229,6 @@ class WidgetUpdater {
         try {
             if (prefEid.isNotBlank()) {
                 val contractInfo = fetchContractData(backup)
-                val periodicalsInfo = fetchPeriodicalsData(prefEid)
                 val contractsArchiveInfo = fetchContractsArchive(prefEid)
 
                 prefPeriodicalsContractInfo =
@@ -242,31 +241,29 @@ class WidgetUpdater {
                         contractsArchiveInfo
                     )
                 prefSeasonInfo = formatSeasonInfo(periodicalsInfo, backup)
+                prefCustomEggsInfo = formatCustomEggs(periodicalsInfo)
 
 
                 preferences.saveContractInfo(prefContractInfo)
                 preferences.savePeriodicalsContractInfo(prefPeriodicalsContractInfo)
                 preferences.saveSeasonInfo(prefSeasonInfo)
+                preferences.saveCustomEggs(prefCustomEggsInfo)
 
-                ContractWidgetDataStore().setEid(context, prefEid)
-                ContractWidgetDataStore().setContractInfo(context, prefContractInfo)
-                ContractWidgetDataStore().setPeriodicalsContractInfo(
+                ContractWidgetDataStore().updateContractWidgetDataStore(
                     context,
-                    prefPeriodicalsContractInfo
+                    eid = prefEid,
+                    contractInfo = prefContractInfo,
+                    periodicalsContractInfo = prefPeriodicalsContractInfo,
+                    seasonInfo = prefSeasonInfo,
+                    useAbsoluteTime = prefUseAbsoluteTime,
+                    useOfflineTime = prefUseOfflineTime,
+                    showAvailableContracts = prefShowAvailableContracts,
+                    showSeasonInfo = prefShowSeasonInfo,
+                    openWasmeggDashboard = prefOpenWasmeggDashboard,
+                    backgroundColor = prefWidgetBackgroundColor,
+                    textColor = prefWidgetTextColor,
+                    customEggs = prefCustomEggsInfo
                 )
-                ContractWidgetDataStore().setSeasonInfo(context, prefSeasonInfo)
-                ContractWidgetDataStore().setUseAbsoluteTime(context, prefUseAbsoluteTime)
-                ContractWidgetDataStore().setUseOfflineTime(context, prefUseOfflineTime)
-                ContractWidgetDataStore().setShowAvailableContracts(
-                    context,
-                    prefShowAvailableContracts
-                )
-                ContractWidgetDataStore().setShowSeasonInfo(context, prefShowSeasonInfo)
-                ContractWidgetDataStore().setOpenWasmeggDashboard(
-                    context, prefOpenWasmeggDashboard
-                )
-                ContractWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
-                ContractWidgetDataStore().setTextColor(context, prefWidgetTextColor)
             }
         } catch (e: Exception) {
             throw e
@@ -277,9 +274,10 @@ class WidgetUpdater {
         context: Context,
         preferences: PreferencesDatastore,
         backup: Ei.Backup,
-        needsPeriodicalsUpdate: Boolean
+        periodicalsInfo: PeriodicalsData
     ) {
         var prefStatsInfo = preferences.getStatsInfo()
+        var prefCustomEggs = preferences.getCustomEggs()
 
         val prefEid = preferences.getEid()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
@@ -289,15 +287,21 @@ class WidgetUpdater {
         try {
             if (prefEid.isNotBlank()) {
                 prefStatsInfo = formatStatsData(backup)
+                prefCustomEggs = formatCustomEggs(periodicalsInfo)
 
                 preferences.saveStatsInfo(prefStatsInfo)
+                preferences.saveCustomEggs(prefCustomEggs)
 
-                StatsWidgetDataStore().setEid(context, prefEid)
-                StatsWidgetDataStore().setEiUserName(context, backup.userName)
-                StatsWidgetDataStore().setStatsInfo(context, prefStatsInfo)
-                StatsWidgetDataStore().setBackgroundColor(context, prefWidgetBackgroundColor)
-                StatsWidgetDataStore().setTextColor(context, prefWidgetTextColor)
-                StatsWidgetDataStore().setShowCommunityBadges(context, prefShowCommunityBadges)
+                StatsWidgetDataStore().updateStatsWidgetDataStore(
+                    context,
+                    eid = prefEid,
+                    eiUserName = backup.userName,
+                    statsInfo = prefStatsInfo,
+                    backgroundColor = prefWidgetBackgroundColor,
+                    textColor = prefWidgetTextColor,
+                    showCommunityBadges = prefShowCommunityBadges,
+                    customEggs = prefCustomEggs
+                )
             }
         } catch (e: Exception) {
             throw e

@@ -14,6 +14,7 @@ import api.fetchPeriodicalsData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
+import tools.utilities.formatCustomEggs
 import tools.utilities.formatMissionData
 import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatSeasonInfo
@@ -99,10 +100,13 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 updateEiUserName(backupResult.userName)
                 preferences.saveEiUserName(backupResult.userName)
                 preferences.saveEid(eid)
-                MissionWidgetDataStore().setEid(context, eid)
-                ContractWidgetDataStore().setEid(context, eid)
-                StatsWidgetDataStore().setEid(context, eid)
-                StatsWidgetDataStore().setEiUserName(context, backupResult.userName)
+                MissionWidgetDataStore().updateMissionWidgetDataStore(context, eid = eid)
+                ContractWidgetDataStore().updateContractWidgetDataStore(context, eid = eid)
+                StatsWidgetDataStore().updateStatsWidgetDataStore(
+                    context,
+                    eid = eid,
+                    eiUserName = backupResult.userName
+                )
                 updateHasSubmitted(false)
                 updateEid("")
             } catch (_: Exception) {
@@ -143,6 +147,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         backupResult
                     )
                     val formattedStatsData = formatStatsData(backupResult)
+                    val formattedCustomEggs = formatCustomEggs(periodicalsResult)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
                     preferences.saveTankInfo(formattedTankInfo)
@@ -151,20 +156,26 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     preferences.savePeriodicalsContractInfo(formattedPeriodicalsContracts)
                     preferences.saveSeasonInfo(formattedSeasonInfo)
                     preferences.saveStatsInfo(formattedStatsData)
-                    MissionWidgetDataStore().setMissionInfo(context, formattedMissionData)
-                    MissionWidgetDataStore().setVirtueMissionInfo(
+                    preferences.saveCustomEggs(formattedCustomEggs)
+                    MissionWidgetDataStore().updateMissionWidgetDataStore(
                         context,
-                        formattedVirtueMissionData
+                        missionInfo = formattedMissionData,
+                        virtueMissionInfo = formattedVirtueMissionData,
+                        tankInfo = formattedTankInfo,
+                        virtueTankInfo = formattedVirtueTankInfo
                     )
-                    MissionWidgetDataStore().setTankInfo(context, formattedTankInfo)
-                    MissionWidgetDataStore().setVirtueTankInfo(context, formattedVirtueTankInfo)
-                    ContractWidgetDataStore().setContractInfo(context, formattedContractData)
-                    ContractWidgetDataStore().setPeriodicalsContractInfo(
+                    ContractWidgetDataStore().updateContractWidgetDataStore(
                         context,
-                        formattedPeriodicalsContracts
+                        contractInfo = formattedContractData,
+                        periodicalsContractInfo = formattedPeriodicalsContracts,
+                        seasonInfo = formattedSeasonInfo,
+                        customEggs = formattedCustomEggs
                     )
-                    ContractWidgetDataStore().setSeasonInfo(context, formattedSeasonInfo)
-                    StatsWidgetDataStore().setStatsInfo(context, formattedStatsData)
+                    StatsWidgetDataStore().updateStatsWidgetDataStore(
+                        context,
+                        statsInfo = formattedStatsData,
+                        customEggs = formattedCustomEggs
+                    )
                 }
             } catch (_: Exception) {
             }

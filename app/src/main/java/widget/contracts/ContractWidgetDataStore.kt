@@ -11,6 +11,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.ContractInfoEntry
+import data.CustomEggInfoEntry
 import data.PeriodicalsContractInfoEntry
 import data.SeasonGradeAndGoals
 import kotlinx.serialization.json.Json
@@ -29,30 +30,70 @@ data object ContractWidgetDataStorePreferencesKeys {
     val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
+    val CUSTOM_EGGS = stringPreferencesKey("widgetCustomEggs")
 }
 
 class ContractWidgetDataStore {
-    suspend fun setEid(context: Context, eid: String) {
+    suspend fun updateContractWidgetDataStore(
+        context: Context,
+        eid: String? = null,
+        contractInfo: List<ContractInfoEntry>? = null,
+        periodicalsContractInfo: List<PeriodicalsContractInfoEntry>? = null,
+        seasonInfo: SeasonGradeAndGoals? = null,
+        useAbsoluteTime: Boolean? = null,
+        useOfflineTime: Boolean? = null,
+        showAvailableContracts: Boolean? = null,
+        showSeasonInfo: Boolean? = null,
+        openWasmeggDashboard: Boolean? = null,
+        backgroundColor: Color? = null,
+        textColor: Color? = null,
+        customEggs: List<CustomEggInfoEntry>? = null
+    ) {
         val contractWidgetIds = getContractWidgetIds(context)
-        (contractWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.EID] = eid
+
+        contractWidgetIds.forEach { glanceId ->
+            updateAppWidgetState(context, glanceId) { prefs ->
+                eid?.let { prefs[ContractWidgetDataStorePreferencesKeys.EID] = it }
+                contractInfo?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] =
+                        Json.encodeToString(it)
+                }
+                periodicalsContractInfo?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.PERIODICALS_CONTRACT_INFO] =
+                        Json.encodeToString(it)
+                }
+                seasonInfo?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.SEASON_INFO] =
+                        Json.encodeToString(it)
+                }
+                useAbsoluteTime?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = it
+                }
+                useOfflineTime?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] = it
+                }
+                showAvailableContracts?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.SHOW_AVAILABLE_CONTRACTS] = it
+                }
+                showSeasonInfo?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.SHOW_SEASON_INFO] = it
+                }
+                openWasmeggDashboard?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] = it
+                }
+                backgroundColor?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
+                        it.toArgb()
+                }
+                textColor?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] = it.toArgb()
+                }
+                customEggs?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.CUSTOM_EGGS] =
+                        Json.encodeToString(it)
                 }
             }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setContractInfo(context: Context, contractInfo: List<ContractInfoEntry>) {
-        val contractString = Json.encodeToString(contractInfo)
-        val contractWidgetIds = getContractWidgetIds(context)
-        (contractWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] = contractString
-                }
-            }
+        }
 
         updateAllWidgets(context)
     }
@@ -65,47 +106,12 @@ class ContractWidgetDataStore {
         }
     }
 
-    suspend fun setPeriodicalsContractInfo(
-        context: Context,
-        contractInfo: List<PeriodicalsContractInfoEntry>
-    ) {
-        val contractString = Json.encodeToString(contractInfo)
-        val contractWidgetIds = getContractWidgetIds(context)
-        (contractWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.PERIODICALS_CONTRACT_INFO] =
-                        contractString
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
     fun decodePeriodicalsContractInfo(contractJson: String): List<PeriodicalsContractInfoEntry> {
         return try {
             Json.decodeFromString<List<PeriodicalsContractInfoEntry>>(contractJson)
         } catch (e: Exception) {
             emptyList()
         }
-    }
-
-    suspend fun setSeasonInfo(
-        context: Context,
-        seasonInfo: SeasonGradeAndGoals
-    ) {
-        val seasonInfoString = Json.encodeToString(seasonInfo)
-        val contractWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetLarge::class.java)
-        (contractWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.SEASON_INFO] =
-                        seasonInfoString
-                }
-            }
-
-        updateAllWidgets(context)
     }
 
     fun decodeSeasonInfo(seasonInfoJson: String): SeasonGradeAndGoals {
@@ -116,97 +122,12 @@ class ContractWidgetDataStore {
         }
     }
 
-    suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
-        val contractWidgetIds = getContractWidgetIds(context)
-        (contractWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] =
-                        useAbsoluteTime
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setUseOfflineTime(context: Context, useOfflineTime: Boolean) {
-        val contractWidgetIds = getContractWidgetIds(context)
-        (contractWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] =
-                        useOfflineTime
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setShowAvailableContracts(context: Context, showAvailableContracts: Boolean) {
-        val contractWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetLarge::class.java)
-        (contractWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.SHOW_AVAILABLE_CONTRACTS] =
-                        showAvailableContracts
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setShowSeasonInfo(context: Context, showSeasonInfo: Boolean) {
-        val contractWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetLarge::class.java)
-        (contractWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.SHOW_SEASON_INFO] =
-                        showSeasonInfo
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setOpenWasmeggDashboard(context: Context, openWasmeggDashboard: Boolean) {
-        val contractWidgetIds = getContractWidgetIds(context)
-        (contractWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] =
-                        openWasmeggDashboard
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setBackgroundColor(context: Context, backgroundColor: Color) {
-        val contractWidgetIds = getContractWidgetIds(context)
-        (contractWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
-                        backgroundColor.toArgb()
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setTextColor(context: Context, textColor: Color) {
-        val contractWidgetIds = getContractWidgetIds(context)
-        (contractWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
-                        textColor.toArgb()
-                }
-            }
-
-        updateAllWidgets(context)
+    fun decodeCustomEggs(customEggsJson: String): List<CustomEggInfoEntry> {
+        return try {
+            Json.decodeFromString<List<CustomEggInfoEntry>>(customEggsJson)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     suspend fun clearAllData(context: Context) {
