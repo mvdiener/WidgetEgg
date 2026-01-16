@@ -614,12 +614,13 @@ fun ArtifactsAndTimeRemaining(
     useOfflineTime: Boolean,
     textColor: Color
 ) {
-    if (contract.contractArtifacts.isNotEmpty()) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 5.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 5.dp),
+        horizontalAlignment = Alignment.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (contract.contractArtifacts.isNotEmpty()) {
             contract.contractArtifacts.forEachIndexed { index, artifact ->
                 val artifactName =
                     getImageNameFromAfxId(artifact.name, artifact.level)
@@ -674,16 +675,16 @@ fun ArtifactsAndTimeRemaining(
                     }
                 }
             }
-            Box(modifier = GlanceModifier.defaultWeight()) {}
-            TimeTextAndScrollLarge(
-                assetManager,
-                context,
-                contract,
-                useAbsoluteTime,
-                useOfflineTime,
-                textColor
-            )
         }
+        Box(modifier = GlanceModifier.defaultWeight()) {}
+        TimeTextAndScrollLarge(
+            assetManager,
+            context,
+            contract,
+            useAbsoluteTime,
+            useOfflineTime,
+            textColor
+        )
     }
 }
 
@@ -732,7 +733,7 @@ fun TimeTextAndScrollLarge(
                         assetManager,
                         "other/$scrollName.png"
                     )
-                ), true
+                )
             )
 
         Image(
