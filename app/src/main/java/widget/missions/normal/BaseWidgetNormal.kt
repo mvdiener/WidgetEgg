@@ -215,10 +215,10 @@ fun MissionProgress(
         }
 
     Box(
-        modifier = GlanceModifier.size(80.dp).padding(bottom = 0.dp),
+        modifier = GlanceModifier.size(65.dp).padding(bottom = 0.dp),
     ) {
         Box(
-            modifier = GlanceModifier.size(80.dp),
+            modifier = GlanceModifier.size(65.dp),
             contentAlignment = Alignment.Center
         ) {
             val bitmap = createMissionCircularProgressBarBitmap(
@@ -246,7 +246,7 @@ fun MissionProgress(
         }
 
         Box(
-            modifier = GlanceModifier.size(80.dp),
+            modifier = GlanceModifier.size(65.dp),
             contentAlignment = Alignment.TopEnd
         ) {
             val artifactName = getImageNameFromAfxId(mission.targetArtifact)
@@ -269,7 +269,7 @@ fun MissionProgress(
     }
 
     Column(
-        modifier = GlanceModifier.fillMaxWidth(),
+        modifier = GlanceModifier.fillMaxWidth().padding(top = 3.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.Top
     ) {
