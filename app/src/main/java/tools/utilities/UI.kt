@@ -1,7 +1,9 @@
 package tools.utilities
 
+import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import androidx.core.graphics.createBitmap
@@ -10,6 +12,7 @@ import androidx.core.graphics.toColorInt
 import data.NUMBER_UNITS
 import data.PROGRESS_BACKGROUND_COLOR
 import ei.Ei
+import java.io.File
 import java.io.InputStream
 import java.util.Locale
 
@@ -86,27 +89,13 @@ fun createCircularProgressBarBitmap(
 // This resize function scales down images. Image quality is worse, but not noticeable if image is already small
 // Useful in places like fuel tank egg icons, target artifacts, contract rewards, or stats icons
 fun bitmapResize(image: Bitmap): Bitmap {
-    try {
-        val width = image.width
-        val height = image.height
-        val aspectRatio = width / height
-        val newWidth = 100
-        return if (width > newWidth) {
-            val newHeight =
-                if (height > width) ((newWidth * height) / width) else newWidth * aspectRatio
-            image.scale(newWidth, newHeight, false)
-        } else {
-            image
-        }
-    } catch (e: Exception) {
-        val other = e
-    }
     val width = image.width
     val height = image.height
     val aspectRatio = width / height
     val newWidth = 100
     return if (width > newWidth) {
-        val newHeight = newWidth * aspectRatio
+        val newHeight =
+            if (height > width) ((newWidth * height) / width) else newWidth * aspectRatio
         image.scale(newWidth, newHeight, false)
     } else {
         image
@@ -118,6 +107,29 @@ fun getAsset(assetManager: AssetManager, path: String): InputStream {
         assetManager.open(path)
     } catch (_: Exception) {
         assetManager.open("eggs/egg_unknown.png")
+    }
+}
+
+fun getColleggtibleBitmap(assetManager: AssetManager, eggName: String, context: Context): Bitmap {
+    val eggAsset = try {
+        assetManager.open("eggs/$eggName.png")
+    } catch (_: Exception) {
+        null
+    }
+
+    return try {
+        if (eggAsset != null) {
+            BitmapFactory.decodeStream(eggAsset)
+        } else {
+            val file = File(context.cacheDir, "$eggName.png")
+            if (file.exists()) {
+                bitmapResize(BitmapFactory.decodeFile(file.absolutePath))
+            } else {
+                BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
+            }
+        }
+    } catch (_: Exception) {
+        BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
     }
 }
 

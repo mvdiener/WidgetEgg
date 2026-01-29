@@ -20,6 +20,7 @@ import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
+import tools.utilities.saveColleggtibleImagesToCache
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
 import widget.missions.MissionWidgetDataStore
@@ -148,6 +149,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     )
                     val formattedStatsData = formatStatsData(backupResult)
                     val formattedCustomEggs = formatCustomEggs(periodicalsResult)
+                    saveColleggtibleImagesToCache(periodicalsResult, context)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
                     preferences.saveTankInfo(formattedTankInfo)
@@ -169,7 +171,6 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         contractInfo = formattedContractData,
                         periodicalsContractInfo = formattedPeriodicalsContracts,
                         seasonInfo = formattedSeasonInfo,
-                        customEggs = formattedCustomEggs
                     )
                     StatsWidgetDataStore().updateStatsWidgetDataStore(
                         context,

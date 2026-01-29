@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CustomEggInfoEntry(
     var name: String,
-    var imageUrl: String,
     var buff: Buff
 )
 

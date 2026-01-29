@@ -50,6 +50,7 @@ import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
 import tools.utilities.getGoalPercentComplete
 import tools.utilities.getContractTimeTextColor
+import tools.utilities.getColleggtibleBitmap
 import tools.utilities.getEggName
 import tools.utilities.getOfflineEggsDelivered
 import tools.utilities.getRewardIconPath
@@ -217,7 +218,7 @@ fun ContractSingle(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, useOfflineTime, 65, 9)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 65, 9)
     }
 
     Text(
@@ -243,7 +244,7 @@ fun ContractDouble(
         modifier = GlanceModifier.padding(start = 5.dp),
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, useOfflineTime, 45, 6)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 45, 6)
     }
 
     Column(
@@ -284,7 +285,7 @@ fun ContractAll(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, useOfflineTime, 30, 4)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 30, 4)
     }
 
     Text(
@@ -339,6 +340,7 @@ fun NoContractsContent(assetManager: AssetManager, textColor: Color) {
 @Composable
 fun EggAndProgressBars(
     assetManager: AssetManager,
+    context: Context,
     contract: ContractInfoEntry,
     useOfflineTime: Boolean,
     eggSize: Int,
@@ -374,8 +376,12 @@ fun EggAndProgressBars(
         )
     }
 
+    val eggBitmap = if (contract.customEggId.isNullOrBlank()) {
+        BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
+    } else {
+        getColleggtibleBitmap(assetManager, eggName, context)
+    }
 
-    val eggBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
     Image(
         provider = ImageProvider(eggBitmap),
         contentDescription = "Egg Icon",

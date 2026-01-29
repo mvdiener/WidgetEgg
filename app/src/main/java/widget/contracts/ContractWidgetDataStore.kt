@@ -30,7 +30,6 @@ data object ContractWidgetDataStorePreferencesKeys {
     val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
-    val CUSTOM_EGGS = stringPreferencesKey("widgetCustomEggs")
 }
 
 class ContractWidgetDataStore {
@@ -46,8 +45,7 @@ class ContractWidgetDataStore {
         showSeasonInfo: Boolean? = null,
         openWasmeggDashboard: Boolean? = null,
         backgroundColor: Color? = null,
-        textColor: Color? = null,
-        customEggs: List<CustomEggInfoEntry>? = null
+        textColor: Color? = null
     ) {
         val contractWidgetIds = getContractWidgetIds(context)
 
@@ -87,10 +85,6 @@ class ContractWidgetDataStore {
                 }
                 textColor?.let {
                     prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] = it.toArgb()
-                }
-                customEggs?.let {
-                    prefs[ContractWidgetDataStorePreferencesKeys.CUSTOM_EGGS] =
-                        Json.encodeToString(it)
                 }
             }
         }

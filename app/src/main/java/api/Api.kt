@@ -25,10 +25,12 @@ import ei.Ei.MissionInfo
 import ei.Ei.PeriodicalsResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.readRawBytes
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import tools.buildSecureAuthMessage
@@ -86,6 +88,20 @@ fun getBasicRequestInfo(eid: String): BasicRequestInfo {
         .setClientVersion(CURRENT_CLIENT_VERSION)
         .setPlatform("DROID")
         .build()
+}
+
+// Used to get colleggtible assets
+suspend fun downloadImageBytes(url: String): ByteArray? {
+    return try {
+        val response = sharedClient.get(url)
+        if (response.status.value == 200) {
+            response.readRawBytes()
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        null
+    }
 }
 
 private suspend fun fetchActiveMissions(

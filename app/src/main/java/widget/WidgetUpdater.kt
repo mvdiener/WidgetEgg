@@ -25,6 +25,7 @@ import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import tools.utilities.removeCalendarEvents
+import tools.utilities.saveColleggtibleImagesToCache
 import tools.utilities.scheduleCalendarEvents
 import tools.utilities.updateFuelingMission
 import user.preferences.PreferencesDatastore
@@ -264,6 +265,7 @@ class WidgetUpdater {
                         )
                     prefSeasonInfo = formatSeasonInfo(periodicalsInfo, backup)
                     prefCustomEggsInfo = formatCustomEggs(periodicalsInfo)
+                    saveColleggtibleImagesToCache(periodicalsInfo, context)
                 }
 
                 if (contractInfo != null) {
@@ -292,8 +294,7 @@ class WidgetUpdater {
                     showSeasonInfo = prefShowSeasonInfo,
                     openWasmeggDashboard = prefOpenWasmeggDashboard,
                     backgroundColor = prefWidgetBackgroundColor,
-                    textColor = prefWidgetTextColor,
-                    customEggs = prefCustomEggsInfo
+                    textColor = prefWidgetTextColor
                 )
             }
         } catch (_: Exception) {

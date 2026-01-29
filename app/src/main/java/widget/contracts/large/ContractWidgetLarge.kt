@@ -59,6 +59,7 @@ import tools.utilities.bitmapResize
 import tools.utilities.createGlowBitmap
 import tools.utilities.formatTokenTimeText
 import tools.utilities.getAsset
+import tools.utilities.getColleggtibleBitmap
 import tools.utilities.getContractDurationRemaining
 import tools.utilities.getGoalPercentComplete
 import tools.utilities.getContractGradeName
@@ -214,6 +215,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
                                 ) {
                                     PeriodicalsContractContent(
                                         assetManager,
+                                        context,
                                         contract,
                                         textColor
                                     )
@@ -291,6 +293,7 @@ fun ContractContentLarge(
 ) {
     EggAndGrade(
         assetManager,
+        context,
         EggAndGrade(
             contract.customEggId,
             contract.eggId,
@@ -326,11 +329,13 @@ fun ContractContentLarge(
 @Composable
 fun PeriodicalsContractContent(
     assetManager: AssetManager,
+    context: Context,
     contract: PeriodicalsContractInfoEntry,
     textColor: Color
 ) {
     EggAndGrade(
         assetManager,
+        context,
         EggAndGrade(
             contract.customEggId,
             contract.eggId,
@@ -359,6 +364,7 @@ fun PeriodicalsContractContent(
 @Composable
 fun EggAndGrade(
     assetManager: AssetManager,
+    context: Context,
     data: EggAndGrade,
     textColor: Color
 ) {
@@ -372,8 +378,12 @@ fun EggAndGrade(
         } else {
             "egg_${data.customEggId}"
         }
-        val eggBitmap =
+
+        val eggBitmap = if (data.customEggId.isNullOrBlank()) {
             bitmapResize(BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png")))
+        } else {
+            getColleggtibleBitmap(assetManager, eggName, context)
+        }
 
         Image(
             provider = ImageProvider(eggBitmap),
