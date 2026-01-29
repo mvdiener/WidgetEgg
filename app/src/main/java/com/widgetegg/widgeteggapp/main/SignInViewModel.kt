@@ -133,14 +133,14 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         formatPeriodicalsContracts(
                             periodicalsResult,
                             backupResult,
-                            contractsArchiveResult
+                            contractsArchiveResult,
+                            null
                         )
                     val formattedContractData =
                         formatContractData(
                             contractResult,
                             backupResult.userName,
-                            formattedPeriodicalsContracts,
-                            contractsArchiveResult
+                            formattedPeriodicalsContracts
                         )
                     val formattedSeasonInfo = formatSeasonInfo(
                         periodicalsResult,

@@ -33,8 +33,7 @@ import kotlin.math.abs
 fun formatContractData(
     contractInfo: ContractData,
     userName: String,
-    periodicalsContracts: List<PeriodicalsContractInfoEntry>,
-    contractsArchive: List<LocalContract>
+    periodicalsContracts: List<PeriodicalsContractInfoEntry>
 ): List<ContractInfoEntry> {
     var formattedContracts: List<ContractInfoEntry> = emptyList()
 
@@ -102,8 +101,6 @@ fun formatContractData(
         val periodicalContract =
             periodicalsContracts.find { it.identifier == contract.contract.identifier }
 
-        val archivedContract = getArchivedContract(contract.contract.identifier, contractsArchive)
-
         formattedContracts = formattedContracts.plus(
             ContractInfoEntry(
                 stateId = UUID.randomUUID()
@@ -125,8 +122,7 @@ fun formatContractData(
                 isUltra = contract.contract.ccOnly,
                 goals = formattedGoals,
                 contributors = formattedContributors,
-                contractArtifacts = contractArtifacts,
-                archivedContractInfo = archivedContract
+                contractArtifacts = contractArtifacts
             )
         )
     }
@@ -137,7 +133,8 @@ fun formatContractData(
 fun formatPeriodicalsContracts(
     periodicalsData: PeriodicalsData,
     backup: Backup,
-    contractsArchive: List<LocalContract>
+    contractsArchive: List<LocalContract>?,
+    previousPeriodicalsData: List<PeriodicalsContractInfoEntry>?
 ): List<PeriodicalsContractInfoEntry> {
     var formattedContracts: List<PeriodicalsContractInfoEntry> = emptyList()
     periodicalsData.contracts.forEach { contract ->
@@ -157,7 +154,13 @@ fun formatPeriodicalsContracts(
             )
         }
 
-        val archivedContract = getArchivedContract(contract.identifier, contractsArchive)
+
+        val archivedContract = if (!contractsArchive.isNullOrEmpty()) {
+            getArchivedContract(contract.identifier, contractsArchive)
+        } else {
+            previousPeriodicalsData?.find { it.identifier == contract.identifier }?.archivedContractInfo
+        }
+
 
         formattedContracts = formattedContracts.plus(
             PeriodicalsContractInfoEntry(

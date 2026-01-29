@@ -2,6 +2,7 @@ package widget
 
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
+import androidx.work.await
 import api.fetchBackupData
 import api.fetchContractsArchive
 import api.fetchContractData
@@ -11,9 +12,11 @@ import data.MissionInfoEntry
 import data.PeriodicalsData
 import ei.Ei
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import tools.utilities.formatContractData
 import tools.utilities.formatCustomEggs
 import tools.utilities.formatMissionData
@@ -54,10 +57,15 @@ class WidgetUpdater {
             try {
                 val backup = fetchBackupData(prefEid)
 
-                val periodicalsInfo =
+                val periodicalsInfo = try {
                     if (hasContractWidgets || hasStatsWidgets) fetchPeriodicalsData(prefEid) else null
+                } catch (e: Exception) {
+                    val thing = e
+                    null
+                }
 
-                coroutineScope {
+
+                supervisorScope {
                     // Update the username, in case it has changed
                     // This is only used in the main activity
                     preferences.saveEiUserName(backup.userName)
@@ -79,7 +87,7 @@ class WidgetUpdater {
                     if (hasContractWidgets) {
                         val job = launch {
                             try {
-                                updateContracts(context, preferences, backup, periodicalsInfo!!)
+                                updateContracts(context, preferences, backup, periodicalsInfo)
                             } catch (e: Exception) {
                                 exceptions.add(e)
                             }
@@ -90,7 +98,7 @@ class WidgetUpdater {
                     if (hasStatsWidgets) {
                         val job = launch {
                             try {
-                                updateStats(context, preferences, backup, periodicalsInfo!!)
+                                updateStats(context, preferences, backup, periodicalsInfo)
                             } catch (e: Exception) {
                                 exceptions.add(e)
                             }
@@ -201,8 +209,7 @@ class WidgetUpdater {
                     textColor = prefWidgetTextColor
                 )
             }
-        } catch (e: Exception) {
-            throw e
+        } catch (_: Exception) {
         }
     }
 
@@ -210,7 +217,7 @@ class WidgetUpdater {
         context: Context,
         preferences: PreferencesDatastore,
         backup: Ei.Backup,
-        periodicalsInfo: PeriodicalsData
+        periodicalsInfo: PeriodicalsData?
     ) {
         var prefContractInfo = preferences.getContractInfo()
         var prefPeriodicalsContractInfo = preferences.getPeriodicalsContractInfo()
@@ -228,21 +235,45 @@ class WidgetUpdater {
 
         try {
             if (prefEid.isNotBlank()) {
-                val contractInfo = fetchContractData(backup)
-                val contractsArchiveInfo = fetchContractsArchive(prefEid)
+                val (contractInfo, contractsArchiveInfo) = supervisorScope {
+                    val contractInfoDeferred = async {
+                        try {
+                            fetchContractData(backup)
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                    val contractsArchiveDeferred = async {
+                        try {
+                            fetchContractsArchive(prefEid)
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
 
-                prefPeriodicalsContractInfo =
-                    formatPeriodicalsContracts(periodicalsInfo, backup, contractsArchiveInfo)
-                prefContractInfo =
-                    formatContractData(
-                        contractInfo,
-                        backup.userName,
-                        prefPeriodicalsContractInfo,
-                        contractsArchiveInfo
-                    )
-                prefSeasonInfo = formatSeasonInfo(periodicalsInfo, backup)
-                prefCustomEggsInfo = formatCustomEggs(periodicalsInfo)
+                    contractInfoDeferred.await() to contractsArchiveDeferred.await()
+                }
 
+                if (periodicalsInfo != null) {
+                    prefPeriodicalsContractInfo =
+                        formatPeriodicalsContracts(
+                            periodicalsInfo,
+                            backup,
+                            contractsArchiveInfo,
+                            prefPeriodicalsContractInfo
+                        )
+                    prefSeasonInfo = formatSeasonInfo(periodicalsInfo, backup)
+                    prefCustomEggsInfo = formatCustomEggs(periodicalsInfo)
+                }
+
+                if (contractInfo != null) {
+                    prefContractInfo =
+                        formatContractData(
+                            contractInfo,
+                            backup.userName,
+                            prefPeriodicalsContractInfo
+                        )
+                }
 
                 preferences.saveContractInfo(prefContractInfo)
                 preferences.savePeriodicalsContractInfo(prefPeriodicalsContractInfo)
@@ -265,8 +296,7 @@ class WidgetUpdater {
                     customEggs = prefCustomEggsInfo
                 )
             }
-        } catch (e: Exception) {
-            throw e
+        } catch (_: Exception) {
         }
     }
 
@@ -274,7 +304,7 @@ class WidgetUpdater {
         context: Context,
         preferences: PreferencesDatastore,
         backup: Ei.Backup,
-        periodicalsInfo: PeriodicalsData
+        periodicalsInfo: PeriodicalsData?
     ) {
         var prefStatsInfo = preferences.getStatsInfo()
         var prefCustomEggs = preferences.getCustomEggs()
@@ -287,7 +317,9 @@ class WidgetUpdater {
         try {
             if (prefEid.isNotBlank()) {
                 prefStatsInfo = formatStatsData(backup)
-                prefCustomEggs = formatCustomEggs(periodicalsInfo)
+                if (periodicalsInfo != null) {
+                    prefCustomEggs = formatCustomEggs(periodicalsInfo)
+                }
 
                 preferences.saveStatsInfo(prefStatsInfo)
                 preferences.saveCustomEggs(prefCustomEggs)
@@ -303,8 +335,7 @@ class WidgetUpdater {
                     customEggs = prefCustomEggs
                 )
             }
-        } catch (e: Exception) {
-            throw e
+        } catch (_: Exception) {
         }
     }
 

@@ -25,8 +25,7 @@ data class ContractInfoEntry(
     var isUltra: Boolean,
     var goals: List<GoalInfoEntry>,
     var contributors: List<ContributorInfoEntry>,
-    var contractArtifacts: List<ContractArtifact>,
-    var archivedContractInfo: ArchivedContractInfoEntry?
+    var contractArtifacts: List<ContractArtifact>
 )
 
 @Serializable
