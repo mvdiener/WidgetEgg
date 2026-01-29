@@ -35,99 +35,81 @@ fun formatContractData(
     userName: String,
     periodicalsContracts: List<PeriodicalsContractInfoEntry>
 ): List<ContractInfoEntry> {
-    var formattedContracts: List<ContractInfoEntry> = emptyList()
-
-    contractInfo.contracts.forEach { contract ->
-        var formattedGoals: List<GoalInfoEntry> = emptyList()
+    return contractInfo.contracts.map { contract ->
         val gradeSpecsList = contract.contract.gradeSpecsList
         val gradeSpecs = gradeSpecsList.find { gradeSpec -> gradeSpec.grade == contract.grade }
 
-        gradeSpecs?.goalsList?.forEach { goal ->
-            formattedGoals = formattedGoals.plus(
-                GoalInfoEntry(
-                    amount = goal.targetAmount,
-                    reward = goal.rewardType,
-                    rewardSubType = goal.rewardSubType,
-                    rewardAmount = goal.rewardAmount
-                )
+        val formattedGoals = gradeSpecs?.goalsList?.map { goal ->
+            GoalInfoEntry(
+                amount = goal.targetAmount,
+                reward = goal.rewardType,
+                rewardSubType = goal.rewardSubType,
+                rewardAmount = goal.rewardAmount
             )
-        }
+        } ?: emptyList()
 
         val status =
             contractInfo.contractStatuses.find { contractStatus ->
                 contractStatus.contractIdentifier == contract.contract.identifier
             }
 
-        var formattedContributors: List<ContributorInfoEntry> = emptyList()
-        status?.contributorsList?.filterNot { contributor ->
+        val formattedContributors = status?.contributorsList?.filterNot { contributor ->
             // Remove any [departed] users stuck from contract creation
             contributor.userName == "[departed]" && contributor.uuid.isNullOrEmpty()
-        }?.forEach { contributor ->
-            formattedContributors = formattedContributors.plus(
-                ContributorInfoEntry(
-                    eggsDelivered = contributor.contributionAmount,
-                    eggRatePerSecond = contributor.contributionRate,
-                    offlineTimeSeconds = getOfflineTime(contributor, true),
-                    offlineTimeSecondsIgnoringSilos = getOfflineTime(contributor, false),
-                    isSelf = contributor.userName == userName
-                )
+        }?.map { contributor ->
+            ContributorInfoEntry(
+                eggsDelivered = contributor.contributionAmount,
+                eggRatePerSecond = contributor.contributionRate,
+                offlineTimeSeconds = getOfflineTime(contributor, true),
+                offlineTimeSecondsIgnoringSilos = getOfflineTime(contributor, false),
+                isSelf = contributor.userName == userName
             )
-        }
+        } ?: emptyList()
 
-        var contractArtifacts: List<ContractArtifact> = emptyList()
-        status?.contributorsList?.find { contributor ->
+        val contractArtifacts = status?.contributorsList?.find { contributor ->
             contributor.userName == userName
-        }?.farmInfo?.equippedArtifactsList?.forEach { artifact ->
-            var stones: List<ContractStone> = emptyList()
-            artifact.stonesList.forEach { stone ->
-                stones = stones.plus(
-                    ContractStone(
-                        name = stone.name.number,
-                        level = stone.level.number
-                    )
+        }?.farmInfo?.equippedArtifactsList?.map { artifact ->
+            val stones = artifact.stonesList.map { stone ->
+                ContractStone(
+                    name = stone.name.number,
+                    level = stone.level.number
                 )
             }
 
-            contractArtifacts = contractArtifacts.plus(
-                ContractArtifact(
-                    name = artifact.spec.name.number,
-                    rarity = artifact.spec.rarity.number,
-                    level = artifact.spec.level.number,
-                    stones = stones
-                )
+            ContractArtifact(
+                name = artifact.spec.name.number,
+                rarity = artifact.spec.rarity.number,
+                level = artifact.spec.level.number,
+                stones = stones
             )
-        }
+        } ?: emptyList()
 
         val periodicalContract =
             periodicalsContracts.find { it.identifier == contract.contract.identifier }
 
-        formattedContracts = formattedContracts.plus(
-            ContractInfoEntry(
-                stateId = UUID.randomUUID()
-                    .toString(), // Probably not necessary, but used in the off chance server data is not different from the last api call
-                eggId = contract.contract.egg.number,
-                customEggId = contract.contract.customEggId,
-                name = contract.contract.name,
-                identifier = contract.contract.identifier,
-                coopName = contract.coopIdentifier,
-                seasonName = formatSeasonName(contract.contract.seasonId),
-                isLegacy = contract.contract.leggacy,
-                eggsDelivered = status?.totalAmount ?: 0.0,
-                timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
-                allGoalsAchieved = status?.allGoalsAchieved == true,
-                clearedForExit = status?.clearedForExit == true,
-                grade = contract.grade.number,
-                maxCoopSize = periodicalContract?.maxCoopSize ?: 0,
-                tokenTimerMinutes = periodicalContract?.tokenTimerMinutes ?: 0.0,
-                isUltra = contract.contract.ccOnly,
-                goals = formattedGoals,
-                contributors = formattedContributors,
-                contractArtifacts = contractArtifacts
-            )
+        ContractInfoEntry(
+            stateId = UUID.randomUUID()
+                .toString(), // Probably not necessary, but used in the off chance server data is not different from the last api call
+            eggId = contract.contract.egg.number,
+            customEggId = contract.contract.customEggId,
+            name = contract.contract.name,
+            identifier = contract.contract.identifier,
+            coopName = contract.coopIdentifier,
+            seasonName = formatSeasonName(contract.contract.seasonId),
+            isLegacy = contract.contract.leggacy,
+            eggsDelivered = status?.totalAmount ?: 0.0,
+            timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
+            allGoalsAchieved = status?.allGoalsAchieved == true,
+            clearedForExit = status?.clearedForExit == true,
+            grade = contract.grade.number,
+            maxCoopSize = periodicalContract?.maxCoopSize ?: 0,
+            tokenTimerMinutes = periodicalContract?.tokenTimerMinutes ?: 0.0,
+            isUltra = contract.contract.ccOnly,
+            goals = formattedGoals,
+            contributors = formattedContributors,
+            contractArtifacts = contractArtifacts
         )
     }
-
-    return formattedContracts
 }
 
 fun formatPeriodicalsContracts(
@@ -136,23 +118,18 @@ fun formatPeriodicalsContracts(
     contractsArchive: List<LocalContract>?,
     previousPeriodicalsData: List<PeriodicalsContractInfoEntry>?
 ): List<PeriodicalsContractInfoEntry> {
-    var formattedContracts: List<PeriodicalsContractInfoEntry> = emptyList()
-    periodicalsData.contracts.forEach { contract ->
-        var formattedGoals: List<GoalInfoEntry> = emptyList()
-        val gradeSpecsList = contract.gradeSpecsList
+    return periodicalsData.contracts.map { contract ->
         val gradeSpecs =
-            gradeSpecsList.find { gradeSpec -> gradeSpec.grade == backup.contracts.lastCpi.grade }
+            contract.gradeSpecsList.find { gradeSpec -> gradeSpec.grade == backup.contracts.lastCpi.grade }
 
-        gradeSpecs?.goalsList?.forEach { goal ->
-            formattedGoals = formattedGoals.plus(
-                GoalInfoEntry(
-                    amount = goal.targetAmount,
-                    reward = goal.rewardType,
-                    rewardSubType = goal.rewardSubType,
-                    rewardAmount = goal.rewardAmount
-                )
+        val formattedGoals = gradeSpecs?.goalsList?.map { goal ->
+            GoalInfoEntry(
+                amount = goal.targetAmount,
+                reward = goal.rewardType,
+                rewardSubType = goal.rewardSubType,
+                rewardAmount = goal.rewardAmount
             )
-        }
+        } ?: emptyList()
 
 
         val archivedContract = if (!contractsArchive.isNullOrEmpty()) {
@@ -162,27 +139,23 @@ fun formatPeriodicalsContracts(
         }
 
 
-        formattedContracts = formattedContracts.plus(
-            PeriodicalsContractInfoEntry(
-                stateId = UUID.randomUUID().toString(),
-                eggId = contract.egg.number,
-                customEggId = contract.customEggId,
-                name = contract.name,
-                identifier = contract.identifier,
-                seasonName = formatSeasonName(contract.seasonId),
-                isLegacy = contract.leggacy,
-                grade = gradeSpecs?.grade?.number ?: 0,
-                maxCoopSize = contract.maxCoopSize,
-                coopLengthSeconds = contract.lengthSeconds,
-                tokenTimerMinutes = contract.minutesPerToken,
-                isUltra = contract.ccOnly,
-                goals = formattedGoals,
-                archivedContractInfo = archivedContract
-            )
+        PeriodicalsContractInfoEntry(
+            stateId = UUID.randomUUID().toString(),
+            eggId = contract.egg.number,
+            customEggId = contract.customEggId,
+            name = contract.name,
+            identifier = contract.identifier,
+            seasonName = formatSeasonName(contract.seasonId),
+            isLegacy = contract.leggacy,
+            grade = gradeSpecs?.grade?.number ?: 0,
+            maxCoopSize = contract.maxCoopSize,
+            coopLengthSeconds = contract.lengthSeconds,
+            tokenTimerMinutes = contract.minutesPerToken,
+            isUltra = contract.ccOnly,
+            goals = formattedGoals,
+            archivedContractInfo = archivedContract
         )
     }
-
-    return formattedContracts
 }
 
 fun formatSeasonInfo(
@@ -199,17 +172,14 @@ fun formatSeasonInfo(
         null
     }
 
-    var formattedGoals: List<GoalInfoEntry> = emptyList()
-    goalSet?.goalsList?.forEach { goal ->
-        formattedGoals = formattedGoals.plus(
-            GoalInfoEntry(
-                amount = goal.cxp,
-                reward = goal.rewardType,
-                rewardSubType = goal.rewardSubType,
-                rewardAmount = goal.rewardAmount
-            )
+    val formattedGoals = goalSet?.goalsList?.map { goal ->
+        GoalInfoEntry(
+            amount = goal.cxp,
+            reward = goal.rewardType,
+            rewardSubType = goal.rewardSubType,
+            rewardAmount = goal.rewardAmount
         )
-    }
+    } ?: emptyList()
 
     return SeasonGradeAndGoals(
         seasonName = seasonInfo.name,
@@ -300,7 +270,7 @@ fun getContractDurationRemaining(
         return Pair("Finished!", isOnTrack)
     }
 
-    val totalEggsNeeded = contract.goals.maxOf { goal -> goal.amount }
+    val totalEggsNeeded = contract.goals.maxOfOrNull { goal -> goal.amount } ?: 0.0
     val totalEggsDelivered = contract.eggsDelivered
     var offlineEggsDelivered = 0.0
 

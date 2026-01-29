@@ -223,7 +223,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun getCalendars(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val contentResolver: ContentResolver = context.contentResolver
-            var calendars = listOf<CalendarEntry>()
+            val calendars = mutableListOf<CalendarEntry>()
 
             val projection = arrayOf(
                 Calendars._ID,
@@ -251,12 +251,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                     val calendarId = it.getLong(projectionIdIndex)
                     val calendarDisplayName = it.getString(projectionDisplayNameIndex)
 
-                    calendars = calendars.plus(CalendarEntry(calendarId, calendarDisplayName))
+                    calendars.add(CalendarEntry(calendarId, calendarDisplayName))
                 }
             }
 
             cursor?.close()
-            updateUserCalendars(calendars)
+            updateUserCalendars(calendars.toList())
         }
     }
 
