@@ -476,19 +476,19 @@ fun CoopNameAndInfo(
                 style = TextStyle(color = ColorProvider(textColor))
             )
         }
-        if (!data.seasonName.isNullOrBlank()) {
+        if (data.isLegacy) {
+            Text(
+                text = "Leggacy",
+                style = TextStyle(color = ColorProvider(Color(0xFFFE9B00.toInt())))
+            )
+        } else if (!data.seasonName.isNullOrBlank()) {
             Text(
                 modifier = GlanceModifier.padding(end = 5.dp),
                 text = data.seasonName,
                 style = TextStyle(color = ColorProvider(Color(0xFF03D0A8.toInt())))
             )
         }
-        if (data.isLegacy) {
-            Text(
-                text = "Leggacy",
-                style = TextStyle(color = ColorProvider(Color(0xFFFE9B00.toInt())))
-            )
-        }
+
         Box(modifier = GlanceModifier.defaultWeight()) {}
         if (data.tokenTimerMinutes > 0) {
             val tokenBitmap =
@@ -860,16 +860,22 @@ fun PeriodicalGoals(
         val pointsReplay = contract.archivedContractInfo?.pointsReplay ?: false
         val numOfGoalsAchieved = contract.archivedContractInfo?.numOfGoalsAchieved ?: 0
         val lastScore = contract.archivedContractInfo?.lastScore ?: 0.0
-        if (pointsReplay || numOfGoalsAchieved == contract.goals.size || lastScore != 0.0) {
+        if (numOfGoalsAchieved == contract.goals.size || pointsReplay || lastScore != 0.0) {
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (pointsReplay || numOfGoalsAchieved == contract.goals.size) {
+                if (numOfGoalsAchieved == contract.goals.size || pointsReplay) {
                     Text(
                         text = "Points replay only",
                         style = TextStyle(color = ColorProvider(textColor))
+                    )
+                    Box(modifier = GlanceModifier.defaultWeight()) {}
+                } else if (numOfGoalsAchieved < contract.goals.size) {
+                    Text(
+                        text = "Awaiting retry",
+                        style = TextStyle(color = ColorProvider(Color.Yellow))
                     )
                     Box(modifier = GlanceModifier.defaultWeight()) {}
                 }
