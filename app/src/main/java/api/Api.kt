@@ -31,9 +31,9 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.util.decodeBase64Bytes
-import io.ktor.util.encodeBase64
 import tools.buildSecureAuthMessage
+import tools.decodeRequest
+import tools.encodeRequest
 import java.util.concurrent.TimeUnit
 
 suspend fun fetchBackupData(eid: String): Backup {
@@ -105,16 +105,15 @@ private suspend fun fetchActiveMissions(
         throw e
     }
 
-    val encodedRequest = authMessage.toByteArray().encodeBase64()
-    val client = createHttpClient()
-    val response = makeRequest(client, url, encodedRequest)
+    val encodedRequest = encodeRequest(authMessage.toByteArray())
+    val response = makeRequest(url, encodedRequest)
 
     when (response.status.value) {
         in 200..299 -> {
             try {
                 val authMessageResponse =
                     AuthenticatedMessage.parseFrom(
-                        response.bodyAsText().decodeBase64Bytes()
+                        decodeRequest(response.bodyAsText())
                     ).message
                 val activeMissionsResponse =
                     GetActiveMissionsResponse.parseFrom(authMessageResponse)
@@ -142,16 +141,15 @@ private suspend fun fetchContractStatus(
         .setCoopIdentifier(coopId)
         .build()
 
-    val encodedRequest = contractRequest.toByteArray().encodeBase64()
-    val client = createHttpClient()
-    val response = makeRequest(client, url, encodedRequest)
+    val encodedRequest = encodeRequest(contractRequest.toByteArray())
+    val response = makeRequest(url, encodedRequest)
 
     when (response.status.value) {
         in 200..299 -> {
             try {
                 val authMessageResponse =
                     AuthenticatedMessage.parseFrom(
-                        response.bodyAsText().decodeBase64Bytes()
+                        decodeRequest(response.bodyAsText())
                     ).message
                 val contractResponse =
                     ContractCoopStatusResponse.parseFrom(authMessageResponse)
@@ -173,16 +171,15 @@ private suspend fun fetchPeriodicals(eid: String): PeriodicalsResponse {
         .setCurrentClientVersion(CURRENT_CLIENT_VERSION)
         .build()
 
-    val encodedRequest = getPeriodicalsRequest.toByteArray().encodeBase64()
-    val client = createHttpClient()
-    val response = makeRequest(client, url, encodedRequest)
+    val encodedRequest = encodeRequest(getPeriodicalsRequest.toByteArray())
+    val response = makeRequest(url, encodedRequest)
 
     when (response.status.value) {
         in 200..299 -> {
             try {
                 val authMessageResponse =
                     AuthenticatedMessage.parseFrom(
-                        response.bodyAsText().decodeBase64Bytes()
+                        decodeRequest(response.bodyAsText())
                     ).message
                 val periodicalsResponse =
                     PeriodicalsResponse.parseFrom(authMessageResponse)
@@ -199,16 +196,15 @@ private suspend fun fetchPeriodicals(eid: String): PeriodicalsResponse {
 private suspend fun fetchContractsArchive(basicRequestInfo: BasicRequestInfo): ContractsArchive {
     val url = CONTRACTS_ARCHIVE_ENDPOINT
 
-    val encodedRequest = basicRequestInfo.toByteArray().encodeBase64()
-    val client = createHttpClient()
-    val response = makeRequest(client, url, encodedRequest)
+    val encodedRequest = encodeRequest(basicRequestInfo.toByteArray())
+    val response = makeRequest(url, encodedRequest)
 
     when (response.status.value) {
         in 200..299 -> {
             try {
                 val authMessageResponse =
                     AuthenticatedMessage.parseFrom(
-                        response.bodyAsText().decodeBase64Bytes()
+                        decodeRequest(response.bodyAsText())
                     ).message
                 val contractsArchiveResponse =
                     ContractsArchive.parseFrom(authMessageResponse)
@@ -230,15 +226,14 @@ private suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
         .setEiUserId(basicRequestInfo.eiUserId)
         .build()
 
-    val encodedRequest = firstContactRequest.toByteArray().encodeBase64()
-    val client = createHttpClient()
-    val response = makeRequest(client, url, encodedRequest)
+    val encodedRequest = encodeRequest(firstContactRequest.toByteArray())
+    val response = makeRequest(url, encodedRequest)
 
     when (response.status.value) {
         in 200..299 -> {
             try {
                 val firstContactResponse =
-                    EggIncFirstContactResponse.parseFrom(response.bodyAsText().decodeBase64Bytes())
+                    EggIncFirstContactResponse.parseFrom(decodeRequest(response.bodyAsText()))
                 if (!firstContactResponse.hasBackup()) throw Exception("No backup found")
                 return firstContactResponse.backup
             } catch (e: Exception) {
@@ -250,31 +245,22 @@ private suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
     }
 }
 
-private fun createHttpClient(): HttpClient {
-    return HttpClient(OkHttp) {
-        engine {
-            config {
-                connectTimeout(20, TimeUnit.SECONDS)
-                readTimeout(20, TimeUnit.SECONDS)
-                writeTimeout(20, TimeUnit.SECONDS)
-            }
+private val sharedClient = HttpClient(OkHttp) {
+    engine {
+        config {
+            connectTimeout(20, TimeUnit.SECONDS)
+            readTimeout(20, TimeUnit.SECONDS)
+            writeTimeout(20, TimeUnit.SECONDS)
         }
     }
 }
 
 private suspend fun makeRequest(
-    client: HttpClient,
     url: String,
     encodedRequest: String
 ): HttpResponse {
-    return try {
-        client.post(urlString = url) {
-            parameter("data", encodedRequest)
-            contentType(ContentType.Application.FormUrlEncoded)
-        }
-    } catch (e: Exception) {
-        throw e
-    } finally {
-        client.close()
+    return sharedClient.post(urlString = url) {
+        parameter("data", encodedRequest)
+        contentType(ContentType.Application.FormUrlEncoded)
     }
 }

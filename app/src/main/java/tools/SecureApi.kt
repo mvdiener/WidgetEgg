@@ -1,9 +1,18 @@
 package tools
 
+import android.util.Base64
 import com.google.protobuf.MessageLite
 import com.widgetegg.widgeteggapp.BuildConfig
 import ei.Ei.AuthenticatedMessage
 import java.security.MessageDigest
+
+fun encodeRequest(input: ByteArray): String {
+    return Base64.encodeToString(input, Base64.DEFAULT)
+}
+
+fun decodeRequest(input: String): ByteArray {
+    return Base64.decode(input, Base64.DEFAULT)
+}
 
 fun <T : MessageLite> buildSecureAuthMessage(data: T): AuthenticatedMessage {
     val secretKey = BuildConfig.SECRET_KEY
