@@ -181,7 +181,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
                     modifier = GlanceModifier.fillMaxSize().background(backgroundColor)
                 ) {
                     item {
-                        Spacer(modifier = GlanceModifier.height(10.dp))
+                        Spacer(modifier = GlanceModifier.height(5.dp))
                     }
                     for (contract in contractData) {
                         item {

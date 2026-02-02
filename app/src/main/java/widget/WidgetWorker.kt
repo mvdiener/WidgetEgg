@@ -9,18 +9,15 @@ class WidgetWorker(
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
     override suspend fun doWork(): Result {
-        var result: Result = Result.success()
-
         if (runAttemptCount > 3) {
             return Result.success()
         }
 
-        try {
+        return try {
             WidgetUpdater().updateWidgets(context)
+            Result.success()
         } catch (_: Exception) {
-            result = Result.retry()
+            Result.retry()
         }
-
-        return result
     }
 }
