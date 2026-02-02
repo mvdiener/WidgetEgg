@@ -8,6 +8,10 @@
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
 /.idea/other.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/deviceManager.xml
+/.idea/codeStyles/Project.xml
+/.idea/inspectionProfiles/Project_Default.xml
 .DS_Store
 /build
 /captures
@@ -16,3 +20,4 @@
 local.properties
 secrets.properties
 app/release/*
+
