@@ -220,7 +220,6 @@ class WidgetUpdater {
         var prefContractInfo = preferences.getContractInfo()
         var prefPeriodicalsContractInfo = preferences.getPeriodicalsContractInfo()
         var prefSeasonInfo = preferences.getSeasonInfo()
-        var prefCustomEggsInfo = preferences.getCustomEggs()
 
         val prefEid = preferences.getEid()
         val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeContract()
@@ -261,7 +260,6 @@ class WidgetUpdater {
                             prefPeriodicalsContractInfo
                         )
                     prefSeasonInfo = formatSeasonInfo(periodicalsInfo, backup)
-                    prefCustomEggsInfo = formatCustomEggs(periodicalsInfo)
                     saveColleggtibleImagesToCache(periodicalsInfo, context)
                 }
 
@@ -277,7 +275,6 @@ class WidgetUpdater {
                 preferences.saveContractInfo(prefContractInfo)
                 preferences.savePeriodicalsContractInfo(prefPeriodicalsContractInfo)
                 preferences.saveSeasonInfo(prefSeasonInfo)
-                preferences.saveCustomEggs(prefCustomEggsInfo)
 
                 ContractWidgetDataStore().updateContractWidgetDataStore(
                     context,
@@ -305,22 +302,24 @@ class WidgetUpdater {
         periodicalsInfo: PeriodicalsData?
     ) {
         var prefStatsInfo = preferences.getStatsInfo()
-        var prefCustomEggs = preferences.getCustomEggs()
 
         val prefEid = preferences.getEid()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
         val prefShowCommunityBadges = preferences.getShowCommunityBadges()
+        val prefCustomEggs = preferences.getCustomEggs()
 
         try {
             if (prefEid.isNotBlank()) {
-                prefStatsInfo = formatStatsData(backup)
-                if (periodicalsInfo != null) {
-                    prefCustomEggs = formatCustomEggs(periodicalsInfo)
+                val formattedCustomEggs = if (periodicalsInfo != null) {
+                    formatCustomEggs(periodicalsInfo)
+                } else {
+                    prefCustomEggs
                 }
 
+                prefStatsInfo = formatStatsData(backup, formattedCustomEggs)
                 preferences.saveStatsInfo(prefStatsInfo)
-                preferences.saveCustomEggs(prefCustomEggs)
+                preferences.saveCustomEggs(formattedCustomEggs)
 
                 StatsWidgetDataStore().updateStatsWidgetDataStore(
                     context,
@@ -329,8 +328,7 @@ class WidgetUpdater {
                     statsInfo = prefStatsInfo,
                     backgroundColor = prefWidgetBackgroundColor,
                     textColor = prefWidgetTextColor,
-                    showCommunityBadges = prefShowCommunityBadges,
-                    customEggs = prefCustomEggs
+                    showCommunityBadges = prefShowCommunityBadges
                 )
             }
         } catch (_: Exception) {

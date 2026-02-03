@@ -147,8 +147,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         periodicalsResult,
                         backupResult
                     )
-                    val formattedStatsData = formatStatsData(backupResult)
                     val formattedCustomEggs = formatCustomEggs(periodicalsResult)
+                    val formattedStatsData = formatStatsData(backupResult, formattedCustomEggs)
                     saveColleggtibleImagesToCache(periodicalsResult, context)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
@@ -174,8 +174,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     )
                     StatsWidgetDataStore().updateStatsWidgetDataStore(
                         context,
-                        statsInfo = formattedStatsData,
-                        customEggs = formattedCustomEggs
+                        statsInfo = formattedStatsData
                     )
                 }
             } catch (_: Exception) {

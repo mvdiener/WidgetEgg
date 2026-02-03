@@ -258,15 +258,6 @@ fun Earnings(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val bookBitmap = bitmapResize(
-            BitmapFactory.decodeStream(
-                getAsset(
-                    assetManager,
-                    "artifacts/afx_book_of_basan_4.png"
-                )
-            )
-        )
-
         val permitName = if (statsInfo.hasProPermit) {
             "pro_permit"
         } else {
@@ -563,10 +554,14 @@ fun Badges(statsInfo: StatsInfo, assetManager: AssetManager) {
         if (badges.hasEnd) {
             BadgeComposable("end", assetManager)
         }
-        if (badges.hasNah) {
+        if (badges.hasNahPlus) {
+            BadgeComposable("nah_plus", assetManager)
+        } else if (badges.hasNah) {
             BadgeComposable("nah", assetManager)
         }
-        if (badges.hasFed) {
+        if (badges.hasFedPlus) {
+            BadgeComposable("fed_plus", assetManager)
+        } else if (badges.hasFed) {
             BadgeComposable("fed", assetManager)
         }
         if (badges.hasZlc) {
