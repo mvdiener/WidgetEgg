@@ -235,7 +235,7 @@ class WidgetUpdater {
                 val (contractInfo, contractsArchiveInfo) = supervisorScope {
                     val contractInfoDeferred = async {
                         try {
-                            fetchContractData(backup)
+                            fetchContractData(prefEid, backup)
                         } catch (_: Exception) {
                             null
                         }
