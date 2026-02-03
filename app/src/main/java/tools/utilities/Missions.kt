@@ -7,7 +7,7 @@ import data.MissionData
 import data.MissionInfoEntry
 import data.TANK_SIZES
 import data.TankInfo
-import ei.Ei
+import ei.Ei.Backup
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -85,7 +85,7 @@ fun getMissionEndTimeMilliseconds(mission: MissionInfoEntry): Long {
 
 fun formatMissionData(
     missionInfo: MissionData,
-    backup: Ei.Backup,
+    backup: Backup,
     isVirtueMission: Boolean = false
 ): List<MissionInfoEntry> {
     val missionsFiltered = if (isVirtueMission) {
@@ -124,7 +124,7 @@ fun formatMissionData(
 
 fun updateFuelingMission(
     missions: List<MissionInfoEntry>,
-    backup: Ei.Backup,
+    backup: Backup,
     isVirtueMission: Boolean = false
 ): List<MissionInfoEntry> {
     val activeMissions =
@@ -163,7 +163,7 @@ fun getTankCapacity(tankLevel: Int): Long {
     return TANK_SIZES[tankLevel]
 }
 
-fun formatTankInfo(backup: Ei.Backup, isVirtueMission: Boolean = false): TankInfo {
+fun formatTankInfo(backup: Backup, isVirtueMission: Boolean = false): TankInfo {
     val tankFuelList = if (isVirtueMission) {
         backup.virtue.afx.tankFuelsList
     } else {

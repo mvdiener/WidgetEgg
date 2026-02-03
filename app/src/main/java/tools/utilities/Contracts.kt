@@ -20,10 +20,10 @@ import data.GoalInfoEntry
 import data.PeriodicalsContractInfoEntry
 import data.PeriodicalsData
 import data.SeasonGradeAndGoals
-import ei.Ei
 import ei.Ei.Backup
 import ei.Ei.ContractCoopStatusResponse.ContributionInfo
 import ei.Ei.LocalContract
+import ei.Ei.RewardType
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -370,15 +370,15 @@ fun formatTokenTimeText(tokenTimerMinutes: Double): String {
 
 fun getRewardIconPath(goal: GoalInfoEntry): String {
     return when (goal.reward) {
-        Ei.RewardType.GOLD -> "other/icon_golden_egg.png"
-        Ei.RewardType.SOUL_EGGS -> "eggs/egg_soul.png"
-        Ei.RewardType.EGGS_OF_PROPHECY -> "eggs/egg_of_prophecy.png"
-        Ei.RewardType.EPIC_RESEARCH_ITEM -> getEpicResearchImagePath(goal)
-        Ei.RewardType.PIGGY_FILL -> "other/icon_piggy_golden_egg.png"
-        Ei.RewardType.PIGGY_LEVEL_BUMP -> "other/icon_piggy_level_up.png"
-        Ei.RewardType.BOOST -> getBoostImagePath(goal)
-        Ei.RewardType.ARTIFACT_CASE -> "other/icon_afx_chest_3.png"
-        Ei.RewardType.SHELL_SCRIPT -> "other/icon_shell_script.png"
+        RewardType.GOLD -> "other/icon_golden_egg.png"
+        RewardType.SOUL_EGGS -> "eggs/egg_soul.png"
+        RewardType.EGGS_OF_PROPHECY -> "eggs/egg_of_prophecy.png"
+        RewardType.EPIC_RESEARCH_ITEM -> getEpicResearchImagePath(goal)
+        RewardType.PIGGY_FILL -> "other/icon_piggy_golden_egg.png"
+        RewardType.PIGGY_LEVEL_BUMP -> "other/icon_piggy_level_up.png"
+        RewardType.BOOST -> getBoostImagePath(goal)
+        RewardType.ARTIFACT_CASE -> "other/icon_afx_chest_3.png"
+        RewardType.SHELL_SCRIPT -> "other/icon_shell_script.png"
         else -> "eggs/egg_unknown.png"
     }
 }

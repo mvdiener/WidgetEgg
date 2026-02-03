@@ -10,7 +10,6 @@ import data.MISSION_ENDPOINT
 import data.MissionData
 import data.PERIODICALS_ENDPOINT
 import data.PeriodicalsData
-import ei.Ei
 import ei.Ei.AuthenticatedMessage
 import ei.Ei.Backup
 import ei.Ei.BasicRequestInfo
@@ -19,7 +18,9 @@ import ei.Ei.ContractCoopStatusRequest
 import ei.Ei.ContractCoopStatusResponse
 import ei.Ei.EggIncFirstContactRequest
 import ei.Ei.EggIncFirstContactResponse
+import ei.Ei.GetActiveMissionsRequest
 import ei.Ei.GetActiveMissionsResponse
+import ei.Ei.GetPeriodicalsRequest
 import ei.Ei.LocalContract
 import ei.Ei.MissionInfo
 import ei.Ei.PeriodicalsResponse
@@ -110,7 +111,7 @@ private suspend fun fetchActiveMissions(
 ): List<MissionInfo> {
     val url = MISSION_ENDPOINT
 
-    val getActiveMissionsRequest = Ei.GetActiveMissionsRequest.newBuilder()
+    val getActiveMissionsRequest = GetActiveMissionsRequest.newBuilder()
         .setRinfo(basicRequestInfo)
         .setResetIndex(resetIndex)
         .build()
@@ -182,7 +183,7 @@ private suspend fun fetchContractStatus(
 private suspend fun fetchPeriodicals(eid: String): PeriodicalsResponse {
     val url = PERIODICALS_ENDPOINT
 
-    val getPeriodicalsRequest = Ei.GetPeriodicalsRequest.newBuilder()
+    val getPeriodicalsRequest = GetPeriodicalsRequest.newBuilder()
         .setUserId(eid)
         .setCurrentClientVersion(CURRENT_CLIENT_VERSION)
         .build()

@@ -11,7 +11,7 @@ import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
 import data.NUMBER_UNITS
 import data.PROGRESS_BACKGROUND_COLOR
-import ei.Ei
+import ei.Ei.Egg
 import java.io.File
 import java.io.InputStream
 import java.util.Locale
@@ -134,7 +134,7 @@ fun getColleggtibleBitmap(assetManager: AssetManager, eggName: String, context: 
 }
 
 fun getEggName(eggId: Int): String {
-    val eggName = Ei.Egg.forNumber(eggId)?.name?.lowercase()
+    val eggName = Egg.forNumber(eggId)?.name?.lowercase()
     return if (eggName.isNullOrBlank()) {
         "egg_unknown"
     } else {

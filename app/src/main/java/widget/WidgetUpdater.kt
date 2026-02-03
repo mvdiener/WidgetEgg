@@ -2,7 +2,6 @@ package widget
 
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.work.await
 import api.fetchBackupData
 import api.fetchContractsArchive
 import api.fetchContractData
@@ -10,10 +9,9 @@ import api.fetchMissionData
 import api.fetchPeriodicalsData
 import data.MissionInfoEntry
 import data.PeriodicalsData
-import ei.Ei
+import ei.Ei.Backup
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -60,8 +58,7 @@ class WidgetUpdater {
 
                 val periodicalsInfo = try {
                     if (hasContractWidgets || hasStatsWidgets) fetchPeriodicalsData(prefEid) else null
-                } catch (e: Exception) {
-                    val thing = e
+                } catch (_: Exception) {
                     null
                 }
 
@@ -121,7 +118,7 @@ class WidgetUpdater {
     }
 
     private suspend fun updateMissions(
-        context: Context, preferences: PreferencesDatastore, backup: Ei.Backup
+        context: Context, preferences: PreferencesDatastore, backup: Backup
     ) {
         var prefMissionInfo = preferences.getMissionInfo()
         var prefVirtueMissionInfo = preferences.getVirtueMissionInfo()
@@ -217,7 +214,7 @@ class WidgetUpdater {
     private suspend fun updateContracts(
         context: Context,
         preferences: PreferencesDatastore,
-        backup: Ei.Backup,
+        backup: Backup,
         periodicalsInfo: PeriodicalsData?
     ) {
         var prefContractInfo = preferences.getContractInfo()
@@ -304,7 +301,7 @@ class WidgetUpdater {
     private suspend fun updateStats(
         context: Context,
         preferences: PreferencesDatastore,
-        backup: Ei.Backup,
+        backup: Backup,
         periodicalsInfo: PeriodicalsData?
     ) {
         var prefStatsInfo = preferences.getStatsInfo()
