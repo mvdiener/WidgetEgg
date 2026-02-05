@@ -55,8 +55,8 @@ suspend fun fetchMissionData(eid: String, resetIndex: Int): MissionData {
     return MissionData(normalMissions, virtueMissions)
 }
 
-suspend fun fetchContractData(eid: String, backup: Backup): ContractData {
-//    val eid = BuildConfig.DEV_ACCOUNT
+suspend fun fetchContractData(backup: Backup): ContractData {
+    val eid = BuildConfig.DEV_ACCOUNT
     val basicRequestInfo = getBasicRequestInfo(eid)
     val statuses = backup.contracts.contractsList.map { contract ->
         fetchContractStatus(
@@ -265,9 +265,9 @@ private suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
 private val sharedClient = HttpClient(OkHttp) {
     engine {
         config {
-            connectTimeout(30, TimeUnit.SECONDS)
-            readTimeout(30, TimeUnit.SECONDS)
-            writeTimeout(30, TimeUnit.SECONDS)
+            connectTimeout(20, TimeUnit.SECONDS)
+            readTimeout(20, TimeUnit.SECONDS)
+            writeTimeout(20, TimeUnit.SECONDS)
         }
     }
 }
