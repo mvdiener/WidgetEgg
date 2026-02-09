@@ -11,6 +11,8 @@ const val CONTRACTS_ARCHIVE_ENDPOINT = "${API_ROOT}/ei_ctx/get_contracts_archive
 
 const val CURRENT_CLIENT_VERSION = 99
 
+const val CONTRACT_NOTIFICATION_CHANNEL_ID = "widgetegg_contract_notifications"
+
 val DEFAULT_WIDGET_BACKGROUND_COLOR = Color(0xff181818)
 val DEFAULT_WIDGET_TEXT_COLOR = Color.White
 

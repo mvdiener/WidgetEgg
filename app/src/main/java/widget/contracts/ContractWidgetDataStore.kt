@@ -116,14 +116,6 @@ class ContractWidgetDataStore {
         }
     }
 
-    fun decodeCustomEggs(customEggsJson: String): List<CustomEggInfoEntry> {
-        return try {
-            Json.decodeFromString<List<CustomEggInfoEntry>>(customEggsJson)
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
-
     suspend fun clearAllData(context: Context) {
         val contractWidgetIds = getContractWidgetIds(context)
         (contractWidgetIds)

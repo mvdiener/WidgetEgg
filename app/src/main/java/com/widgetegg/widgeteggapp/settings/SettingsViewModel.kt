@@ -308,6 +308,28 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         )
     }
 
+    var newContractsNotification by mutableStateOf(false)
+        private set
+
+    fun updateNewContractsNotification(input: Boolean) {
+        newContractsNotification = input
+        // Changes to this value are tied into lifecycle events and need to wait for this operation to finish
+        runBlocking {
+            preferences.saveNewContractsNotification(input)
+        }
+    }
+
+    var incompleteContractsNotification by mutableStateOf(false)
+        private set
+
+    fun updateIncompleteContractsNotification(input: Boolean) {
+        incompleteContractsNotification = input
+        // Changes to this value are tied into lifecycle events and need to wait for this operation to finish
+        runBlocking {
+            preferences.saveIncompleteContractsNotification(input)
+        }
+    }
+
     var showSeasonInfo by mutableStateOf(false)
         private set
 

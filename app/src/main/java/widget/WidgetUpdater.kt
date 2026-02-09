@@ -25,6 +25,7 @@ import tools.utilities.formatTankInfo
 import tools.utilities.removeCalendarEvents
 import tools.utilities.saveColleggtibleImagesToCache
 import tools.utilities.scheduleCalendarEvents
+import tools.utilities.sendContractNotification
 import tools.utilities.updateFuelingMission
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
@@ -225,6 +226,8 @@ class WidgetUpdater {
         val prefUseAbsoluteTime = preferences.getUseAbsoluteTimeContract()
         val prefUseOfflineTime = preferences.getUseOfflineTime()
         val prefShowAvailableContracts = preferences.getShowAvailableContracts()
+        val prefNewContractsNotification = preferences.getNewContractsNotification()
+        val prefIncompleteContractsNotification = preferences.getIncompleteContractsNotification()
         val prefShowSeasonInfo = preferences.getShowSeasonInfo()
         val prefOpenWasmeggDashboard = preferences.getOpenWasmeggDashboard()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
@@ -270,6 +273,15 @@ class WidgetUpdater {
                             backup.userName,
                             prefPeriodicalsContractInfo
                         )
+                }
+
+                if (prefNewContractsNotification || prefIncompleteContractsNotification) {
+                    prefPeriodicalsContractInfo = sendContractNotification(
+                        context,
+                        prefNewContractsNotification,
+                        prefIncompleteContractsNotification,
+                        prefPeriodicalsContractInfo
+                    )
                 }
 
                 preferences.saveContractInfo(prefContractInfo)

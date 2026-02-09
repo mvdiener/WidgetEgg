@@ -54,6 +54,9 @@ class PreferencesDatastore(context: Context) {
         private val USE_ABSOLUTE_TIME_CONTRACT = booleanPreferencesKey("useAbsoluteTimeContract")
         private val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
         private val SHOW_AVAILABLE_CONTRACTS = booleanPreferencesKey("showAvailableContracts")
+        private val NEW_CONTRACTS_NOTIFICATION = booleanPreferencesKey("newContractsNotification")
+        private val INCOMPLETE_CONTRACTS_NOTIFICATION =
+            booleanPreferencesKey("incompleteContractsNotification")
         private val SHOW_SEASON_INFO = booleanPreferencesKey("showSeasonInfo")
         private val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
         private val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
@@ -346,6 +349,28 @@ class PreferencesDatastore(context: Context) {
             it[SHOW_AVAILABLE_CONTRACTS] = showAvailableContracts
         }
     }
+
+    suspend fun getNewContractsNotification() = dataStore.data.map {
+        it[NEW_CONTRACTS_NOTIFICATION] == true
+    }.first()
+
+
+    suspend fun saveNewContractsNotification(newContractsNotification: Boolean) {
+        dataStore.edit {
+            it[NEW_CONTRACTS_NOTIFICATION] = newContractsNotification
+        }
+    }
+
+    suspend fun getIncompleteContractsNotification() = dataStore.data.map {
+        it[INCOMPLETE_CONTRACTS_NOTIFICATION] == true
+    }.first()
+
+    suspend fun saveIncompleteContractsNotification(incompleteContractsNotification: Boolean) {
+        dataStore.edit {
+            it[INCOMPLETE_CONTRACTS_NOTIFICATION] = incompleteContractsNotification
+        }
+    }
+
 
     suspend fun getShowSeasonInfo() = dataStore.data.map {
         it[SHOW_SEASON_INFO] == true

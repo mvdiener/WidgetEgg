@@ -132,10 +132,12 @@ fun formatPeriodicalsContracts(
         } ?: emptyList()
 
 
+        val previousPeriodicalContract =
+            previousPeriodicalsData?.find { it.identifier == contract.identifier }
         val archivedContract = if (!contractsArchive.isNullOrEmpty()) {
             getArchivedContract(contract.identifier, contractsArchive)
         } else {
-            previousPeriodicalsData?.find { it.identifier == contract.identifier }?.archivedContractInfo
+            previousPeriodicalContract?.archivedContractInfo
         }
 
 
@@ -152,6 +154,7 @@ fun formatPeriodicalsContracts(
             coopLengthSeconds = contract.lengthSeconds,
             tokenTimerMinutes = contract.minutesPerToken,
             isUltra = contract.ccOnly,
+            notificationSent = previousPeriodicalContract?.notificationSent ?: false,
             goals = formattedGoals,
             archivedContractInfo = archivedContract
         )

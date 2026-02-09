@@ -74,6 +74,7 @@ data class PeriodicalsContractInfoEntry(
     var coopLengthSeconds: Double,
     var tokenTimerMinutes: Double,
     var isUltra: Boolean,
+    var notificationSent: Boolean,
     var goals: List<GoalInfoEntry>,
     var archivedContractInfo: ArchivedContractInfoEntry?
 )

@@ -435,7 +435,7 @@ fun TankInfoContent(
                     Image(
                         provider = ImageProvider(eggBitmap),
                         contentDescription = "Egg icon",
-                        modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+                        modifier = GlanceModifier.size(18.dp).padding(end = 5.dp)
                     )
                     LinearProgressIndicator(
                         modifier = GlanceModifier.height(5.dp).defaultWeight(),
