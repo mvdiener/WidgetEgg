@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.widgetegg.widgeteggapp.R
 import data.CONTRACT_NOTIFICATION_CHANNEL_ID
+import data.ContractInfoEntry
 import data.PeriodicalsContractInfoEntry
 
 fun hasNotificationPermissions(context: Context): Boolean {
@@ -41,12 +42,18 @@ fun sendContractNotification(
     context: Context,
     newContractNotifications: Boolean,
     incompleteContractNotifications: Boolean,
+    contracts: List<ContractInfoEntry>,
     periodicalsContracts: List<PeriodicalsContractInfoEntry>
 ): List<PeriodicalsContractInfoEntry> {
     if (!hasNotificationPermissions(context)) return periodicalsContracts
 
-    return periodicalsContracts.map { contract ->
-        if (contract.notificationSent || contract.identifier == "first-contract") return@map contract
+    // Filter out first-contract and active contracts
+    val filtered = periodicalsContracts.filter { periodical ->
+        (periodical.identifier !in contracts.map { it.identifier }) && periodical.identifier != "first-contract"
+    }
+
+    return filtered.map { contract ->
+        if (contract.notificationSent) return@map contract
         val numOfGoalsAchieved = contract.archivedContractInfo?.numOfGoalsAchieved ?: 0
         val lastScore = contract.archivedContractInfo?.lastScore ?: 0.0
 
@@ -67,7 +74,6 @@ fun sendContractNotification(
 
             val builder = createNotificationBuilder(context, titleText, contract.name)
             with(NotificationManagerCompat.from(context)) {
-                // notificationId is a unique int for each notification that you want to be able to update
                 notify(contract.identifier.hashCode(), builder.build())
             }
 

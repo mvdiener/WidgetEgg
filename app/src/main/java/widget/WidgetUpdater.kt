@@ -280,6 +280,7 @@ class WidgetUpdater {
                         context,
                         prefNewContractsNotification,
                         prefIncompleteContractsNotification,
+                        prefContractInfo,
                         prefPeriodicalsContractInfo
                     )
                 }
