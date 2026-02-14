@@ -37,8 +37,10 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.ContractInfoEntry
+import data.DEFAULT_BROWSER
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.PROBLEMATIC_BROWSERS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,8 +48,9 @@ import tools.utilities.bitmapResize
 import tools.utilities.createContractCircularProgressBarBitmap
 import tools.utilities.getAsset
 import tools.utilities.getContractDurationRemaining
-import tools.utilities.getContractGoalPercentComplete
+import tools.utilities.getGoalPercentComplete
 import tools.utilities.getContractTimeTextColor
+import tools.utilities.getColleggtibleBitmap
 import tools.utilities.getEggName
 import tools.utilities.getOfflineEggsDelivered
 import tools.utilities.getRewardIconPath
@@ -105,8 +108,6 @@ class ContractWidgetActive : GlanceAppWidget() {
                     .background(backgroundColor)
                     .clickable {
                         if (openWasmeggDashboard) {
-                            val problematicBrowsers =
-                                listOf("org.mozilla.firefox", "com.duckduckgo.mobile.android")
                             val packageManager: PackageManager = context.packageManager
                             var browserPackage: String? = packageManager.resolveActivity(
                                 Intent(Intent.ACTION_VIEW, "https://www.example.com".toUri()),
@@ -116,8 +117,8 @@ class ContractWidgetActive : GlanceAppWidget() {
                             if (browserPackage != null) {
                                 // Not all browsers play nicely with opening a link from a widget
                                 // If using any of these browsers, attempt to use chrome instead
-                                if (browserPackage in problematicBrowsers) {
-                                    browserPackage = "com.android.chrome"
+                                if (browserPackage in PROBLEMATIC_BROWSERS) {
+                                    browserPackage = DEFAULT_BROWSER
                                 }
                                 val launchIntent: Intent? =
                                     packageManager.getLaunchIntentForPackage(browserPackage)
@@ -217,7 +218,7 @@ fun ContractSingle(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, useOfflineTime, 65, 9)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 65, 9)
     }
 
     Text(
@@ -243,7 +244,7 @@ fun ContractDouble(
         modifier = GlanceModifier.padding(start = 5.dp),
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, useOfflineTime, 45, 6)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 45, 6)
     }
 
     Column(
@@ -284,7 +285,7 @@ fun ContractAll(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, contract, useOfflineTime, 30, 4)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 30, 4)
     }
 
     Text(
@@ -339,6 +340,7 @@ fun NoContractsContent(assetManager: AssetManager, textColor: Color) {
 @Composable
 fun EggAndProgressBars(
     assetManager: AssetManager,
+    context: Context,
     contract: ContractInfoEntry,
     useOfflineTime: Boolean,
     eggSize: Int,
@@ -350,14 +352,15 @@ fun EggAndProgressBars(
         "egg_${contract.customEggId}"
     }
 
-    contract.goals.sortedBy { goal -> goal.goalAmount }.forEachIndexed { index, goal ->
+    contract.goals.sortedBy { goal -> goal.amount }.forEachIndexed { index, goal ->
         val percentComplete =
-            getContractGoalPercentComplete(contract.eggsDelivered, goal.goalAmount)
+            getGoalPercentComplete(contract.eggsDelivered, goal.amount)
         var offlinePercentComplete: Float? = null
         if (useOfflineTime) {
-            val totalEggsDelivered = contract.eggsDelivered + getOfflineEggsDelivered(contract)
+            val totalEggsDelivered =
+                contract.eggsDelivered + getOfflineEggsDelivered(contract.contributors)
             offlinePercentComplete =
-                getContractGoalPercentComplete(totalEggsDelivered, goal.goalAmount)
+                getGoalPercentComplete(totalEggsDelivered, goal.amount)
         }
 
         val bitmap = createContractCircularProgressBarBitmap(
@@ -368,13 +371,17 @@ fun EggAndProgressBars(
 
         Image(
             provider = ImageProvider(bitmap),
-            contentDescription = "Circular Progress",
+            contentDescription = "Circular Progress $index",
             modifier = GlanceModifier.size(((index + progressSize) * 10).dp)
         )
     }
 
+    val eggBitmap = if (contract.customEggId.isNullOrBlank()) {
+        BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
+    } else {
+        getColleggtibleBitmap(assetManager, eggName, context)
+    }
 
-    val eggBitmap = BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
     Image(
         provider = ImageProvider(eggBitmap),
         contentDescription = "Egg Icon",
@@ -426,7 +433,7 @@ fun TimeTextAndScroll(
             Image(
                 provider = ImageProvider(scrollBitmap),
                 contentDescription = "Contract Scroll",
-                modifier = GlanceModifier.size(scrollSize.dp).padding(start = 1.dp)
+                modifier = GlanceModifier.size(scrollSize.dp).padding(start = 2.dp)
             )
         }
     }

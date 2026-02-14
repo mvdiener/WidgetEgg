@@ -7,8 +7,7 @@ import data.MissionData
 import data.MissionInfoEntry
 import data.TANK_SIZES
 import data.TankInfo
-import ei.Ei
-import ei.Ei.MissionInfo
+import ei.Ei.Backup
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -86,58 +85,50 @@ fun getMissionEndTimeMilliseconds(mission: MissionInfoEntry): Long {
 
 fun formatMissionData(
     missionInfo: MissionData,
-    backup: Ei.Backup,
+    backup: Backup,
     isVirtueMission: Boolean = false
 ): List<MissionInfoEntry> {
-    var formattedMissions: List<MissionInfoEntry> = emptyList()
-    var missionsWithFueling = if (isVirtueMission) {
+    val missionsFiltered = if (isVirtueMission) {
         missionInfo.virtueMissions
     } else {
         missionInfo.missions
     }
 
-    // For whatever reason, sometimes get_active_missions doesn't return active missions, or unclaimed missions (EI bug??)
-    // If this is the case, get the active missions from the backup
-    if (missionsWithFueling.isEmpty()) {
-        missionsWithFueling = getBackupMissions(backup, isVirtueMission)
-    }
-
     val fuelingMission = if (isVirtueMission) {
         backup.artifactsDb.virtueAfxDb.fuelingMission
     } else {
         backup.artifactsDb.fuelingMission
     }
 
-    if (fuelingMission.capacity > 0) {
-        missionsWithFueling = missionsWithFueling + fuelingMission
+    val missionsWithFueling = if (fuelingMission.capacity > 0) {
+        missionsFiltered + fuelingMission
+    } else {
+        missionsFiltered
     }
 
-    missionsWithFueling.forEach { mission ->
-        formattedMissions = formattedMissions.plus(
-            MissionInfoEntry(
-                stateId = UUID.randomUUID().toString(),
-                secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
-                missionDuration = mission.durationSeconds,
-                date = Instant.now().epochSecond,
-                shipId = mission.ship.number,
-                capacity = mission.capacity,
-                shipLevel = mission.level,
-                targetArtifact = mission.targetArtifact.number,
-                durationType = mission.durationType.number,
-                identifier = mission.identifier
-            )
+    return missionsWithFueling.map { mission ->
+        MissionInfoEntry(
+            stateId = UUID.randomUUID().toString(),
+            secondsRemaining = if (mission.secondsRemaining >= 0) mission.secondsRemaining else 0.0,
+            missionDuration = mission.durationSeconds,
+            date = Instant.now().epochSecond,
+            shipId = mission.ship.number,
+            capacity = mission.capacity,
+            shipLevel = mission.level,
+            targetArtifact = mission.targetArtifact.number,
+            durationType = mission.durationType.number,
+            identifier = mission.identifier
         )
     }
-
-    return formattedMissions
 }
 
 fun updateFuelingMission(
     missions: List<MissionInfoEntry>,
-    backup: Ei.Backup,
+    backup: Backup,
     isVirtueMission: Boolean = false
 ): List<MissionInfoEntry> {
-    var activeMissions = missions.filter { mission -> mission.identifier.isNotBlank() }
+    val activeMissions =
+        missions.filter { mission -> mission.identifier.isNotBlank() }.toMutableList()
     val fuelingMission = if (isVirtueMission) {
         backup.artifactsDb.virtueAfxDb.fuelingMission
     } else {
@@ -145,7 +136,7 @@ fun updateFuelingMission(
     }
 
     if (fuelingMission.capacity > 0) {
-        activeMissions = activeMissions.plus(
+        activeMissions.add(
             MissionInfoEntry(
                 stateId = UUID.randomUUID().toString(),
                 secondsRemaining = if (fuelingMission.secondsRemaining >= 0) fuelingMission.secondsRemaining else 0.0,
@@ -161,22 +152,18 @@ fun updateFuelingMission(
         )
     }
 
-    val activeMissionsUpdatedState = activeMissions.map { mission ->
+    return activeMissions.map { mission ->
         // If all data is the same from the last update (no change in fueling ship, no change in active ships), widgets won't update state
         // By changing the stateId, this will force widgets to re-render
         mission.copy(stateId = UUID.randomUUID().toString())
     }
-
-    return activeMissionsUpdatedState
 }
 
 fun getTankCapacity(tankLevel: Int): Long {
     return TANK_SIZES[tankLevel]
 }
 
-fun formatTankInfo(backup: Ei.Backup, isVirtueMission: Boolean = false): TankInfo {
-    var formattedFuelLevels: List<FuelLevelInfo> = emptyList()
-
+fun formatTankInfo(backup: Backup, isVirtueMission: Boolean = false): TankInfo {
     val tankFuelList = if (isVirtueMission) {
         backup.virtue.afx.tankFuelsList
     } else {
@@ -189,21 +176,20 @@ fun formatTankInfo(backup: Ei.Backup, isVirtueMission: Boolean = false): TankInf
         backup.artifacts.tankLimitsList
     }
 
-    tankFuelList.forEachIndexed { index, fuel ->
+    val formattedFuelLevels = tankFuelList.mapIndexedNotNull { index, fuel ->
         if (fuel > 0) {
             val eggId = if (isVirtueMission) {
                 index + 30
             } else {
                 index + 1
             }
-            formattedFuelLevels = formattedFuelLevels.plus(
-                FuelLevelInfo(
-                    eggId = eggId,
-                    fuelQuantity = fuel,
-                    fuelSlider = tankLimitsList[index]
-                )
+
+            FuelLevelInfo(
+                eggId = eggId,
+                fuelQuantity = fuel,
+                fuelSlider = tankLimitsList.getOrElse(index) { 0.0 }
             )
-        }
+        } else null
     }
 
     return TankInfo(
@@ -271,7 +257,7 @@ fun createMissionCircularProgressBarBitmap(
     isFueling: Boolean
 ): Bitmap {
     val color = getMissionColor(durationType, isFueling)
-    val progressData = listOf(CircularProgress(progress, color))
+    val progressData = listOf(ProgressData(progress, color))
     return createCircularProgressBarBitmap(progressData, size, 8f)
 }
 
@@ -302,27 +288,4 @@ fun getMissionColor(durationType: Int, isFueling: Boolean): Int {
 fun getFuelPercentFilled(capacity: Long, fuelQuantity: Double): Float {
     if (capacity == 0L) return 0f
     return fuelQuantity.toFloat() / capacity.toFloat()
-}
-
-private fun getBackupMissions(
-    backup: Ei.Backup,
-    isVirtueMission: Boolean
-): List<MissionInfo> {
-    val missions = backup.artifactsDb.missionInfosList.filter { mission ->
-        if (isVirtueMission) {
-            mission.type == MissionInfo.MissionType.VIRTUE
-        } else {
-            mission.type == MissionInfo.MissionType.STANDARD
-        }
-    }
-
-    // The seconds remaining for a mission needs to be adjusted based on the last backup date
-    val lastBackupTime = backup.settings.lastBackupTime
-    val secondsSinceBackup = Instant.now().epochSecond - lastBackupTime
-
-    return missions.map { mission ->
-        mission.toBuilder()
-            .setSecondsRemaining(mission.secondsRemaining - secondsSinceBackup)
-            .build()
-    }
 }

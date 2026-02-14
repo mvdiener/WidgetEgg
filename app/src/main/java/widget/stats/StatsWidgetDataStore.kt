@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
+import data.CustomEggInfoEntry
 import data.StatsInfo
 import kotlinx.serialization.json.Json
 import widget.stats.normal.StatsWidgetNormal
@@ -20,45 +21,44 @@ data object StatsWidgetDataStorePreferencesKeys {
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
     val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
+    val CUSTOM_EGGS = stringPreferencesKey("widgetCustomEggs")
 }
 
 class StatsWidgetDataStore {
-    suspend fun setEid(context: Context, eid: String) {
+    suspend fun updateStatsWidgetDataStore(
+        context: Context,
+        eid: String? = null,
+        eiUserName: String? = null,
+        statsInfo: StatsInfo? = null,
+        backgroundColor: Color? = null,
+        textColor: Color? = null,
+        showCommunityBadges: Boolean? = null,
+        customEggs: List<CustomEggInfoEntry>? = null
+    ) {
         val statsWidgetIds =
             GlanceAppWidgetManager(context).getGlanceIds(StatsWidgetNormal::class.java)
-        (statsWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[StatsWidgetDataStorePreferencesKeys.EID] = eid
+
+        statsWidgetIds.forEach { glanceId ->
+            updateAppWidgetState(context, glanceId) { prefs ->
+                eid?.let { prefs[StatsWidgetDataStorePreferencesKeys.EID] = it }
+                eiUserName?.let { prefs[StatsWidgetDataStorePreferencesKeys.EI_USER_NAME] = it }
+                statsInfo?.let {
+                    prefs[StatsWidgetDataStorePreferencesKeys.STATS_INFO] = Json.encodeToString(it)
+                }
+                backgroundColor?.let {
+                    prefs[StatsWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] = it.toArgb()
+                }
+                textColor?.let {
+                    prefs[StatsWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] = it.toArgb()
+                }
+                showCommunityBadges?.let {
+                    prefs[StatsWidgetDataStorePreferencesKeys.SHOW_COMMUNITY_BADGES] = it
+                }
+                customEggs?.let {
+                    prefs[StatsWidgetDataStorePreferencesKeys.CUSTOM_EGGS] = Json.encodeToString(it)
                 }
             }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setEiUserName(context: Context, eiUserName: String) {
-        val statsWidgetIds =
-            GlanceAppWidgetManager(context).getGlanceIds(StatsWidgetNormal::class.java)
-        (statsWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[StatsWidgetDataStorePreferencesKeys.EI_USER_NAME] = eiUserName
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setStatsInfo(context: Context, statsInfo: StatsInfo) {
-        val statsString = Json.encodeToString(statsInfo)
-        val statsWidgetIds =
-            GlanceAppWidgetManager(context).getGlanceIds(StatsWidgetNormal::class.java)
-        (statsWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[StatsWidgetDataStorePreferencesKeys.STATS_INFO] = statsString
-                }
-            }
+        }
 
         updateAllWidgets(context)
     }
@@ -71,46 +71,12 @@ class StatsWidgetDataStore {
         }
     }
 
-    suspend fun setBackgroundColor(context: Context, backgroundColor: Color) {
-        val statsWidgetIds =
-            GlanceAppWidgetManager(context).getGlanceIds(StatsWidgetNormal::class.java)
-        (statsWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[StatsWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
-                        backgroundColor.toArgb()
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setTextColor(context: Context, textColor: Color) {
-        val statsWidgetIds =
-            GlanceAppWidgetManager(context).getGlanceIds(StatsWidgetNormal::class.java)
-        (statsWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[StatsWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
-                        textColor.toArgb()
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setShowCommunityBadges(context: Context, showCommunityBadges: Boolean) {
-        val statsWidgetIds =
-            GlanceAppWidgetManager(context).getGlanceIds(StatsWidgetNormal::class.java)
-        (statsWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[StatsWidgetDataStorePreferencesKeys.SHOW_COMMUNITY_BADGES] =
-                        showCommunityBadges
-                }
-            }
-
-        updateAllWidgets(context)
+    fun decodeCustomEggs(customEggsJson: String): List<CustomEggInfoEntry> {
+        return try {
+            Json.decodeFromString<List<CustomEggInfoEntry>>(customEggsJson)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     suspend fun clearAllData(context: Context) {

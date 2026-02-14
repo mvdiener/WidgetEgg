@@ -39,42 +39,74 @@ data object MissionWidgetDataStorePreferencesKeys {
 }
 
 class MissionWidgetDataStore {
-    suspend fun setEid(context: Context, eid: String) {
-        val missionWidgetIds = getMissionWidgetIds(context)
-        val virtueMissionWidgetIds = getVirtueMissionWidgetIds(context)
-        (missionWidgetIds + virtueMissionWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.EID] = eid
+    suspend fun updateMissionWidgetDataStore(
+        context: Context,
+        eid: String? = null,
+        missionInfo: List<MissionInfoEntry>? = null,
+        virtueMissionInfo: List<MissionInfoEntry>? = null,
+        tankInfo: TankInfo? = null,
+        virtueTankInfo: TankInfo? = null,
+        useAbsoluteTime: Boolean? = null,
+        useAbsoluteTimePlusDay: Boolean? = null,
+        targetArtifactNormalWidget: Boolean? = null,
+        targetArtifactLargeWidget: Boolean? = null,
+        showFuelingShip: Boolean? = null,
+        showTankLevels: Boolean? = null,
+        useSliderCapacity: Boolean? = null,
+        openEggInc: Boolean? = null,
+        backgroundColor: Color? = null,
+        textColor: Color? = null
+    ) {
+        val allIds = getMissionWidgetIds(context) + getVirtueMissionWidgetIds(context)
+        allIds.forEach { glanceId ->
+            updateAppWidgetState(context, glanceId) { prefs ->
+                eid?.let { prefs[MissionWidgetDataStorePreferencesKeys.EID] = it }
+                missionInfo?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] =
+                        Json.encodeToString(it)
+                }
+                virtueMissionInfo?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.VIRTUE_MISSION_INFO] =
+                        Json.encodeToString(it)
+                }
+                tankInfo?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.TANK_INFO] = Json.encodeToString(it)
+                }
+                virtueTankInfo?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.VIRTUE_TANK_INFO] =
+                        Json.encodeToString(it)
+                }
+                useAbsoluteTime?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = it
+                }
+                useAbsoluteTimePlusDay?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] = it
+                }
+                targetArtifactNormalWidget?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_NORMAL_WIDGET] = it
+                }
+                targetArtifactLargeWidget?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] = it
+                }
+                showFuelingShip?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] = it
+                }
+                showTankLevels?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] = it
+                }
+                useSliderCapacity?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.USE_SLIDER_CAPACITY] = it
+                }
+                openEggInc?.let { prefs[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] = it }
+                backgroundColor?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
+                        it.toArgb()
+                }
+                textColor?.let {
+                    prefs[MissionWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] = it.toArgb()
                 }
             }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setMissionInfo(context: Context, missionInfo: List<MissionInfoEntry>) {
-        val missionString = Json.encodeToString(missionInfo)
-        val missionWidgetIds = getMissionWidgetIds(context)
-        (missionWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.MISSION_INFO] = missionString
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setVirtueMissionInfo(context: Context, missionInfo: List<MissionInfoEntry>) {
-        val missionString = Json.encodeToString(missionInfo)
-        val virtueMissionWidgetIds = getVirtueMissionWidgetIds(context)
-        (virtueMissionWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.VIRTUE_MISSION_INFO] = missionString
-                }
-            }
-
+        }
         updateAllWidgets(context)
     }
 
@@ -86,209 +118,12 @@ class MissionWidgetDataStore {
         }
     }
 
-    suspend fun setTankInfo(context: Context, tankInfo: TankInfo) {
-        val tankInfoString = Json.encodeToString(tankInfo)
-        GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.TANK_INFO] = tankInfoString
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setVirtueTankInfo(context: Context, tankInfo: TankInfo) {
-        val tankInfoString = Json.encodeToString(tankInfo)
-        GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetLarge::class.java)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.VIRTUE_TANK_INFO] = tankInfoString
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
     fun decodeTankInfo(tankInfoJson: String): TankInfo {
         return try {
             Json.decodeFromString<TankInfo>(tankInfoJson)
         } catch (e: Exception) {
             TankInfo()
         }
-    }
-
-    suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
-        val missionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
-        val missionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-        val virtueMissionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetNormal::class.java)
-        val virtueMissionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetLarge::class.java)
-        (missionWidgetNormalIds + missionWidgetLargeIds + virtueMissionWidgetNormalIds + virtueMissionWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = useAbsoluteTime
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setUseAbsoluteTimePlusDay(context: Context, useAbsoluteTimePlusDay: Boolean) {
-        val missionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
-        val missionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-        val virtueMissionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetNormal::class.java)
-        val virtueMissionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetLarge::class.java)
-        (missionWidgetNormalIds + missionWidgetLargeIds + virtueMissionWidgetNormalIds + virtueMissionWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_PLUS_DAY] =
-                        useAbsoluteTimePlusDay
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setOpenEggInc(context: Context, openEggInc: Boolean) {
-        val missionWidgetIds = getMissionWidgetIds(context)
-        val virtueMissionWidgetIds = getVirtueMissionWidgetIds(context)
-        (missionWidgetIds + virtueMissionWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.OPEN_EGG_INC] =
-                        openEggInc
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setTargetArtifactNormalWidget(
-        context: Context,
-        showTargetArtifactNormalWidget: Boolean
-    ) {
-        val missionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
-        val virtueMissionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetNormal::class.java)
-        (missionWidgetNormalIds + virtueMissionWidgetNormalIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_NORMAL_WIDGET] =
-                        showTargetArtifactNormalWidget
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setShowFuelingShip(context: Context, showFuelingShip: Boolean) {
-        val missionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
-        val virtueMissionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetNormal::class.java)
-        (missionWidgetNormalIds + virtueMissionWidgetNormalIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_FUELING_SHIP] =
-                        showFuelingShip
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setTargetArtifactLargeWidget(
-        context: Context,
-        showTargetArtifactLargeWidget: Boolean
-    ) {
-        val missionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-        val virtueMissionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetLarge::class.java)
-        (missionWidgetLargeIds + virtueMissionWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.TARGET_ARTIFACT_LARGE_WIDGET] =
-                        showTargetArtifactLargeWidget
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setShowTankLevels(context: Context, showTankLevels: Boolean) {
-        val missionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-        val virtueMissionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetLarge::class.java)
-        (missionWidgetLargeIds + virtueMissionWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.SHOW_TANK_LEVELS] =
-                        showTankLevels
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setUseSliderCapacity(context: Context, useSliderCapacity: Boolean) {
-        val missionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-        val virtueMissionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetLarge::class.java)
-        (missionWidgetLargeIds + virtueMissionWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.USE_SLIDER_CAPACITY] =
-                        useSliderCapacity
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setBackgroundColor(context: Context, backgroundColor: Color) {
-        val missionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetNormal::class.java)
-        val missionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(MissionWidgetLarge::class.java)
-        val virtueMissionWidgetNormalIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetNormal::class.java)
-        val virtueMissionWidgetLargeIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueMissionWidgetLarge::class.java)
-        (missionWidgetNormalIds + missionWidgetLargeIds + virtueMissionWidgetNormalIds + virtueMissionWidgetLargeIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
-                        backgroundColor.toArgb()
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setTextColor(context: Context, textColor: Color) {
-        val missionWidgetIds = getMissionWidgetIds(context)
-        val virtueMissionWidgetIds = getVirtueMissionWidgetIds(context)
-        (missionWidgetIds + virtueMissionWidgetIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[MissionWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
-                        textColor.toArgb()
-                }
-            }
-
-        updateAllWidgets(context)
     }
 
     suspend fun clearAllData(context: Context) {

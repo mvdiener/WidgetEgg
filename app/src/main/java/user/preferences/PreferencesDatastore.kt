@@ -12,9 +12,12 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.CalendarEntry
 import data.ContractInfoEntry
+import data.CustomEggInfoEntry
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
+import data.PeriodicalsContractInfoEntry
+import data.SeasonGradeAndGoals
 import data.StatsInfo
 import data.TankInfo
 import kotlinx.coroutines.flow.first
@@ -46,39 +49,21 @@ class PreferencesDatastore(context: Context) {
         private val SCHEDULE_EVENTS = booleanPreferencesKey("scheduleEvents")
         private val SELECTED_CALENDAR = stringPreferencesKey("selectedCalendar")
         private val CONTRACT_INFO = stringPreferencesKey("contractInfo")
+        private val PERIODICALS_CONTRACT_INFO = stringPreferencesKey("periodicalsContractInfo")
+        private val SEASON_INFO = stringPreferencesKey("seasonInfo")
         private val USE_ABSOLUTE_TIME_CONTRACT = booleanPreferencesKey("useAbsoluteTimeContract")
         private val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
+        private val SHOW_AVAILABLE_CONTRACTS = booleanPreferencesKey("showAvailableContracts")
+        private val NEW_CONTRACTS_NOTIFICATION = booleanPreferencesKey("newContractsNotification")
+        private val INCOMPLETE_CONTRACTS_NOTIFICATION =
+            booleanPreferencesKey("incompleteContractsNotification")
+        private val SHOW_SEASON_INFO = booleanPreferencesKey("showSeasonInfo")
         private val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
         private val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
         private val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
         private val STATS_INFO = stringPreferencesKey("statsInfo")
         private val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
-        private val ALL_KEYS = listOf(
-            EID,
-            EI_USER_NAME,
-            MISSION_INFO,
-            VIRTUE_MISSION_INFO,
-            TANK_INFO,
-            VIRTUE_TANK_INFO,
-            USE_ABSOLUTE_TIME,
-            USE_ABSOLUTE_TIME_PLUS_DAY,
-            TARGET_ARTIFACT_NORMAL_WIDGET,
-            TARGET_ARTIFACT_LARGE_WIDGET,
-            SHOW_FUELING_SHIP,
-            SHOW_TANK_LEVELS,
-            USE_SLIDER_CAPACITY,
-            OPEN_EGG_INC,
-            SCHEDULE_EVENTS,
-            SELECTED_CALENDAR,
-            CONTRACT_INFO,
-            USE_ABSOLUTE_TIME_CONTRACT,
-            USE_OFFLINE_TIME,
-            OPEN_WASMEGG_DASHBOARD,
-            WIDGET_BACKGROUND_COLOR,
-            WIDGET_TEXT_COLOR,
-            STATS_INFO,
-            SHOW_COMMUNITY_BADGES
-        )
+        private val CUSTOM_EGGS = stringPreferencesKey("customEggs")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -299,6 +284,42 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
+    suspend fun getPeriodicalsContractInfo(): List<PeriodicalsContractInfoEntry> {
+        return dataStore.data.map {
+            it[PERIODICALS_CONTRACT_INFO]?.let { contractJson ->
+                try {
+                    Json.decodeFromString<List<PeriodicalsContractInfoEntry>>(contractJson)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList()
+        }.first()
+    }
+
+    suspend fun savePeriodicalsContractInfo(contractInfo: List<PeriodicalsContractInfoEntry>) {
+        dataStore.edit {
+            it[PERIODICALS_CONTRACT_INFO] = Json.encodeToString(contractInfo)
+        }
+    }
+
+    suspend fun getSeasonInfo(): SeasonGradeAndGoals {
+        return dataStore.data.map {
+            it[SEASON_INFO]?.let { seasonInfoJson ->
+                try {
+                    Json.decodeFromString<SeasonGradeAndGoals>(seasonInfoJson)
+                } catch (e: Exception) {
+                    SeasonGradeAndGoals()
+                }
+            } ?: SeasonGradeAndGoals()
+        }.first()
+    }
+
+    suspend fun saveSeasonInfo(seasonInfo: SeasonGradeAndGoals) {
+        dataStore.edit {
+            it[SEASON_INFO] = Json.encodeToString(seasonInfo)
+        }
+    }
+
     suspend fun getUseAbsoluteTimeContract() = dataStore.data.map {
         it[USE_ABSOLUTE_TIME_CONTRACT] == true
     }.first()
@@ -316,6 +337,48 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveUseOfflineTime(useOfflineTime: Boolean) {
         dataStore.edit {
             it[USE_OFFLINE_TIME] = useOfflineTime
+        }
+    }
+
+    suspend fun getShowAvailableContracts() = dataStore.data.map {
+        it[SHOW_AVAILABLE_CONTRACTS] == true
+    }.first()
+
+    suspend fun saveShowAvailableContracts(showAvailableContracts: Boolean) {
+        dataStore.edit {
+            it[SHOW_AVAILABLE_CONTRACTS] = showAvailableContracts
+        }
+    }
+
+    suspend fun getNewContractsNotification() = dataStore.data.map {
+        it[NEW_CONTRACTS_NOTIFICATION] == true
+    }.first()
+
+
+    suspend fun saveNewContractsNotification(newContractsNotification: Boolean) {
+        dataStore.edit {
+            it[NEW_CONTRACTS_NOTIFICATION] = newContractsNotification
+        }
+    }
+
+    suspend fun getIncompleteContractsNotification() = dataStore.data.map {
+        it[INCOMPLETE_CONTRACTS_NOTIFICATION] == true
+    }.first()
+
+    suspend fun saveIncompleteContractsNotification(incompleteContractsNotification: Boolean) {
+        dataStore.edit {
+            it[INCOMPLETE_CONTRACTS_NOTIFICATION] = incompleteContractsNotification
+        }
+    }
+
+
+    suspend fun getShowSeasonInfo() = dataStore.data.map {
+        it[SHOW_SEASON_INFO] == true
+    }.first()
+
+    suspend fun saveShowSeasonInfo(showSeasonInfo: Boolean) {
+        dataStore.edit {
+            it[SHOW_SEASON_INFO] = showSeasonInfo
         }
     }
 
@@ -378,11 +441,27 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
+    suspend fun getCustomEggs(): List<CustomEggInfoEntry> {
+        return dataStore.data.map {
+            it[CUSTOM_EGGS]?.let { customEggsJson ->
+                try {
+                    Json.decodeFromString<List<CustomEggInfoEntry>>(customEggsJson)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList()
+        }.first()
+    }
+
+    suspend fun saveCustomEggs(customEggs: List<CustomEggInfoEntry>) {
+        dataStore.edit {
+            it[CUSTOM_EGGS] = Json.encodeToString(customEggs)
+        }
+    }
+
     suspend fun clearPreferences() {
         dataStore.edit { preferences ->
-            ALL_KEYS.forEach { key ->
-                preferences.remove(key)
-            }
+            preferences.clear()
         }
     }
 }

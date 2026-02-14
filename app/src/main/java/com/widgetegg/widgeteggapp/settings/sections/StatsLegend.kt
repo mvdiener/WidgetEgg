@@ -101,7 +101,9 @@ fun StatsDescriptions() {
             Badge List
             Trophy: Enlightenment Diamond completed
             NAH: Enlightenment max population reached
+            NAH (red): NAH including hab space colleggtible multipliers
             FED: All farms max population reached (not including virtue or contract colleggtibles)
+            FED (red): FED including hab space colleggtible multipliers
             ZLC: No legendary artifacts owned
             ALC: All types of legendary artifacts owned
             ASC: Maximum stars on all ships reached

@@ -6,6 +6,7 @@
     <string name="virtue_mission_widget_normal">Active virtue missions standard view</string>
     <string name="virtue_mission_widget_minimal">Active virtue missions minimal view</string>
     <string name="virtue_mission_widget_large">Active virtue missions detailed view</string>
-    <string name="contract_widget_active">Active contracts standard view</string>
+    <string name="contract_widget_active">Contracts minimal view</string>
+    <string name="contract_widget_large">Contracts detailed view with vertical scroll</string>
     <string name="stats_widget_normal">Egg Inc user stats</string>
 </resources>

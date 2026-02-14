@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,7 +42,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.Routes
-import kotlinx.coroutines.runBlocking
 import tools.utilities.getAsset
 import user.preferences.PreferencesDatastore
 
@@ -105,7 +105,8 @@ fun MainScreen(navController: NavController) {
 @Composable
 fun SignInContent(signInViewModel: SignInViewModel) {
     val context = LocalContext.current
-    runBlocking {
+
+    LaunchedEffect(Unit) {
         val preferences = PreferencesDatastore(context)
 
         val prefEiUsername = preferences.getEiUserName()
