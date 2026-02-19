@@ -14,6 +14,9 @@ import data.PROGRESS_BACKGROUND_COLOR
 import ei.Ei.Egg
 import java.io.File
 import java.io.InputStream
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.Locale
 
 data class ProgressData(
@@ -220,19 +223,16 @@ fun numberToString(amount: Double): String {
         units = units.drop(1).toTypedArray()
     }
 
-    var formatted = String.format(Locale.ROOT, "%.3g", number)
+    val symbols = DecimalFormatSymbols.getInstance()
+    val df = DecimalFormat().apply {
+        decimalFormatSymbols = symbols
+        roundingMode = RoundingMode.DOWN
+    }
 
-    // If using %.3g for the string format it _sometimes_ ends up in sci. notation
-    // It seems to only be cases where it's right below the threshold of the next power of ten
-    // e.g. 999,999,999,999.999999 becomes 1.00e+03B
-    // In this case, strip off the e+03 and bump the unit to the next tier letter
-
-    if (formatted.contains("e+")) {
-        val split = formatted.split("e+")
-        val unitIndex = units.indexOf(unit)
-        if ((unitIndex + 1) >= units.size) return "Inf"
-        unit = units[unitIndex + 1]
-        formatted = split[0]
+    val formatted = when {
+        number >= 100 -> df.apply { applyPattern("000") }.format(number)
+        number >= 10 -> df.apply { applyPattern("00.0") }.format(number)
+        else -> df.apply { applyPattern("0.00") }.format(number)
     }
 
     return "$formatted$unit"

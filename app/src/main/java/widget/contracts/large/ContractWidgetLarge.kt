@@ -79,6 +79,8 @@ import widget.WidgetUpdater
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
 import widget.contracts.active.LogoContentContracts
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import kotlin.text.isBlank
 
 class ContractWidgetLarge : GlanceAppWidget() {
@@ -989,7 +991,12 @@ fun SeasonContent(
         horizontalAlignment = Alignment.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val scoreText = numberToString(seasonData.seasonScore)
+        val scoreText = DecimalFormat("#,###").apply {
+            decimalFormatSymbols = DecimalFormatSymbols.getInstance()
+            maximumFractionDigits = 0
+            roundingMode = java.math.RoundingMode.DOWN
+        }.format(seasonData.seasonScore)
+
         Text(
             text = "Current score: $scoreText",
             style = TextStyle(color = ColorProvider(textColor))
