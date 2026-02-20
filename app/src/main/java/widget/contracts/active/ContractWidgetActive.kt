@@ -19,8 +19,10 @@ import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.LocalSize
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.currentState
@@ -61,6 +63,8 @@ import widget.contracts.ContractWidgetDataStorePreferencesKeys
 
 class ContractWidgetActive : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
+
+    override val sizeMode: SizeMode = SizeMode.Exact
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
@@ -218,7 +222,10 @@ fun ContractSingle(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 65, 9)
+        val widgetHeight = LocalSize.current.height.value
+        val eggSize = (widgetHeight * 1 / 3).toInt().coerceAtMost(68)
+        val progressSize = (eggSize * 2 / 15).coerceAtMost(9)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, eggSize, progressSize)
     }
 
     Text(
