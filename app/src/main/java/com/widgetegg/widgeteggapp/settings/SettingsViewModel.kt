@@ -231,7 +231,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             )
 
             val selection =
-                "${Calendars.CALENDAR_ACCESS_LEVEL} = ? AND ${Calendars.VISIBLE} = 1"
+                "${Calendars.CALENDAR_ACCESS_LEVEL} >= ? AND ${Calendars.VISIBLE} = 1"
             val selectionArgs = arrayOf(Calendars.CAL_ACCESS_CONTRIBUTOR.toString())
 
             val cursor: Cursor? =
@@ -244,8 +244,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 )
 
             cursor?.use {
-                val idIndex = it.getColumnIndexOrThrow(Calendars._ID)
-                val nameIndex = it.getColumnIndexOrThrow(Calendars.CALENDAR_DISPLAY_NAME)
+                val idIndex = it.getColumnIndex(Calendars._ID)
+                val nameIndex = it.getColumnIndex(Calendars.CALENDAR_DISPLAY_NAME)
                 while (it.moveToNext()) {
                     if (idIndex != -1 && nameIndex != -1) {
                         val calendarId = it.getLong(idIndex)
