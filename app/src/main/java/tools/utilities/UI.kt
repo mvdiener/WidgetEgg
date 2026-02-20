@@ -95,11 +95,11 @@ fun bitmapResize(image: Bitmap): Bitmap {
     val width = image.width
     val height = image.height
     val aspectRatio = width / height
-    val newWidth = 100
+    val newWidth = 50
     return if (width > newWidth) {
         val newHeight =
             if (height > width) ((newWidth * height) / width) else newWidth * aspectRatio
-        image.scale(newWidth, newHeight, false)
+        image.scale(newWidth, newHeight, true)
     } else {
         image
     }
