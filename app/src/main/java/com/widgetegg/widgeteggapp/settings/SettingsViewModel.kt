@@ -231,11 +231,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             )
 
             val selection =
-                "${Calendars.CALENDAR_ACCESS_LEVEL} = ?"
-            val selectionArgs = arrayOf(Calendars.CAL_ACCESS_OWNER.toString())
-
-            val projectionIdIndex = 0
-            val projectionDisplayNameIndex = 1
+                "${Calendars.CALENDAR_ACCESS_LEVEL} = ? AND ${Calendars.VISIBLE} = 1"
+            val selectionArgs = arrayOf(Calendars.CAL_ACCESS_CONTRIBUTOR.toString())
 
             val cursor: Cursor? =
                 contentResolver.query(
@@ -247,15 +244,18 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 )
 
             cursor?.use {
+                val idIndex = it.getColumnIndexOrThrow(Calendars._ID)
+                val nameIndex = it.getColumnIndexOrThrow(Calendars.CALENDAR_DISPLAY_NAME)
                 while (it.moveToNext()) {
-                    val calendarId = it.getLong(projectionIdIndex)
-                    val calendarDisplayName = it.getString(projectionDisplayNameIndex)
+                    if (idIndex != -1 && nameIndex != -1) {
+                        val calendarId = it.getLong(idIndex)
+                        val calendarDisplayName = it.getString(nameIndex)
 
-                    calendars.add(CalendarEntry(calendarId, calendarDisplayName))
+                        calendars.add(CalendarEntry(calendarId, calendarDisplayName))
+                    }
                 }
             }
 
-            cursor?.close()
             updateUserCalendars(calendars.toList())
         }
     }
