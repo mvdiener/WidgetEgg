@@ -271,7 +271,8 @@ class WidgetUpdater {
                         formatContractData(
                             contractInfo,
                             backup.userName,
-                            prefPeriodicalsContractInfo
+                            prefPeriodicalsContractInfo,
+                            prefContractInfo
                         )
                 }
 

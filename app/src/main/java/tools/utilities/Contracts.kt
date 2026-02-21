@@ -33,7 +33,8 @@ import kotlin.math.abs
 fun formatContractData(
     contractInfo: ContractData,
     userName: String,
-    periodicalsContracts: List<PeriodicalsContractInfoEntry>
+    periodicalsContracts: List<PeriodicalsContractInfoEntry>,
+    previousContractInfo: List<ContractInfoEntry>?,
 ): List<ContractInfoEntry> {
     return contractInfo.contracts.map { contract ->
         val gradeSpecsList = contract.contract.gradeSpecsList
@@ -86,6 +87,9 @@ fun formatContractData(
 
         val periodicalContract =
             periodicalsContracts.find { it.identifier == contract.contract.identifier }
+        val previousContract =
+            previousContractInfo?.find { it.identifier == contract.contract.identifier }
+
 
         ContractInfoEntry(
             stateId = UUID.randomUUID()
@@ -102,8 +106,9 @@ fun formatContractData(
             allGoalsAchieved = status?.allGoalsAchieved == true,
             clearedForExit = status?.clearedForExit == true,
             grade = contract.grade.number,
-            maxCoopSize = periodicalContract?.maxCoopSize ?: 0,
-            tokenTimerMinutes = periodicalContract?.tokenTimerMinutes ?: 0.0,
+            maxCoopSize = periodicalContract?.maxCoopSize ?: previousContract?.maxCoopSize ?: 0,
+            tokenTimerMinutes = periodicalContract?.tokenTimerMinutes
+                ?: previousContract?.tokenTimerMinutes ?: 0.0,
             isUltra = contract.contract.ccOnly,
             goals = formattedGoals,
             contributors = formattedContributors,
@@ -185,6 +190,7 @@ fun formatSeasonInfo(
     } ?: emptyList()
 
     return SeasonGradeAndGoals(
+        stateId = UUID.randomUUID().toString(),
         seasonName = seasonInfo.name,
         seasonScore = backup.contracts.lastCpi.seasonCxp,
         startingSeasonGrade = startingGrade,

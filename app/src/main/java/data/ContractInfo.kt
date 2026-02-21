@@ -88,6 +88,7 @@ data class ArchivedContractInfoEntry(
 
 @Serializable
 data class SeasonGradeAndGoals(
+    var stateId: String = "",
     var seasonName: String = "",
     var seasonScore: Double = 0.0,
     var startingSeasonGrade: PlayerGrade? = null,
