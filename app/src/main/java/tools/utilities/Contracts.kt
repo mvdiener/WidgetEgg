@@ -123,7 +123,11 @@ fun formatPeriodicalsContracts(
     contractsArchive: List<LocalContract>?,
     previousPeriodicalsData: List<PeriodicalsContractInfoEntry>?
 ): List<PeriodicalsContractInfoEntry> {
-    return periodicalsData.contracts.map { contract ->
+    val filtered = periodicalsData.contracts.filter { contract ->
+        contract.identifier != "first-contract"
+    }
+
+    return filtered.map { contract ->
         val gradeSpecs =
             contract.gradeSpecsList.find { gradeSpec -> gradeSpec.grade == backup.contracts.lastCpi.grade }
 

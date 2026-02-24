@@ -47,9 +47,9 @@ fun sendContractNotification(
 ): List<PeriodicalsContractInfoEntry> {
     if (!hasNotificationPermissions(context)) return periodicalsContracts
 
-    // Filter out first-contract and active contracts
+    // Filter out active contracts
     val filtered = periodicalsContracts.filter { periodical ->
-        (periodical.identifier !in contracts.map { it.identifier }) && periodical.identifier != "first-contract"
+        (periodical.identifier !in contracts.map { it.identifier })
     }
 
     return filtered.map { contract ->

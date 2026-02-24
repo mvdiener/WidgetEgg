@@ -177,7 +177,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
                 }
             } else {
                 val filteredPeriodicalsContracts =
-                    periodicalsContractData.filter { periodical -> (periodical.identifier !in contractData.map { it.identifier }) && periodical.identifier != "first-contract" }
+                    periodicalsContractData.filter { periodical -> (periodical.identifier !in contractData.map { it.identifier }) }
                 LazyColumn(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = GlanceModifier.fillMaxSize().background(backgroundColor)
