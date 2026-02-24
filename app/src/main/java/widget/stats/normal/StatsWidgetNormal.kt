@@ -185,7 +185,7 @@ fun NameAndRole(
         )
         Text(
             modifier = GlanceModifier.defaultWeight(),
-            text = truncateString(eiUserName, 15),
+            text = truncateString(eiUserName, 12),
             style = TextStyle(color = ColorProvider(textColor))
         )
         val farmerRole = getFarmerRole(statsInfo.farmerRoleId)
