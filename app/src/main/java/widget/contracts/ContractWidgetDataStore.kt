@@ -6,47 +6,88 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.ContractInfoEntry
+import data.CustomEggInfoEntry
+import data.PeriodicalsContractInfoEntry
+import data.SeasonGradeAndGoals
 import kotlinx.serialization.json.Json
 import widget.contracts.active.ContractWidgetActive
+import widget.contracts.large.ContractWidgetLarge
 
 data object ContractWidgetDataStorePreferencesKeys {
     val EID = stringPreferencesKey("widgetEid")
     val CONTRACT_INFO = stringPreferencesKey("widgetContractInfo")
+    val PERIODICALS_CONTRACT_INFO = stringPreferencesKey("widgetPeriodicalsContractInfo")
+    val SEASON_INFO = stringPreferencesKey("widgetSeasonInfo")
     val USE_ABSOLUTE_TIME = booleanPreferencesKey("useAbsoluteTime")
     val USE_OFFLINE_TIME = booleanPreferencesKey("useOfflineTime")
+    val SHOW_AVAILABLE_CONTRACTS = booleanPreferencesKey("showAvailableContracts")
+    val SHOW_SEASON_INFO = booleanPreferencesKey("showSeasonInfo")
     val OPEN_WASMEGG_DASHBOARD = booleanPreferencesKey("openWasmeggDashboard")
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
 }
 
 class ContractWidgetDataStore {
-    suspend fun setEid(context: Context, eid: String) {
-        val contractWidgetActiveIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
-        (contractWidgetActiveIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.EID] = eid
+    suspend fun updateContractWidgetDataStore(
+        context: Context,
+        eid: String? = null,
+        contractInfo: List<ContractInfoEntry>? = null,
+        periodicalsContractInfo: List<PeriodicalsContractInfoEntry>? = null,
+        seasonInfo: SeasonGradeAndGoals? = null,
+        useAbsoluteTime: Boolean? = null,
+        useOfflineTime: Boolean? = null,
+        showAvailableContracts: Boolean? = null,
+        showSeasonInfo: Boolean? = null,
+        openWasmeggDashboard: Boolean? = null,
+        backgroundColor: Color? = null,
+        textColor: Color? = null
+    ) {
+        val contractWidgetIds = getContractWidgetIds(context)
+
+        contractWidgetIds.forEach { glanceId ->
+            updateAppWidgetState(context, glanceId) { prefs ->
+                eid?.let { prefs[ContractWidgetDataStorePreferencesKeys.EID] = it }
+                contractInfo?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] =
+                        Json.encodeToString(it)
+                }
+                periodicalsContractInfo?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.PERIODICALS_CONTRACT_INFO] =
+                        Json.encodeToString(it)
+                }
+                seasonInfo?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.SEASON_INFO] =
+                        Json.encodeToString(it)
+                }
+                useAbsoluteTime?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] = it
+                }
+                useOfflineTime?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] = it
+                }
+                showAvailableContracts?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.SHOW_AVAILABLE_CONTRACTS] = it
+                }
+                showSeasonInfo?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.SHOW_SEASON_INFO] = it
+                }
+                openWasmeggDashboard?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] = it
+                }
+                backgroundColor?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
+                        it.toArgb()
+                }
+                textColor?.let {
+                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] = it.toArgb()
                 }
             }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setContractInfo(context: Context, contractInfo: List<ContractInfoEntry>) {
-        val contractString = Json.encodeToString(contractInfo)
-        val contractWidgetActiveIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
-        (contractWidgetActiveIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.CONTRACT_INFO] = contractString
-                }
-            }
+        }
 
         updateAllWidgets(context)
     }
@@ -59,80 +100,25 @@ class ContractWidgetDataStore {
         }
     }
 
-    suspend fun setUseAbsoluteTime(context: Context, useAbsoluteTime: Boolean) {
-        val contractWidgetActiveIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
-        (contractWidgetActiveIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME] =
-                        useAbsoluteTime
-                }
-            }
-
-        updateAllWidgets(context)
+    fun decodePeriodicalsContractInfo(contractJson: String): List<PeriodicalsContractInfoEntry> {
+        return try {
+            Json.decodeFromString<List<PeriodicalsContractInfoEntry>>(contractJson)
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
-    suspend fun setUseOfflineTime(context: Context, useOfflineTime: Boolean) {
-        val contractWidgetActiveIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
-        (contractWidgetActiveIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.USE_OFFLINE_TIME] =
-                        useOfflineTime
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setOpenWasmeggDashboard(context: Context, openWasmeggDashboard: Boolean) {
-        val contractWidgetActiveIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
-        (contractWidgetActiveIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.OPEN_WASMEGG_DASHBOARD] =
-                        openWasmeggDashboard
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setBackgroundColor(context: Context, backgroundColor: Color) {
-        val contractWidgetActiveIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
-        (contractWidgetActiveIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
-                        backgroundColor.toArgb()
-                }
-            }
-
-        updateAllWidgets(context)
-    }
-
-    suspend fun setTextColor(context: Context, textColor: Color) {
-        val contractWidgetActiveIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
-        (contractWidgetActiveIds)
-            .forEach { glanceId ->
-                updateAppWidgetState(context, glanceId) { prefs ->
-                    prefs[ContractWidgetDataStorePreferencesKeys.WIDGET_TEXT_COLOR] =
-                        textColor.toArgb()
-                }
-            }
-
-        updateAllWidgets(context)
+    fun decodeSeasonInfo(seasonInfoJson: String): SeasonGradeAndGoals {
+        return try {
+            Json.decodeFromString<SeasonGradeAndGoals>(seasonInfoJson)
+        } catch (e: Exception) {
+            SeasonGradeAndGoals()
+        }
     }
 
     suspend fun clearAllData(context: Context) {
-        val contractWidgetActiveIds =
-            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
-        (contractWidgetActiveIds)
+        val contractWidgetIds = getContractWidgetIds(context)
+        (contractWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
                     prefs.clear()
@@ -142,7 +128,16 @@ class ContractWidgetDataStore {
         updateAllWidgets(context)
     }
 
+    private suspend fun getContractWidgetIds(context: Context): List<GlanceId> {
+        val contractWidgetActiveIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetActive::class.java)
+        val contractWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(ContractWidgetLarge::class.java)
+        return contractWidgetActiveIds + contractWidgetLargeIds
+    }
+
     private suspend fun updateAllWidgets(context: Context) {
         ContractWidgetActive().updateAll(context)
+        ContractWidgetLarge().updateAll(context)
     }
 }

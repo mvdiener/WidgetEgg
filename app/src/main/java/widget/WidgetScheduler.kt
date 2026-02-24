@@ -2,7 +2,9 @@ package widget
 
 import android.content.Context
 import androidx.work.BackoffPolicy
+import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
@@ -13,10 +15,13 @@ class WidgetScheduler() {
         // Update widget every 15 minutes
         val workRequest = PeriodicWorkRequestBuilder<WidgetWorker>(15, TimeUnit.MINUTES)
             .setBackoffCriteria(BackoffPolicy.LINEAR, 45, TimeUnit.SECONDS)
+            .setConstraints(
+                Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
+            )
             .build()
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "widgetegg_worker",
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE,
             workRequest
         )
     }

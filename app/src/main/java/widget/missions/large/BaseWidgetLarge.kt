@@ -417,6 +417,7 @@ fun TankInfoContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val capacity = getTankCapacity(tankInfo.level)
+            val fuelCount = tankInfo.fuelLevels.size
             tankInfo.fuelLevels.forEach { fuel ->
                 val eggName = getEggName(fuel.eggId)
                 val eggBitmap = bitmapResize(
@@ -432,10 +433,11 @@ fun TankInfoContent(
                     modifier = GlanceModifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val eggDp = if (fuelCount <= 4) 20.dp else 17.dp
                     Image(
                         provider = ImageProvider(eggBitmap),
                         contentDescription = "Egg icon",
-                        modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
+                        modifier = GlanceModifier.size(eggDp).padding(end = 5.dp)
                     )
                     LinearProgressIndicator(
                         modifier = GlanceModifier.height(5.dp).defaultWeight(),

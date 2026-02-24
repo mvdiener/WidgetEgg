@@ -1,5 +1,6 @@
 package com.widgetegg.widgeteggapp.settings.sections
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +19,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.settings.ScrollBottomPadding
 import com.widgetegg.widgeteggapp.settings.SettingsHeader
 import com.widgetegg.widgeteggapp.settings.SettingsHeaderAndDescription
@@ -28,10 +33,11 @@ import com.widgetegg.widgeteggapp.settings.settingsRowModifier
 import com.widgetegg.widgeteggapp.settings.widgetGroupingModifier
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import tools.utilities.hasNotificationPermissions
 import user.preferences.PreferencesDatastore
 
 @Composable
-fun Contracts(navController: NavController) {
+fun Contracts(navController: NavController, activity: MainActivity) {
     val settingsViewModel = viewModel<SettingsViewModel>()
 
     val context = LocalContext.current
@@ -41,6 +47,26 @@ fun Contracts(navController: NavController) {
         settingsViewModel.updateUseAbsoluteTimeContract(preferences.getUseAbsoluteTimeContract())
         settingsViewModel.updateUseOfflineTime(preferences.getUseOfflineTime())
         settingsViewModel.updateOpenWasmeggDashboard(preferences.getOpenWasmeggDashboard())
+        settingsViewModel.updateShowAvailableContracts(preferences.getShowAvailableContracts())
+        settingsViewModel.updateNewContractsNotification(preferences.getNewContractsNotification())
+        settingsViewModel.updateIncompleteContractsNotification(preferences.getIncompleteContractsNotification())
+        settingsViewModel.updateShowSeasonInfo(preferences.getShowSeasonInfo())
+    }
+
+    val hasNotificationPermissions = hasNotificationPermissions(context)
+
+    if (!hasNotificationPermissions) {
+        settingsViewModel.updateNewContractsNotification(false)
+        settingsViewModel.updateIncompleteContractsNotification(false)
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        val onResumeNotificationPermissions = hasNotificationPermissions(context)
+
+        if (!onResumeNotificationPermissions) {
+            settingsViewModel.updateNewContractsNotification(false)
+            settingsViewModel.updateIncompleteContractsNotification(false)
+        }
     }
 
     Column(
@@ -61,6 +87,7 @@ fun Contracts(navController: NavController) {
         ) {
             Text(text = "Contract Settings", fontSize = TextUnit(24f, TextUnitType.Sp))
             ContractsGeneralGroup(settingsViewModel)
+            LargeContractWidgetGroup(settingsViewModel, context, activity)
             ScrollBottomPadding()
         }
     }
@@ -165,6 +192,177 @@ fun OpenWasmeggDashboardRow(settingsViewModel: SettingsViewModel) {
                 onCheckedChange = {
                     scope.launch {
                         settingsViewModel.updateOpenWasmeggDashboard(!settingsViewModel.openWasmeggDashboard)
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun LargeContractWidgetGroup(
+    settingsViewModel: SettingsViewModel,
+    context: Context,
+    activity: MainActivity
+) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(text = "Large Contract Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
+        ShowAvailableContractsRow(settingsViewModel)
+        SendNotificationsForNewContractsRow(settingsViewModel, context, activity)
+        SendNotificationsForIncompleteContractsRow(settingsViewModel, context, activity)
+        ShowSeasonInfoRow(settingsViewModel)
+    }
+}
+
+@Composable
+fun ShowAvailableContractsRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Show available contracts",
+                "Vertically scroll through available contracts, in addition to active contracts.",
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.showAvailableContracts,
+                onCheckedChange = {
+                    scope.launch {
+                        settingsViewModel.updateShowAvailableContracts(!settingsViewModel.showAvailableContracts)
+                        if (!settingsViewModel.showAvailableContracts) {
+                            settingsViewModel.updateNewContractsNotification(false)
+                            settingsViewModel.updateIncompleteContractsNotification(false)
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun SendNotificationsForNewContractsRow(
+    settingsViewModel: SettingsViewModel,
+    context: Context,
+    activity: MainActivity
+) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Notify on new contracts",
+                "Timeliness of notification not guaranteed. Previously denied notification permissions need to be manually re-enabled within app settings.",
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.newContractsNotification,
+                onCheckedChange = {
+                    if (hasNotificationPermissions(context)) {
+                        scope.launch {
+                            settingsViewModel.updateNewContractsNotification(!settingsViewModel.newContractsNotification)
+                        }
+                    } else {
+                        ActivityCompat.requestPermissions(
+                            activity, arrayOf(
+                                android.Manifest.permission.POST_NOTIFICATIONS
+                            ),
+                            101
+                        )
+                    }
+                },
+                enabled = settingsViewModel.showAvailableContracts
+            )
+        }
+    }
+}
+
+@Composable
+fun SendNotificationsForIncompleteContractsRow(
+    settingsViewModel: SettingsViewModel,
+    context: Context,
+    activity: MainActivity
+) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Notify on incomplete contracts",
+                "Timeliness of notification not guaranteed. Previously denied notification permissions need to be manually re-enabled within app settings.",
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.incompleteContractsNotification,
+                onCheckedChange = {
+                    if (hasNotificationPermissions(context)) {
+                        scope.launch {
+                            settingsViewModel.updateIncompleteContractsNotification(!settingsViewModel.incompleteContractsNotification)
+                        }
+                    } else {
+                        ActivityCompat.requestPermissions(
+                            activity, arrayOf(
+                                android.Manifest.permission.POST_NOTIFICATIONS
+                            ),
+                            101
+                        )
+                    }
+                },
+                enabled = settingsViewModel.showAvailableContracts
+            )
+        }
+    }
+}
+
+@Composable
+fun ShowSeasonInfoRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Show season progress",
+                null,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.showSeasonInfo,
+                onCheckedChange = {
+                    scope.launch {
+                        settingsViewModel.updateShowSeasonInfo(!settingsViewModel.showSeasonInfo)
                     }
                 }
             )

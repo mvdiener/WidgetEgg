@@ -1,25 +1,31 @@
 package tools.utilities
 
+import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
-import androidx.core.text.color
 import data.NUMBER_UNITS
-import ei.Ei
+import data.PROGRESS_BACKGROUND_COLOR
+import ei.Ei.Egg
+import java.io.File
 import java.io.InputStream
+import java.math.RoundingMode
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.Locale
 
-data class CircularProgress(
+data class ProgressData(
     val progress: Float,
     val color: Int,
 )
 
 fun createCircularProgressBarBitmap(
-    progressData: List<CircularProgress>,
+    progressData: List<ProgressData>,
     size: Int,
     width: Float
 ): Bitmap {
@@ -33,7 +39,7 @@ fun createCircularProgressBarBitmap(
     }
 
     // Background gray circle
-    paint.color = "#464646".toColorInt()
+    paint.color = PROGRESS_BACKGROUND_COLOR.toColorInt()
     val radius = size / 2f - paint.strokeWidth / 2
     canvas.drawCircle(size / 2f, size / 2f, radius, paint)
 
@@ -89,10 +95,11 @@ fun bitmapResize(image: Bitmap): Bitmap {
     val width = image.width
     val height = image.height
     val aspectRatio = width / height
-    val newWidth = 100
+    val newWidth = 50
     return if (width > newWidth) {
-        val newHeight = newWidth * aspectRatio
-        image.scale(newWidth, newHeight, false)
+        val newHeight =
+            if (height > width) ((newWidth * height) / width) else newWidth * aspectRatio
+        image.scale(newWidth, newHeight, true)
     } else {
         image
     }
@@ -106,8 +113,31 @@ fun getAsset(assetManager: AssetManager, path: String): InputStream {
     }
 }
 
+fun getColleggtibleBitmap(assetManager: AssetManager, eggName: String, context: Context): Bitmap {
+    val eggAsset = try {
+        assetManager.open("eggs/$eggName.png")
+    } catch (_: Exception) {
+        null
+    }
+
+    return try {
+        if (eggAsset != null) {
+            BitmapFactory.decodeStream(eggAsset)
+        } else {
+            val file = File(context.cacheDir, "$eggName.png")
+            if (file.exists()) {
+                bitmapResize(BitmapFactory.decodeFile(file.absolutePath))
+            } else {
+                BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
+            }
+        }
+    } catch (_: Exception) {
+        BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
+    }
+}
+
 fun getEggName(eggId: Int): String {
-    val eggName = Ei.Egg.forNumber(eggId)?.name?.lowercase()
+    val eggName = Egg.forNumber(eggId)?.name?.lowercase()
     return if (eggName.isNullOrBlank()) {
         "egg_unknown"
     } else {
@@ -115,8 +145,8 @@ fun getEggName(eggId: Int): String {
     }
 }
 
-fun getImageNameFromAfxId(afxId: Int): String {
-    return when (afxId) {
+fun getImageNameFromAfxId(afxId: Int, level: Int? = null): String {
+    val name = when (afxId) {
         23 -> "afx_puzzle_cube_4"
         0 -> "afx_lunar_totem_4"
         6 -> "afx_demeters_necklace_4"
@@ -151,6 +181,7 @@ fun getImageNameFromAfxId(afxId: Int): String {
         17 -> "afx_gold_meteorite_3"
         18 -> "afx_tau_ceti_geode_3"
         43 -> "afx_solar_titanium_3"
+        // Fragments
         2 -> "afx_tachyon_stone_1"
         44 -> "afx_dilithium_stone_1"
         45 -> "afx_shell_stone_1"
@@ -163,6 +194,14 @@ fun getImageNameFromAfxId(afxId: Int): String {
         52 -> "afx_clarity_stone_1"
         else -> ""
     }
+
+    return getImageNameWithAfxLevel(name, level)
+}
+
+private fun getImageNameWithAfxLevel(afxName: String, level: Int? = null): String {
+    if (level == null || afxName.isBlank()) return afxName
+    val afxBaseName = afxName.substringBeforeLast("_")
+    return "${afxBaseName}_${level + 1}"
 }
 
 fun numberToString(amount: Double): String {
@@ -184,20 +223,23 @@ fun numberToString(amount: Double): String {
         units = units.drop(1).toTypedArray()
     }
 
-    var formatted = String.Companion.format(Locale.ROOT, "%.3g", number)
+    val symbols = DecimalFormatSymbols.getInstance()
+    val df = DecimalFormat().apply {
+        decimalFormatSymbols = symbols
+        roundingMode = RoundingMode.DOWN
+    }
 
-    // If using %.3g for the string format it _sometimes_ ends up in sci. notation
-    // It seems to only be cases where it's right below the threshold of the next power of ten
-    // e.g. 999,999,999,999.999999 becomes 1.00e+03B
-    // In this case, strip off the e+03 and bump the unit to the next tier letter
-
-    if (formatted.contains("e+")) {
-        val split = formatted.split("e+")
-        val unitIndex = units.indexOf(unit)
-        if ((unitIndex + 1) >= units.size) return "Inf"
-        unit = units[unitIndex + 1]
-        formatted = split[0]
+    val formatted = when {
+        number >= 100 -> df.apply { applyPattern("000") }.format(number)
+        number >= 10 -> df.apply { applyPattern("00.0") }.format(number)
+        else -> df.apply { applyPattern("0.00") }.format(number)
     }
 
     return "$formatted$unit"
+}
+
+fun truncateString(text: String, maxLength: Int): String {
+    if (text.length <= maxLength) return text
+
+    return text.take(maxLength - 3) + "..."
 }

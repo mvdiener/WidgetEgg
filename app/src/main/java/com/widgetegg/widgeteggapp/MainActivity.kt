@@ -19,6 +19,7 @@ import com.widgetegg.widgeteggapp.settings.sections.Missions
 import com.widgetegg.widgeteggapp.settings.sections.Stats
 import com.widgetegg.widgeteggapp.settings.sections.StatsLegend
 import com.widgetegg.widgeteggapp.ui.theme.WidgetEggTheme
+import tools.utilities.createNotificationChannel
 import widget.WidgetScheduler
 
 class MainActivity : ComponentActivity() {
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
         val activity = this
 
         WidgetScheduler().scheduleUpdate(this.applicationContext)
+        createNotificationChannel(this.applicationContext)
 
         enableEdgeToEdge()
         setContent {
@@ -47,7 +49,7 @@ class MainActivity : ComponentActivity() {
                                 General(navController)
                             }
                             composable(Routes.contractsSettingsScreen) {
-                                Contracts(navController)
+                                Contracts(navController, activity)
                             }
                             composable(Routes.missionsSettingsScreen) {
                                 Missions(navController, activity)

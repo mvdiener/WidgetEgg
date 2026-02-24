@@ -6,8 +6,12 @@ const val API_ROOT = "https://www.auxbrain.com"
 const val MISSION_ENDPOINT = "${API_ROOT}/ei_afx/get_active_missions_v2"
 const val BACKUP_ENDPOINT = "${API_ROOT}/ei/bot_first_contact"
 const val CONTRACT_ENDPOINT = "${API_ROOT}/ei/coop_status_bot"
+const val PERIODICALS_ENDPOINT = "${API_ROOT}/ei/get_periodicals"
+const val CONTRACTS_ARCHIVE_ENDPOINT = "${API_ROOT}/ei_ctx/get_contracts_archive"
 
-const val CURRENT_CLIENT_VERSION = 71
+const val CURRENT_CLIENT_VERSION = 99
+
+const val CONTRACT_NOTIFICATION_CHANNEL_ID = "widgetegg_contract_notifications"
 
 val DEFAULT_WIDGET_BACKGROUND_COLOR = Color(0xff181818)
 val DEFAULT_WIDGET_TEXT_COLOR = Color.White
@@ -188,3 +192,14 @@ const val MAX_FARM_POP = 14175000000L
 
 // Pop w/ leggy gusset and 3 t4 clarity stones
 const val MAX_ENLIGHTEN_FARM_POP = 19845000000L
+
+val PROBLEMATIC_BROWSERS = arrayOf(
+    "org.mozilla.firefox",
+    "com.duckduckgo.mobile.android"
+)
+
+const val DEFAULT_BROWSER = "com.android.chrome"
+
+const val PROGRESS_BACKGROUND_COLOR = "#464646"
+const val CONTRACT_PROGRESS_COLOR = "#008531"
+const val CONTRACT_OFFLINE_PROGRESS_COLOR = "#51dda8"

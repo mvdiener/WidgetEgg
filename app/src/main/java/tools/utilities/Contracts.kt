@@ -1,93 +1,238 @@
 package tools.utilities
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RadialGradient
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
+import data.ArchivedContractInfoEntry
+import data.CONTRACT_OFFLINE_PROGRESS_COLOR
+import data.CONTRACT_PROGRESS_COLOR
+import data.ContractArtifact
 import data.ContractData
 import data.ContractInfoEntry
+import data.ContractStone
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
-import ei.Ei
+import data.PeriodicalsContractInfoEntry
+import data.PeriodicalsData
+import data.SeasonGradeAndGoals
+import ei.Ei.Backup
 import ei.Ei.ContractCoopStatusResponse.ContributionInfo
+import ei.Ei.LocalContract
+import ei.Ei.RewardType
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
 import kotlin.math.abs
 
-fun formatContractData(contractInfo: ContractData): List<ContractInfoEntry> {
-    var formattedContracts: List<ContractInfoEntry> = emptyList()
-
-    contractInfo.contracts.forEach { contract ->
-        var formattedGoals: List<GoalInfoEntry> = emptyList()
+fun formatContractData(
+    contractInfo: ContractData,
+    userName: String,
+    periodicalsContracts: List<PeriodicalsContractInfoEntry>,
+    previousContractInfo: List<ContractInfoEntry>?,
+): List<ContractInfoEntry> {
+    return contractInfo.contracts.map { contract ->
         val gradeSpecsList = contract.contract.gradeSpecsList
         val gradeSpecs = gradeSpecsList.find { gradeSpec -> gradeSpec.grade == contract.grade }
 
-        gradeSpecs?.goalsList?.forEach { goal ->
-            formattedGoals = formattedGoals.plus(
-                GoalInfoEntry(
-                    goalAmount = goal.targetAmount,
-                    reward = goal.rewardType,
-                    rewardSubType = goal.rewardSubType
-                )
+        val formattedGoals = gradeSpecs?.goalsList?.map { goal ->
+            GoalInfoEntry(
+                amount = goal.targetAmount,
+                reward = goal.rewardType,
+                rewardSubType = goal.rewardSubType,
+                rewardAmount = goal.rewardAmount
             )
-        }
+        } ?: emptyList()
 
         val status =
             contractInfo.contractStatuses.find { contractStatus ->
                 contractStatus.contractIdentifier == contract.contract.identifier
             }
 
-        var formattedContributors: List<ContributorInfoEntry> = emptyList()
-        status?.contributorsList?.filterNot { contributor ->
+        val formattedContributors = status?.contributorsList?.filterNot { contributor ->
             // Remove any [departed] users stuck from contract creation
-            contributor.userName == "[departed]" && contributor.contributionAmount == 0.0 && contributor.contributionRate == 0.0 && contributor.uuid.isNullOrEmpty()
-        }?.forEach { contributor ->
-            formattedContributors = formattedContributors.plus(
-                ContributorInfoEntry(
-                    eggsDelivered = contributor.contributionAmount,
-                    eggRatePerSecond = contributor.contributionRate,
-                    offlineTimeSeconds = getOfflineTime(contributor)
-                )
+            contributor.userName == "[departed]" && contributor.uuid.isNullOrEmpty()
+        }?.map { contributor ->
+            ContributorInfoEntry(
+                eggsDelivered = contributor.contributionAmount,
+                eggRatePerSecond = contributor.contributionRate,
+                offlineTimeSeconds = getOfflineTime(contributor, true),
+                offlineTimeSecondsIgnoringSilos = getOfflineTime(contributor, false),
+                isSelf = contributor.userName == userName
             )
-        }
+        } ?: emptyList()
 
-        formattedContracts = formattedContracts.plus(
-            ContractInfoEntry(
-                stateId = UUID.randomUUID()
-                    .toString(), // Probably not necessary, but used in the off chance server data is not different from the last api call
-                eggId = contract.contract.egg.number,
-                customEggId = contract.contract.customEggId,
-                name = contract.contract.name,
-                seasonName = formatSeasonName(contract.contract.seasonId),
-                isLegacy = contract.contract.leggacy,
-                eggsDelivered = status?.totalAmount ?: 0.0,
-                timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
-                allGoalsAchieved = status?.allGoalsAchieved == true,
-                clearedForExit = status?.clearedForExit == true,
-                goals = formattedGoals,
-                contributors = formattedContributors
+        val contractArtifacts = status?.contributorsList?.find { contributor ->
+            contributor.userName == userName
+        }?.farmInfo?.equippedArtifactsList?.map { artifact ->
+            val stones = artifact.stonesList.map { stone ->
+                ContractStone(
+                    name = stone.name.number,
+                    level = stone.level.number
+                )
+            }
+
+            ContractArtifact(
+                name = artifact.spec.name.number,
+                rarity = artifact.spec.rarity.number,
+                level = artifact.spec.level.number,
+                stones = stones
             )
+        } ?: emptyList()
+
+        val periodicalContract =
+            periodicalsContracts.find { it.identifier == contract.contract.identifier }
+        val previousContract =
+            previousContractInfo?.find { it.identifier == contract.contract.identifier }
+
+
+        ContractInfoEntry(
+            stateId = UUID.randomUUID()
+                .toString(), // Probably not necessary, but used in the off chance server data is not different from the last api call
+            eggId = contract.contract.egg.number,
+            customEggId = contract.contract.customEggId,
+            name = contract.contract.name,
+            identifier = contract.contract.identifier,
+            coopName = contract.coopIdentifier,
+            seasonName = formatSeasonName(contract.contract.seasonId),
+            isLegacy = contract.contract.leggacy,
+            eggsDelivered = status?.totalAmount ?: 0.0,
+            timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
+            allGoalsAchieved = status?.allGoalsAchieved == true,
+            clearedForExit = status?.clearedForExit == true,
+            grade = contract.grade.number,
+            maxCoopSize = periodicalContract?.maxCoopSize ?: previousContract?.maxCoopSize ?: 0,
+            tokenTimerMinutes = periodicalContract?.tokenTimerMinutes
+                ?: previousContract?.tokenTimerMinutes ?: 0.0,
+            isUltra = contract.contract.ccOnly,
+            goals = formattedGoals,
+            contributors = formattedContributors,
+            contractArtifacts = contractArtifacts
         )
     }
-
-    return formattedContracts
 }
 
-fun getContractGoalPercentComplete(
-    delivered: Double,
-    goal: Double
-): Float {
-    return if (delivered >= goal) {
-        1F
-    } else {
-        (delivered / goal).toFloat()
+fun formatPeriodicalsContracts(
+    periodicalsData: PeriodicalsData,
+    backup: Backup,
+    contractsArchive: List<LocalContract>?,
+    previousPeriodicalsData: List<PeriodicalsContractInfoEntry>?
+): List<PeriodicalsContractInfoEntry> {
+    val filtered = periodicalsData.contracts.filter { contract ->
+        contract.identifier != "first-contract"
+    }
+
+    return filtered.map { contract ->
+        val gradeSpecs =
+            contract.gradeSpecsList.find { gradeSpec -> gradeSpec.grade == backup.contracts.lastCpi.grade }
+
+        val formattedGoals = gradeSpecs?.goalsList?.map { goal ->
+            GoalInfoEntry(
+                amount = goal.targetAmount,
+                reward = goal.rewardType,
+                rewardSubType = goal.rewardSubType,
+                rewardAmount = goal.rewardAmount
+            )
+        } ?: emptyList()
+
+
+        val previousPeriodicalContract =
+            previousPeriodicalsData?.find { it.identifier == contract.identifier }
+        val archivedContract = if (!contractsArchive.isNullOrEmpty()) {
+            getArchivedContract(contract.identifier, contractsArchive)
+        } else {
+            previousPeriodicalContract?.archivedContractInfo
+        }
+
+
+        PeriodicalsContractInfoEntry(
+            stateId = UUID.randomUUID().toString(),
+            eggId = contract.egg.number,
+            customEggId = contract.customEggId,
+            name = contract.name,
+            identifier = contract.identifier,
+            seasonName = formatSeasonName(contract.seasonId),
+            isLegacy = contract.leggacy,
+            grade = gradeSpecs?.grade?.number ?: 0,
+            maxCoopSize = contract.maxCoopSize,
+            coopLengthSeconds = contract.lengthSeconds,
+            tokenTimerMinutes = contract.minutesPerToken,
+            isUltra = contract.ccOnly,
+            notificationSent = previousPeriodicalContract?.notificationSent ?: false,
+            goals = formattedGoals,
+            archivedContractInfo = archivedContract
+        )
     }
 }
 
-fun getOfflineEggsDelivered(contract: ContractInfoEntry): Double {
-    return contract.contributors.sumOf { contributor ->
+fun formatSeasonInfo(
+    periodicalsData: PeriodicalsData,
+    backup: Backup,
+): SeasonGradeAndGoals {
+    val seasonInfo = periodicalsData.seasonInfo
+    val startingGrade =
+        backup.contracts.lastCpi.seasonProgressList.find { it.seasonId == seasonInfo.id }?.startingGrade
+
+    val goalSet = if (startingGrade != null) {
+        seasonInfo.gradeGoalsList.find { it.grade == startingGrade }
+    } else {
+        null
+    }
+
+    val formattedGoals = goalSet?.goalsList?.map { goal ->
+        GoalInfoEntry(
+            amount = goal.cxp,
+            reward = goal.rewardType,
+            rewardSubType = goal.rewardSubType,
+            rewardAmount = goal.rewardAmount
+        )
+    } ?: emptyList()
+
+    return SeasonGradeAndGoals(
+        stateId = UUID.randomUUID().toString(),
+        seasonName = seasonInfo.name,
+        seasonScore = backup.contracts.lastCpi.seasonCxp,
+        startingSeasonGrade = startingGrade,
+        goals = formattedGoals
+    )
+}
+
+fun getArchivedContract(
+    contractIdentifier: String,
+    contractsArchive: List<LocalContract>
+): ArchivedContractInfoEntry? {
+    val archivedContract =
+        contractsArchive.find { it.contract.identifier == contractIdentifier }
+
+    return if (archivedContract != null) {
+        ArchivedContractInfoEntry(
+            numOfGoalsAchieved = archivedContract.numGoalsAchieved,
+            pointsReplay = archivedContract.pointsReplay,
+            lastScore = archivedContract.evaluation.cxp
+        )
+    } else {
+        null
+    }
+}
+
+fun getGoalPercentComplete(
+    progress: Double,
+    goal: Double
+): Float {
+    return if (progress >= goal) {
+        1F
+    } else {
+        (progress / goal).toFloat()
+    }
+}
+
+fun getOfflineEggsDelivered(contributors: List<ContributorInfoEntry>): Double {
+    return contributors.sumOf { contributor ->
         contributor.offlineTimeSeconds * contributor.eggRatePerSecond
     }
 }
@@ -97,13 +242,33 @@ fun createContractCircularProgressBarBitmap(
     offlineProgress: Float?,
     size: Int
 ): Bitmap {
-    val totalProgressColor = "#008531".toColorInt()
-    val offlineProgressColor = "#51dda8".toColorInt()
-    val progressData = mutableListOf(CircularProgress(totalProgress, totalProgressColor))
+    val totalProgressColor = CONTRACT_PROGRESS_COLOR.toColorInt()
+    val offlineProgressColor = CONTRACT_OFFLINE_PROGRESS_COLOR.toColorInt()
+    val progressData = mutableListOf(ProgressData(totalProgress, totalProgressColor))
     if (offlineProgress != null) {
-        progressData.add(CircularProgress(offlineProgress, offlineProgressColor))
+        progressData.add(ProgressData(offlineProgress, offlineProgressColor))
     }
     return createCircularProgressBarBitmap(progressData, size, 4f)
+}
+
+fun createGlowBitmap(rarity: Int, sizePx: Int = 100): Bitmap {
+    val bitmap = createBitmap(sizePx, sizePx)
+    val canvas = Canvas(bitmap)
+    val center = sizePx / 2f
+    val color = getRarityColor(rarity)
+    val stops = floatArrayOf(0.0f, 0.8f, 1.0f)
+
+    val paint = Paint().apply {
+        isAntiAlias = true
+        shader = RadialGradient(
+            center, center, center,
+            intArrayOf(color, (color and 0x00FFFFFF) or (0x66 shl 24), Color.Transparent.toArgb()),
+            stops,
+            android.graphics.Shader.TileMode.CLAMP
+        )
+    }
+    canvas.drawCircle(center, center, center, paint)
+    return bitmap
 }
 
 // Returns Pair<timeText, isOnTrack>
@@ -118,12 +283,12 @@ fun getContractDurationRemaining(
         return Pair("Finished!", isOnTrack)
     }
 
-    val totalEggsNeeded = contract.goals.maxOf { goal -> goal.goalAmount }
+    val totalEggsNeeded = contract.goals.maxOfOrNull { goal -> goal.amount } ?: 0.0
     val totalEggsDelivered = contract.eggsDelivered
     var offlineEggsDelivered = 0.0
 
     if (useOfflineTime) {
-        offlineEggsDelivered = getOfflineEggsDelivered(contract)
+        offlineEggsDelivered = getOfflineEggsDelivered(contract.contributors)
     }
 
     val remainingEggsNeeded = totalEggsNeeded - totalEggsDelivered - offlineEggsDelivered
@@ -143,6 +308,47 @@ fun getContractDurationRemaining(
     val timeText = formatTimeText(timeRemainingSeconds, useAbsoluteTime, use24HrFormat)
 
     return Pair(timeText, isOnTrack)
+}
+
+fun getIndividualEggsPerHour(contributor: ContributorInfoEntry): String {
+    val eggsPerHour = contributor.eggRatePerSecond * 60 * 60
+    return "${numberToString(eggsPerHour)}/h"
+}
+
+fun getCoopEggsPerHour(contributors: List<ContributorInfoEntry>): String {
+    val totalEggRatePerSecond = contributors.sumOf { contributor -> contributor.eggRatePerSecond }
+    val totalEggRatePerHour = totalEggRatePerSecond * 60 * 60
+    return "${numberToString(totalEggRatePerHour)}/h"
+}
+
+fun getOfflineTimeHoursAndMinutes(offlineTimeSeconds: Double): String {
+    if (offlineTimeSeconds <= 0) return "0m"
+
+    val hours = (offlineTimeSeconds / 3600).toInt()
+    val minutes = ((offlineTimeSeconds % 3600) / 60).toInt()
+
+    return when {
+        hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+        hours > 0 -> "${hours}h"
+        else -> "${minutes}m"
+    }
+}
+
+fun getContractTotalTimeText(seconds: Double): String {
+    if (seconds <= 0) return "0s"
+
+    val days = (seconds / 86400).toInt()
+    val hours = ((seconds % 86400) / 3600).toInt()
+    val minutes = ((seconds % 3600) / 60).toInt()
+    val remainingSeconds = (seconds % 60).toInt()
+
+    val parts = mutableListOf<String>()
+    if (days > 0) parts.add("${days}d")
+    if (hours > 0) parts.add("${hours}h")
+    if (minutes > 0) parts.add("${minutes}m")
+    if (remainingSeconds > 0 || parts.isEmpty()) parts.add("${remainingSeconds}s")
+
+    return parts.joinToString(" ")
 }
 
 fun getScrollName(contract: ContractInfoEntry, timeText: String): String {
@@ -171,17 +377,21 @@ fun getContractTimeTextColor(
     }
 }
 
+fun formatTokenTimeText(tokenTimerMinutes: Double): String {
+    return "${tokenTimerMinutes.toInt()}m"
+}
+
 fun getRewardIconPath(goal: GoalInfoEntry): String {
     return when (goal.reward) {
-        Ei.RewardType.GOLD -> "other/icon_golden_egg.png"
-        Ei.RewardType.SOUL_EGGS -> "eggs/egg_soul.png"
-        Ei.RewardType.EGGS_OF_PROPHECY -> "eggs/egg_of_prophecy.png"
-        Ei.RewardType.EPIC_RESEARCH_ITEM -> getEpicResearchImagePath(goal)
-        Ei.RewardType.PIGGY_FILL -> "other/icon_piggy_golden_egg.png"
-        Ei.RewardType.PIGGY_LEVEL_BUMP -> "other/icon_piggy_level_up.png"
-        Ei.RewardType.BOOST -> getBoostImagePath(goal)
-        Ei.RewardType.ARTIFACT_CASE -> "other/icon_afx_chest_3.png"
-        Ei.RewardType.SHELL_SCRIPT -> "other/icon_shell_script.png"
+        RewardType.GOLD -> "other/icon_golden_egg.png"
+        RewardType.SOUL_EGGS -> "eggs/egg_soul.png"
+        RewardType.EGGS_OF_PROPHECY -> "eggs/egg_of_prophecy.png"
+        RewardType.EPIC_RESEARCH_ITEM -> getEpicResearchImagePath(goal)
+        RewardType.PIGGY_FILL -> "other/icon_piggy_golden_egg.png"
+        RewardType.PIGGY_LEVEL_BUMP -> "other/icon_piggy_level_up.png"
+        RewardType.BOOST -> getBoostImagePath(goal)
+        RewardType.ARTIFACT_CASE -> "other/icon_afx_chest_3.png"
+        RewardType.SHELL_SCRIPT -> "other/icon_shell_script.png"
         else -> "eggs/egg_unknown.png"
     }
 }
@@ -205,9 +415,13 @@ private fun getBoostImagePath(goal: GoalInfoEntry): String {
     return "boosts/b_icon_$id.png"
 }
 
-private fun getOfflineTime(contributor: ContributionInfo): Double {
+private fun getOfflineTime(contributor: ContributionInfo, accountForSilos: Boolean): Double {
     val currentOfflineTime = abs(contributor.farmInfo?.timestamp ?: 0.0)
     if (currentOfflineTime == 0.0) return currentOfflineTime // farm is probably private
+
+    if (!accountForSilos) {
+        return currentOfflineTime
+    }
 
     val baseSiloTimeSeconds = 3600.0
     val siloResearchLevel =
@@ -282,5 +496,18 @@ private fun formatSeasonName(seasonId: String): String {
                 Locale.ROOT
             ) else it.toString()
         }
+    }
+}
+
+private fun getRarityColor(rarity: Int): Int {
+    return when (rarity) {
+        //rare
+        1 -> android.graphics.Color.rgb(141, 217, 255) //light blue
+        //epic
+        2 -> android.graphics.Color.rgb(253, 64, 253) //purple
+        //legendary
+        3 -> android.graphics.Color.rgb(246, 216, 63) //yellow
+        //common
+        else -> android.graphics.Color.rgb(255, 255, 255) //white
     }
 }

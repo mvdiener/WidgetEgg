@@ -33,7 +33,9 @@ data class Badges(
     var hasCraftingLegend: Boolean = false,
     var hasEnd: Boolean = false,
     var hasNah: Boolean = false,
+    var hasNahPlus: Boolean = false,
     var hasFed: Boolean = false,
+    var hasFedPlus: Boolean = false,
     var hasAllShells: Boolean = false,
     var hasZlc: Boolean = false
 )
