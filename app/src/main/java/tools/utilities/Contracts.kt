@@ -114,7 +114,7 @@ fun formatContractData(
             contributors = formattedContributors,
             contractArtifacts = contractArtifacts
         )
-    }
+    }.sortedBy { it.allGoalsAchieved }
 }
 
 fun formatPeriodicalsContracts(

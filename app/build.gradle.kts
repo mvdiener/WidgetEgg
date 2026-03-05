@@ -17,8 +17,8 @@ android {
         applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 26
-        versionName = "4.0.0"
+        versionCode = 27
+        versionName = "4.0.1"
 
         ndk {
             debugSymbolLevel = "SYMBOL_TABLE"
