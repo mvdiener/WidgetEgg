@@ -384,7 +384,7 @@ fun EggAndGrade(
         val eggBitmap = if (data.customEggId.isNullOrBlank()) {
             bitmapResize(BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png")))
         } else {
-            getColleggtibleBitmap(assetManager, eggName, context)
+            getColleggtibleBitmap(assetManager, eggName, context, true)
         }
 
         Image(

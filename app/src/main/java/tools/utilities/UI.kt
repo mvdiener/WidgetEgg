@@ -113,7 +113,12 @@ fun getAsset(assetManager: AssetManager, path: String): InputStream {
     }
 }
 
-fun getColleggtibleBitmap(assetManager: AssetManager, eggName: String, context: Context): Bitmap {
+fun getColleggtibleBitmap(
+    assetManager: AssetManager,
+    eggName: String,
+    context: Context,
+    shouldResize: Boolean
+): Bitmap {
     val eggAsset = try {
         assetManager.open("eggs/$eggName.png")
     } catch (_: Exception) {
@@ -126,7 +131,12 @@ fun getColleggtibleBitmap(assetManager: AssetManager, eggName: String, context: 
         } else {
             val file = File(context.cacheDir, "$eggName.png")
             if (file.exists()) {
-                bitmapResize(BitmapFactory.decodeFile(file.absolutePath))
+                val fileBitmap = BitmapFactory.decodeFile(file.absolutePath)
+                if (shouldResize) {
+                    bitmapResize(fileBitmap)
+                } else {
+                    fileBitmap
+                }
             } else {
                 BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
             }

@@ -32,7 +32,8 @@
         <receiver
             android:name="widget.missions.normal.MissionWidgetNormalReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Missions Normal">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -44,7 +45,8 @@
         <receiver
             android:name="widget.missions.minimal.MissionWidgetMinimalReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Missions Minimal">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -56,7 +58,8 @@
         <receiver
             android:name="widget.missions.large.MissionWidgetLargeReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Missions Detailed">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -68,7 +71,8 @@
         <receiver
             android:name="widget.missions.normal.VirtueMissionWidgetNormalReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Virtue Missions Normal">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -80,7 +84,8 @@
         <receiver
             android:name="widget.missions.minimal.VirtueMissionWidgetMinimalReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Virtue Missions Minimal">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -92,7 +97,8 @@
         <receiver
             android:name="widget.missions.large.VirtueMissionWidgetLargeReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Virtue Missions Detailed">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -104,7 +110,8 @@
         <receiver
             android:name="widget.contracts.active.ContractWidgetActiveReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Contracts Active">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -116,7 +123,8 @@
         <receiver
             android:name="widget.contracts.large.ContractWidgetLargeReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Contracts Detailed">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -128,7 +136,8 @@
         <receiver
             android:name="widget.stats.normal.StatsWidgetNormalReceiver"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:label="Stats">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
