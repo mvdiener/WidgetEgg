@@ -386,7 +386,7 @@ fun EggAndProgressBars(
     val eggBitmap = if (contract.customEggId.isNullOrBlank()) {
         BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
     } else {
-        getColleggtibleBitmap(assetManager, eggName, context)
+        getColleggtibleBitmap(assetManager, eggName, context, false)
     }
 
     Image(
