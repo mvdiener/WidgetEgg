@@ -435,7 +435,14 @@ fun TimeTextAndScroll(
         val scrollName = getScrollName(contract, timeText)
         if (scrollName.isNotEmpty()) {
             val scrollBitmap =
-                BitmapFactory.decodeStream(getAsset(assetManager, "other/$scrollName.png"))
+                bitmapResize(
+                    BitmapFactory.decodeStream(
+                        getAsset(
+                            assetManager,
+                            "other/$scrollName.png"
+                        )
+                    )
+                )
 
             Image(
                 provider = ImageProvider(scrollBitmap),
