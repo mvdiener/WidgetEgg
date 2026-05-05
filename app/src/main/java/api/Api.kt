@@ -58,14 +58,27 @@ suspend fun fetchMissionData(eid: String, resetIndex: Int): MissionData {
 suspend fun fetchContractData(backup: Backup): ContractData {
     val eid = BuildConfig.DEV_ACCOUNT
     val basicRequestInfo = getBasicRequestInfo(eid)
-    val statuses = backup.contracts.contractsList.map { contract ->
-        fetchContractStatus(
-            basicRequestInfo,
-            contract.contract.identifier,
-            contract.coopIdentifier
-        )
+    val validContracts = backup.contracts.contractsList.mapNotNull { contract ->
+        try {
+            val status = fetchContractStatus(
+                basicRequestInfo,
+                contract.contract.identifier,
+                contract.coopIdentifier
+            )
+            contract to status
+        } catch (e: Exception) {
+            if (e is AppError.EopError) {
+                null
+            } else {
+                throw e
+            }
+        }
     }
-    return ContractData(backup.contracts.contractsList, statuses)
+
+    val contracts = validContracts.map { it.first }
+    val statuses = validContracts.map { it.second }
+
+    return ContractData(contracts, statuses)
 }
 
 suspend fun fetchPeriodicalsData(eid: String): PeriodicalsData {
@@ -171,6 +184,19 @@ private suspend fun fetchContractStatus(
                 val contractResponse =
                     ContractCoopStatusResponse.parseFrom(authMessageResponse)
                 return contractResponse
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+
+        500 -> {
+            try {
+                val errorText = response.bodyAsText()
+                if (errorText == "eop") {
+                    throw AppError.EopError()
+                } else {
+                    throw Exception("Error retrieving data")
+                }
             } catch (e: Exception) {
                 throw e
             }
