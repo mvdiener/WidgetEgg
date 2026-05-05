@@ -460,21 +460,19 @@ fun SeasonAndRewardInfo(
     textSize: Float = 14f,
     rewardSize: Int = 22
 ) {
-    if (!contract.seasonName.isNullOrBlank()) {
-        Text(
-            text = contract.seasonName!!,
-            style = TextStyle(
-                color = ColorProvider(Color(0xFF03D0A8.toInt())),
-                fontSize = TextUnit(textSize, TextUnitType.Sp)
-            )
-        )
-    }
-
     if (contract.isLegacy) {
         Text(
             text = "Leggacy",
             style = TextStyle(
                 color = ColorProvider(Color(0xFFFE9B00.toInt())),
+                fontSize = TextUnit(textSize, TextUnitType.Sp)
+            )
+        )
+    } else if (!contract.seasonName.isNullOrBlank()) {
+        Text(
+            text = contract.seasonName!!,
+            style = TextStyle(
+                color = ColorProvider(Color(0xFF03D0A8.toInt())),
                 fontSize = TextUnit(textSize, TextUnitType.Sp)
             )
         )
