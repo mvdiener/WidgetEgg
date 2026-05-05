@@ -40,6 +40,7 @@ import widget.missions.normal.MissionWidgetNormal
 import widget.missions.normal.VirtueMissionWidgetNormal
 import widget.stats.StatsWidgetDataStore
 import widget.stats.normal.StatsWidgetNormal
+import widget.virtue.normal.VirtueWidgetNormal
 import java.time.Instant
 
 class WidgetUpdater {
@@ -50,15 +51,22 @@ class WidgetUpdater {
         val hasVirtueMissionWidgets = hasVirtueMissionWidgets(context)
         val hasContractWidgets = hasContractWidgets(context)
         val hasStatsWidgets = hasStatsWidgets(context)
+        val hasVirtueWidgets = hasVirtueWidgets(context)
         val allWidgets =
-            listOf(hasMissionWidgets, hasVirtueMissionWidgets, hasContractWidgets, hasStatsWidgets)
+            listOf(
+                hasMissionWidgets,
+                hasVirtueMissionWidgets,
+                hasContractWidgets,
+                hasStatsWidgets,
+                hasVirtueWidgets
+            )
 
         if (prefEid.isNotBlank() && allWidgets.any { it }) {
             try {
                 val backup = fetchBackupData(prefEid)
 
                 val periodicalsInfo = try {
-                    if (hasContractWidgets || hasStatsWidgets) fetchPeriodicalsData(prefEid) else null
+                    if (hasContractWidgets || hasStatsWidgets || hasVirtueWidgets) fetchPeriodicalsData(prefEid) else null
                 } catch (_: Exception) {
                     null
                 }
@@ -98,6 +106,17 @@ class WidgetUpdater {
                         val job = launch {
                             try {
                                 updateStats(context, preferences, backup, periodicalsInfo)
+                            } catch (e: Exception) {
+                                exceptions.add(e)
+                            }
+                        }
+                        jobs.add(job)
+                    }
+
+                    if (hasVirtueWidgets) {
+                        val job = launch {
+                            try {
+                                updateVirtue(context, preferences, backup, periodicalsInfo)
                             } catch (e: Exception) {
                                 exceptions.add(e)
                             }
@@ -349,6 +368,15 @@ class WidgetUpdater {
         }
     }
 
+    private fun updateVirtue(
+        context: Context,
+        preferences: PreferencesDatastore,
+        backup: Backup,
+        periodicalsInfo: PeriodicalsData?
+    ) {
+        
+    }
+
     private fun numOfActiveMissions(missions: List<MissionInfoEntry>): Int {
         return missions.count { mission ->
             mission.identifier.isNotBlank()
@@ -392,6 +420,12 @@ class WidgetUpdater {
     private suspend fun hasStatsWidgets(context: Context): Boolean {
         return GlanceAppWidgetManager(context).getGlanceIds(
             StatsWidgetNormal::class.java
+        ).isNotEmpty()
+    }
+
+    private suspend fun hasVirtueWidgets(context: Context): Boolean {
+        return GlanceAppWidgetManager(context).getGlanceIds(
+            VirtueWidgetNormal::class.java
         ).isNotEmpty()
     }
 

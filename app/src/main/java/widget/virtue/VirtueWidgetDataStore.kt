@@ -1,0 +1,5 @@
+package widget.virtue
+
+data object VirtueWidgetDataStorePreferencesKeys
+
+class VirtueWidgetDataStore

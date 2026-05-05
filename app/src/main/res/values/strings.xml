@@ -9,4 +9,5 @@
     <string name="contract_widget_active">Contracts minimal view</string>
     <string name="contract_widget_large">Contracts detailed view with vertical scroll</string>
     <string name="stats_widget_normal">Egg Inc user stats</string>
+    <string name="virtue_widget_normal">Virtue farm standard view</string>
 </resources>
