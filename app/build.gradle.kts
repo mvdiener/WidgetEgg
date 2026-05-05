@@ -120,7 +120,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     // Color picker
-    implementation("com.github.skydoves:colorpicker-compose:1.1.2")
+    implementation("com.github.skydoves:colorpicker-compose:1.1.3")
 
 }
 
