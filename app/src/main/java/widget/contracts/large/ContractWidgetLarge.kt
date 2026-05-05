@@ -488,16 +488,16 @@ fun CoopNameAndInfo(
                 style = TextStyle(color = ColorProvider(textColor))
             )
         }
-        if (data.isLegacy) {
-            Text(
-                text = "Leggacy",
-                style = TextStyle(color = ColorProvider(Color(0xFFFE9B00.toInt())))
-            )
-        } else if (!data.seasonName.isNullOrBlank()) {
+        if (!data.seasonName.isNullOrBlank()) {
             Text(
                 modifier = GlanceModifier.padding(end = 5.dp),
                 text = data.seasonName,
                 style = TextStyle(color = ColorProvider(Color(0xFF03D0A8.toInt())))
+            )
+        } else if (data.isLegacy) {
+            Text(
+                text = "Leggacy",
+                style = TextStyle(color = ColorProvider(Color(0xFFFE9B00.toInt())))
             )
         }
 
