@@ -20,6 +20,7 @@ import data.PeriodicalsContractInfoEntry
 import data.SeasonGradeAndGoals
 import data.StatsInfo
 import data.TankInfo
+import data.VirtueInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -64,6 +65,7 @@ class PreferencesDatastore(context: Context) {
         private val STATS_INFO = stringPreferencesKey("statsInfo")
         private val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
         private val CUSTOM_EGGS = stringPreferencesKey("customEggs")
+        private val VIRTUE_INFO = stringPreferencesKey("virtueInfo")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -456,6 +458,24 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveCustomEggs(customEggs: List<CustomEggInfoEntry>) {
         dataStore.edit {
             it[CUSTOM_EGGS] = Json.encodeToString(customEggs)
+        }
+    }
+
+    suspend fun getVirtueInfo(): VirtueInfo {
+        return dataStore.data.map {
+            it[VIRTUE_INFO]?.let { virtueJson ->
+                try {
+                    Json.decodeFromString<VirtueInfo>(virtueJson)
+                } catch (e: Exception) {
+                    VirtueInfo()
+                }
+            } ?: VirtueInfo()
+        }.first()
+    }
+
+    suspend fun saveVirtueInfo(virtueInfo: VirtueInfo) {
+        dataStore.edit {
+            it[VIRTUE_INFO] = Json.encodeToString(virtueInfo)
         }
     }
 

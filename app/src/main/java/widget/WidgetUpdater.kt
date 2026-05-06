@@ -22,6 +22,7 @@ import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
+import tools.utilities.formatVirtueData
 import tools.utilities.removeCalendarEvents
 import tools.utilities.saveColleggtibleImagesToCache
 import tools.utilities.scheduleCalendarEvents
@@ -40,6 +41,7 @@ import widget.missions.normal.MissionWidgetNormal
 import widget.missions.normal.VirtueMissionWidgetNormal
 import widget.stats.StatsWidgetDataStore
 import widget.stats.normal.StatsWidgetNormal
+import widget.virtue.VirtueWidgetDataStore
 import widget.virtue.normal.VirtueWidgetNormal
 import java.time.Instant
 
@@ -66,7 +68,9 @@ class WidgetUpdater {
                 val backup = fetchBackupData(prefEid)
 
                 val periodicalsInfo = try {
-                    if (hasContractWidgets || hasStatsWidgets || hasVirtueWidgets) fetchPeriodicalsData(prefEid) else null
+                    if (hasContractWidgets || hasStatsWidgets || hasVirtueWidgets) fetchPeriodicalsData(
+                        prefEid
+                    ) else null
                 } catch (_: Exception) {
                     null
                 }
@@ -368,13 +372,35 @@ class WidgetUpdater {
         }
     }
 
-    private fun updateVirtue(
+    private suspend fun updateVirtue(
         context: Context,
         preferences: PreferencesDatastore,
         backup: Backup,
         periodicalsInfo: PeriodicalsData?
     ) {
-        
+        var prefVirtueInfo = preferences.getVirtueInfo()
+
+        val prefEid = preferences.getEid()
+        val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
+        val prefWidgetTextColor = preferences.getWidgetTextColor()
+
+        try {
+            if (prefEid.isNotBlank()) {
+                prefVirtueInfo =
+                    formatVirtueData(backup, periodicalsInfo)
+
+                preferences.saveVirtueInfo(prefVirtueInfo)
+
+                VirtueWidgetDataStore().updateVirtueWidgetDataStore(
+                    context,
+                    eid = prefEid,
+                    virtueInfo = prefVirtueInfo,
+                    backgroundColor = prefWidgetBackgroundColor,
+                    textColor = prefWidgetTextColor
+                )
+            }
+        } catch (_: Exception) {
+        }
     }
 
     private fun numOfActiveMissions(missions: List<MissionInfoEntry>): Int {

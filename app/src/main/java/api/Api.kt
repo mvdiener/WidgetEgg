@@ -86,7 +86,8 @@ suspend fun fetchPeriodicalsData(eid: String): PeriodicalsData {
     return PeriodicalsData(
         periodicals.contracts.contractsList,
         periodicals.contracts.customEggsList,
-        periodicals.contracts.currentSeason
+        periodicals.contracts.currentSeason,
+        periodicals.events.eventsList
     )
 }
 
