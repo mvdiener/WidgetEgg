@@ -105,6 +105,12 @@ fun SettingsScreen(navController: NavController) {
                     onClick = { navController.navigate(Routes.statsSettingsScreen) }
                 )
             }
+            item {
+                SettingsSectionItem(
+                    text = "Virtue",
+                    onClick = { navController.navigate(Routes.virtueSettingsScreen) }
+                )
+            }
         }
     }
 }
