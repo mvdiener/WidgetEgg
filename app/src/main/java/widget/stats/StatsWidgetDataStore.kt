@@ -21,7 +21,6 @@ data object StatsWidgetDataStorePreferencesKeys {
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
     val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
-    val CUSTOM_EGGS = stringPreferencesKey("widgetCustomEggs")
 }
 
 class StatsWidgetDataStore {
@@ -33,7 +32,6 @@ class StatsWidgetDataStore {
         backgroundColor: Color? = null,
         textColor: Color? = null,
         showCommunityBadges: Boolean? = null,
-        customEggs: List<CustomEggInfoEntry>? = null
     ) {
         val statsWidgetIds =
             GlanceAppWidgetManager(context).getGlanceIds(StatsWidgetNormal::class.java)
@@ -54,9 +52,6 @@ class StatsWidgetDataStore {
                 showCommunityBadges?.let {
                     prefs[StatsWidgetDataStorePreferencesKeys.SHOW_COMMUNITY_BADGES] = it
                 }
-                customEggs?.let {
-                    prefs[StatsWidgetDataStorePreferencesKeys.CUSTOM_EGGS] = Json.encodeToString(it)
-                }
             }
         }
 
@@ -68,14 +63,6 @@ class StatsWidgetDataStore {
             Json.decodeFromString<StatsInfo>(statsInfoJson)
         } catch (e: Exception) {
             StatsInfo()
-        }
-    }
-
-    fun decodeCustomEggs(customEggsJson: String): List<CustomEggInfoEntry> {
-        return try {
-            Json.decodeFromString<List<CustomEggInfoEntry>>(customEggsJson)
-        } catch (e: Exception) {
-            emptyList()
         }
     }
 

@@ -8,7 +8,6 @@ import data.CRAFTING_LEVELS
 import data.CustomEggInfoEntry
 import data.MAX_ENLIGHTEN_FARM_POP
 import data.MAX_FARM_POP
-import data.PeriodicalsData
 import data.SHIP_MAX_LAUNCH_POINTS
 import data.StatsInfo
 import ei.Ei.ArtifactInventoryItem
