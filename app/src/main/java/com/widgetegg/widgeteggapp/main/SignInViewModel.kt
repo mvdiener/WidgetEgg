@@ -164,6 +164,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     preferences.saveSeasonInfo(formattedSeasonInfo)
                     preferences.saveStatsInfo(formattedStatsData)
                     preferences.saveCustomEggs(formattedCustomEggs)
+                    preferences.saveVirtueInfo(formattedVirtueData)
                     MissionWidgetDataStore().updateMissionWidgetDataStore(
                         context,
                         missionInfo = formattedMissionData,

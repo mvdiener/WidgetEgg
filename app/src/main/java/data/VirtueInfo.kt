@@ -11,8 +11,9 @@ data class VirtueInfo(
     var totalTruthEggs: String = "",
     var eggId: Int = 0,
     var population: String = "",
-    var lastBackupDate: String = "",
+    var lastBackupDate: Double = 0.0,
     var siloCount: Int = 1,
+    var maximumOfflineTime: Double = 0.0,
     var virtueEquippedArtifacts: List<Artifact> = emptyList(),
     var homeEquippedArtifacts: List<Artifact> = emptyList(),
     var dailyEvents: List<Event> = emptyList(),
@@ -36,14 +37,14 @@ data class Artifact(
 )
 
 @Serializable
+data class Stone(
+    var name: Int,
+    var level: Int
+)
+
+@Serializable
 data class Event(
     var type: String,
     var multiplier: Double,
     var isUltra: Boolean
-)
-
-@Serializable
-data class Stone(
-    var name: Int,
-    var level: Int
 )
