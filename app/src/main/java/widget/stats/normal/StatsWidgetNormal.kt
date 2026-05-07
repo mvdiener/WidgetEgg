@@ -99,10 +99,10 @@ class StatsWidgetNormal : GlanceAppWidget() {
                         }
                     }
             ) {
+                val assetManager = context.assets
                 if (eid.isBlank()) {
-                    NoStatsContent(context.assets, textColor)
+                    NoStatsContent(assetManager, textColor)
                 } else {
-                    val assetManager = context.assets
                     NameAndRole(statsInfo, eiUserName, assetManager, textColor)
                     MysticalEggs(statsInfo, assetManager, textColor)
                     Earnings(statsInfo, assetManager, textColor)

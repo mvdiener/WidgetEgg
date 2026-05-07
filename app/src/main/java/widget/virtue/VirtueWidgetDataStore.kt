@@ -50,6 +50,14 @@ class VirtueWidgetDataStore {
         updateAllWidgets(context)
     }
 
+    fun decodeVirtueInfo(virtueInfoJson: String): VirtueInfo {
+        return try {
+            Json.decodeFromString<VirtueInfo>(virtueInfoJson)
+        } catch (e: Exception) {
+            VirtueInfo()
+        }
+    }
+
     suspend fun clearAllData(context: Context) {
         val virtueWidgetIds =
             GlanceAppWidgetManager(context).getGlanceIds(VirtueWidgetNormal::class.java)

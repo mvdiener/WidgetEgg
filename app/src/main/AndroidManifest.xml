@@ -150,7 +150,7 @@
             android:name="widget.virtue.normal.VirtueWidgetReceiver"
             android:enabled="true"
             android:exported="false"
-            android:label="Stats">
+            android:label="Virtue Farm">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
