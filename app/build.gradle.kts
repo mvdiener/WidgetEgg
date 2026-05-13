@@ -17,8 +17,8 @@ android {
         applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 29
-        versionName = "4.0.3"
+        versionCode = 30
+        versionName = "4.0.4"
 
         ndk {
             debugSymbolLevel = "SYMBOL_TABLE"
@@ -120,7 +120,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     // Color picker
-    implementation("com.github.skydoves:colorpicker-compose:1.1.2")
+    implementation("com.github.skydoves:colorpicker-compose:1.1.3")
 
 }
 

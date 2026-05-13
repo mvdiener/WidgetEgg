@@ -468,9 +468,7 @@ fun SeasonAndRewardInfo(
                 fontSize = TextUnit(textSize, TextUnitType.Sp)
             )
         )
-    }
-
-    if (contract.isLegacy) {
+    } else if (contract.isLegacy) {
         Text(
             text = "Leggacy",
             style = TextStyle(
