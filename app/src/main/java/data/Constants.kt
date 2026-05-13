@@ -206,7 +206,13 @@ const val CONTRACT_PROGRESS_COLOR = "#008531"
 const val CONTRACT_OFFLINE_PROGRESS_COLOR = "#51dda8"
 
 //Order of virtue egg list is important, do not alter
-val VIRTUE_EGGS = arrayOf(Egg.CURIOSITY, Egg.INTEGRITY, Egg.HUMILITY, Egg.RESILIENCE, Egg.KINDNESS)
+val VIRTUE_EGGS = arrayOf(
+    Egg.CURIOSITY.number,
+    Egg.INTEGRITY.number,
+    Egg.HUMILITY.number,
+    Egg.RESILIENCE.number,
+    Egg.KINDNESS.number
+)
 val VIRTUE_DELIVERY_GOALS = arrayOf(
     5e7, // 50M - TE #1
     1e9, // 1B

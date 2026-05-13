@@ -14,6 +14,7 @@ data class VirtueInfo(
     var lastBackupDate: Double = 0.0,
     var siloCount: Int = 1,
     var maximumOfflineTime: Double = 0.0,
+    var isOnVirtue: Boolean = false,
     var virtueEquippedArtifacts: List<Artifact> = emptyList(),
     var homeEquippedArtifacts: List<Artifact> = emptyList(),
     var dailyEvents: List<Event> = emptyList(),

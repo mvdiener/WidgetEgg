@@ -14,6 +14,7 @@ import ei.Ei.Backup
 import ei.Ei.FarmType
 import java.util.UUID
 import kotlin.math.max
+import java.time.Instant
 
 fun formatVirtueData(backup: Backup, periodicalsData: PeriodicalsData?): VirtueInfo {
     val homeFarm = backup.farmsList.first { it.farmType == FarmType.HOME }
@@ -46,6 +47,7 @@ fun formatVirtueData(backup: Backup, periodicalsData: PeriodicalsData?): VirtueI
         lastBackupDate = homeFarm.lastStepTime,
         siloCount = silosBuilt,
         maximumOfflineTime = maximumOfflineTimeSeconds,
+        isOnVirtue = homeFarm.eggType.number in VIRTUE_EGGS,
         virtueEquippedArtifacts = virtueArtifacts,
         homeEquippedArtifacts = homeArtifacts,
         dailyEvents = formatDailyEvents(periodicalsData),
@@ -60,6 +62,22 @@ fun countTruthEggThresholdsPassed(delivered: Double): Int {
         count++
     }
     return count
+}
+
+fun getRemainingSiloTime(lastBackupDate: Double, maximumOfflineTime: Double): String {
+    val offlineTime = Instant.now().epochSecond.toDouble() - lastBackupDate
+    val timeRemaining = maximumOfflineTime - offlineTime
+
+    if (timeRemaining <= 0) return "Empty!"
+
+    val hours = (timeRemaining / 3600).toInt()
+    val minutes = ((timeRemaining % 3600) / 60).toInt()
+
+    return when {
+        hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+        hours > 0 -> "${hours}h"
+        else -> "${minutes}m"
+    }
 }
 
 private fun getArtifacts(
@@ -105,7 +123,7 @@ private fun formatVirtueFarms(virtue: Backup.Virtue): List<VirtueFarmInfo> {
         val truthEggs = virtue.eovEarnedList.elementAtOrNull(index) ?: 0
 
         VirtueFarmInfo(
-            eggId = egg.number,
+            eggId = egg,
             truthEggs = truthEggs,
             pendingTruthEggs = max(0, pendingTruthEggs - truthEggs),
             eggsDelivered = eggsDelivered
