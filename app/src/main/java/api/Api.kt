@@ -10,7 +10,6 @@ import data.MISSION_ENDPOINT
 import data.MissionData
 import data.PERIODICALS_ENDPOINT
 import data.PeriodicalsData
-import ei.Ei.AuthenticatedMessage
 import ei.Ei.Backup
 import ei.Ei.BasicRequestInfo
 import ei.Ei.ContractsArchive
@@ -35,8 +34,9 @@ import io.ktor.client.statement.readRawBytes
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import tools.buildSecureAuthMessage
-import tools.decodeRequest
 import tools.encodeRequest
+import tools.handleAuthMessageResponse
+import tools.handleBackupResponse
 import java.util.concurrent.TimeUnit
 
 suspend fun fetchBackupData(eid: String): Backup {
@@ -114,7 +114,7 @@ suspend fun downloadImageBytes(url: String): ByteArray? {
         } else {
             null
         }
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 }
@@ -142,10 +142,7 @@ private suspend fun fetchActiveMissions(
     when (response.status.value) {
         in 200..299 -> {
             try {
-                val authMessageResponse =
-                    AuthenticatedMessage.parseFrom(
-                        decodeRequest(response.bodyAsText())
-                    ).message
+                val authMessageResponse = handleAuthMessageResponse(response)
                 val activeMissionsResponse =
                     GetActiveMissionsResponse.parseFrom(authMessageResponse)
                 return activeMissionsResponse.activeMissionsList
@@ -178,10 +175,7 @@ private suspend fun fetchContractStatus(
     when (response.status.value) {
         in 200..299 -> {
             try {
-                val authMessageResponse =
-                    AuthenticatedMessage.parseFrom(
-                        decodeRequest(response.bodyAsText())
-                    ).message
+                val authMessageResponse = handleAuthMessageResponse(response)
                 val contractResponse =
                     ContractCoopStatusResponse.parseFrom(authMessageResponse)
                 return contractResponse
@@ -221,10 +215,7 @@ private suspend fun fetchPeriodicals(eid: String): PeriodicalsResponse {
     when (response.status.value) {
         in 200..299 -> {
             try {
-                val authMessageResponse =
-                    AuthenticatedMessage.parseFrom(
-                        decodeRequest(response.bodyAsText())
-                    ).message
+                val authMessageResponse = handleAuthMessageResponse(response)
                 val periodicalsResponse =
                     PeriodicalsResponse.parseFrom(authMessageResponse)
                 return periodicalsResponse
@@ -246,10 +237,7 @@ private suspend fun fetchContractsArchive(basicRequestInfo: BasicRequestInfo): C
     when (response.status.value) {
         in 200..299 -> {
             try {
-                val authMessageResponse =
-                    AuthenticatedMessage.parseFrom(
-                        decodeRequest(response.bodyAsText())
-                    ).message
+                val authMessageResponse = handleAuthMessageResponse(response)
                 val contractsArchiveResponse =
                     ContractsArchive.parseFrom(authMessageResponse)
                 return contractsArchiveResponse
@@ -276,8 +264,9 @@ private suspend fun fetchBackup(basicRequestInfo: BasicRequestInfo): Backup {
     when (response.status.value) {
         in 200..299 -> {
             try {
+                val backupResponse = handleBackupResponse(response)
                 val firstContactResponse =
-                    EggIncFirstContactResponse.parseFrom(decodeRequest(response.bodyAsText()))
+                    EggIncFirstContactResponse.parseFrom(backupResponse)
                 if (!firstContactResponse.hasBackup()) throw Exception("No backup found")
                 return firstContactResponse.backup
             } catch (e: Exception) {

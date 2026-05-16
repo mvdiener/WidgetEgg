@@ -100,7 +100,7 @@ class StatsWidgetNormal : GlanceAppWidget() {
                     }
             ) {
                 val assetManager = context.assets
-                if (eid.isBlank()) {
+                if (eid.isBlank() || statsInfo.stateId.isBlank()) {
                     NoStatsContent(assetManager, textColor)
                 } else {
                     NameAndRole(statsInfo, eiUserName, assetManager, textColor)
