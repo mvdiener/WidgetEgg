@@ -78,7 +78,8 @@ import tools.utilities.truncateString
 import widget.WidgetUpdater
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
-import widget.contracts.active.LogoContentContracts
+import widget.shared.ArtifactsContent
+import widget.shared.NoWidgetContent
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import kotlin.text.isBlank
@@ -144,7 +145,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    NoContractsContentLarge(assetManager, textColor)
+                    NoWidgetContent(assetManager, "Waiting for contract data...", 80.dp, textColor)
                 }
             } else if (contractData.size == 1 && !showAvailableContracts && !showSeasonInfo) {
                 Column(
@@ -247,22 +248,6 @@ class ContractWidgetLarge : GlanceAppWidget() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun NoContractsContentLarge(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContentContracts(assetManager)
-        Text(
-            text = "Waiting for contract data...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
     }
 }
 
@@ -632,62 +617,7 @@ fun ArtifactsAndTimeRemaining(
         horizontalAlignment = Alignment.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (contract.contractArtifacts.isNotEmpty()) {
-            contract.contractArtifacts.forEachIndexed { index, artifact ->
-                val artifactName =
-                    getImageNameFromAfxId(artifact.name, artifact.level)
-                val artifactBitmap = bitmapResize(
-                    BitmapFactory.decodeStream(
-                        getAsset(
-                            assetManager,
-                            "artifacts/$artifactName.png"
-                        )
-                    )
-                )
-                Box(
-                    modifier = GlanceModifier.size(30.dp).padding(start = 2.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (artifact.rarity > 0) {
-                        Image(
-                            provider = ImageProvider(createGlowBitmap(artifact.rarity)),
-                            contentDescription = null,
-                            modifier = GlanceModifier.fillMaxSize()
-                        )
-                    }
-                    Image(
-                        provider = ImageProvider(artifactBitmap),
-                        contentDescription = "Contract Artifact $index",
-                        modifier = GlanceModifier.size(25.dp)
-                    )
-                    if (artifact.stones.isNotEmpty()) {
-                        Box(
-                            modifier = GlanceModifier.fillMaxSize().padding(end = 2.dp),
-                            contentAlignment = Alignment.BottomEnd
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                artifact.stones.forEachIndexed { index, stone ->
-                                    val stoneName =
-                                        getImageNameFromAfxId(stone.name, stone.level + 1)
-                                    val stoneBitmap = bitmapResize(
-                                        BitmapFactory.decodeStream(
-                                            getAsset(assetManager, "artifacts/$stoneName.png")
-                                        )
-                                    )
-                                    Image(
-                                        provider = ImageProvider(stoneBitmap),
-                                        contentDescription = "Stone Icon $index",
-                                        modifier = GlanceModifier.size(8.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        ArtifactsContent(assetManager, contract.contractArtifacts)
         Box(modifier = GlanceModifier.defaultWeight()) {}
         TimeTextAndScrollLarge(
             assetManager,

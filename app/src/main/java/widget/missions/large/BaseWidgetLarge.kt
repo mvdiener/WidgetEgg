@@ -59,6 +59,7 @@ import tools.utilities.getTankCapacity
 import widget.WidgetUpdater
 import widget.missions.MissionWidgetDataStore
 import widget.missions.MissionWidgetDataStorePreferencesKeys
+import widget.shared.NoWidgetContent
 
 abstract class BaseWidgetLarge(val isVirtueWidget: Boolean = false) : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -147,7 +148,7 @@ abstract class BaseWidgetLarge(val isVirtueWidget: Boolean = false) : GlanceAppW
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || missionData.isEmpty()) {
-                    NoMissionsContentLarge(assetManager, textColor)
+                    NoWidgetContent(assetManager, "Waiting for mission data...", 80.dp, textColor)
                 } else {
                     val adjustedMissions: List<MissionInfoEntry> =
                         if (showTankLevels) {
@@ -211,34 +212,6 @@ abstract class BaseWidgetLarge(val isVirtueWidget: Boolean = false) : GlanceAppW
                 }
             }
         }
-    }
-}
-
-@Composable
-fun LogoContentLarge(assetManager: AssetManager) {
-    val bitmapImage =
-        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
-
-    Image(
-        provider = ImageProvider(bitmapImage),
-        contentDescription = "Empty Widget Logo",
-        modifier = GlanceModifier.size(80.dp)
-    )
-}
-
-@Composable
-fun NoMissionsContentLarge(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContentLarge(assetManager)
-        Text(
-            text = "Waiting for mission data...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
     }
 }
 

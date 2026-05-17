@@ -25,7 +25,7 @@ data class ContractInfoEntry(
     var isUltra: Boolean,
     var goals: List<GoalInfoEntry>,
     var contributors: List<ContributorInfoEntry>,
-    var contractArtifacts: List<ContractArtifact>
+    var contractArtifacts: List<Artifact>
 )
 
 @Serializable
@@ -43,20 +43,6 @@ data class ContributorInfoEntry(
     var offlineTimeSeconds: Double,
     var offlineTimeSecondsIgnoringSilos: Double,
     var isSelf: Boolean
-)
-
-@Serializable
-data class ContractArtifact(
-    var name: Int,
-    var rarity: Int,
-    var level: Int,
-    var stones: List<ContractStone>
-)
-
-@Serializable
-data class ContractStone(
-    var name: Int,
-    var level: Int
 )
 
 // Data class used to save periodicals contract information to preferences

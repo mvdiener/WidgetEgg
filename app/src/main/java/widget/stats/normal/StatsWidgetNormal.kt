@@ -45,6 +45,7 @@ import tools.utilities.getFarmerRole
 import tools.utilities.getShortenedFarmerRole
 import tools.utilities.truncateString
 import widget.WidgetUpdater
+import widget.shared.NoWidgetContent
 import widget.stats.StatsWidgetDataStore
 import widget.stats.StatsWidgetDataStorePreferencesKeys
 
@@ -101,7 +102,7 @@ class StatsWidgetNormal : GlanceAppWidget() {
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || statsInfo.stateId.isBlank()) {
-                    NoStatsContent(assetManager, textColor)
+                    NoWidgetContent(assetManager, "Waiting for stats data...", 80.dp, textColor)
                 } else {
                     NameAndRole(statsInfo, eiUserName, assetManager, textColor)
                     MysticalEggs(statsInfo, assetManager, textColor)
@@ -117,34 +118,6 @@ class StatsWidgetNormal : GlanceAppWidget() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun LogoContentStats(assetManager: AssetManager) {
-    val bitmapImage =
-        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
-
-    Image(
-        provider = ImageProvider(bitmapImage),
-        contentDescription = "Empty Widget Logo",
-        modifier = GlanceModifier.size(80.dp)
-    )
-}
-
-@Composable
-fun NoStatsContent(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContentStats(assetManager)
-        Text(
-            text = "Waiting for stats data...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
     }
 }
 

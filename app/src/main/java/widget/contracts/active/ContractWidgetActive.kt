@@ -60,6 +60,7 @@ import tools.utilities.getScrollName
 import widget.WidgetUpdater
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
+import widget.shared.NoWidgetContent
 
 class ContractWidgetActive : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -142,7 +143,7 @@ class ContractWidgetActive : GlanceAppWidget() {
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || contractData.isEmpty()) {
-                    NoContractsContent(assetManager, textColor)
+                    NoWidgetContent(assetManager, "No active contracts...", 80.dp, textColor)
                 } else {
                     when (contractData.size) {
                         1 -> {
@@ -314,34 +315,6 @@ fun ContractAll(
         10f,
         12
     )
-}
-
-@Composable
-fun LogoContentContracts(assetManager: AssetManager) {
-    val bitmapImage =
-        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
-
-    Image(
-        provider = ImageProvider(bitmapImage),
-        contentDescription = "Empty Widget Logo",
-        modifier = GlanceModifier.size(80.dp)
-    )
-}
-
-@Composable
-fun NoContractsContent(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContentContracts(assetManager)
-        Text(
-            text = "No active contracts...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
-    }
 }
 
 @Composable

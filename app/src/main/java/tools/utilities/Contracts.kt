@@ -9,17 +9,17 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import data.ArchivedContractInfoEntry
+import data.Artifact
 import data.CONTRACT_OFFLINE_PROGRESS_COLOR
 import data.CONTRACT_PROGRESS_COLOR
-import data.ContractArtifact
 import data.ContractData
 import data.ContractInfoEntry
-import data.ContractStone
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
 import data.PeriodicalsContractInfoEntry
 import data.PeriodicalsData
 import data.SeasonGradeAndGoals
+import data.Stone
 import ei.Ei.Backup
 import ei.Ei.ContractCoopStatusResponse.ContributionInfo
 import ei.Ei.LocalContract
@@ -71,13 +71,13 @@ fun formatContractData(
             contributor.userName == userName
         }?.farmInfo?.equippedArtifactsList?.map { artifact ->
             val stones = artifact.stonesList.map { stone ->
-                ContractStone(
+                Stone(
                     name = stone.name.number,
                     level = stone.level.number
                 )
             }
 
-            ContractArtifact(
+            Artifact(
                 name = artifact.spec.name.number,
                 rarity = artifact.spec.rarity.number,
                 level = artifact.spec.level.number,
