@@ -15,6 +15,7 @@ import ei.Ei.FarmType
 import java.util.UUID
 import kotlin.math.max
 import java.time.Instant
+import kotlin.math.pow
 
 fun formatVirtueData(backup: Backup, periodicalsData: PeriodicalsData?): VirtueInfo {
     val homeFarm = backup.farmsList.first { it.farmType == FarmType.HOME }
@@ -36,12 +37,15 @@ fun formatVirtueData(backup: Backup, periodicalsData: PeriodicalsData?): VirtueI
         backup.artifactsDb.inventoryItemsList
     )
 
+    val virtueFarms = formatVirtueFarms(backup.virtue)
+
     return VirtueInfo(
         stateId = UUID.randomUUID().toString(),
         resets = backup.virtue.resets,
         shifts = backup.virtue.shiftCount,
-        soulEggs = numberToString(backup.game.soulEggsD),
+        nextShiftCost = numberToString(getNextShiftCost(backup)),
         totalTruthEggs = backup.virtue.eovEarnedList.sumOf { it }.toString(),
+        totalPendingTruthEggs = virtueFarms.sumOf { it.pendingTruthEggs }.toString(),
         eggId = homeFarm.eggType.number,
         population = numberToString(homeFarm.numChickens.toDouble()),
         lastBackupDate = homeFarm.lastStepTime,
@@ -51,7 +55,7 @@ fun formatVirtueData(backup: Backup, periodicalsData: PeriodicalsData?): VirtueI
         virtueEquippedArtifacts = virtueArtifacts,
         homeEquippedArtifacts = homeArtifacts,
         dailyEvents = formatDailyEvents(periodicalsData),
-        farms = formatVirtueFarms(backup.virtue)
+        farms = virtueFarms
     )
 }
 
@@ -129,4 +133,14 @@ private fun formatVirtueFarms(virtue: Backup.Virtue): List<VirtueFarmInfo> {
             eggsDelivered = eggsDelivered
         )
     }
+}
+
+private fun getNextShiftCost(backup: Backup): Double {
+    val soulEggs = backup.game.soulEggsD
+    val shiftCount = backup.virtue.shiftCount.toDouble()
+
+    val basisMultiplier = 0.02 * (shiftCount / 120.0).pow(3.0) + 0.0001
+    val basis = soulEggs * basisMultiplier
+
+    return 10.0.pow(11.0) + (0.6 * basis) + (0.4 * basis).pow(0.9)
 }

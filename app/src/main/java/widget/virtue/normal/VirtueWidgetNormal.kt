@@ -43,6 +43,8 @@ import tools.utilities.getEggName
 import tools.utilities.getImageNameFromAfxId
 import tools.utilities.getRemainingSiloTime
 import widget.WidgetUpdater
+import widget.shared.ArtifactsContent
+import widget.shared.NoWidgetContent
 import widget.virtue.VirtueWidgetDataStore
 import widget.virtue.VirtueWidgetDataStorePreferencesKeys
 
@@ -65,7 +67,7 @@ class VirtueWidgetNormal : GlanceAppWidget() {
                     Color(colorInt)
                 } ?: DEFAULT_WIDGET_TEXT_COLOR
 
-            if (eid.isBlank()) {
+            if (eid.isBlank() || virtueInfo.stateId.isBlank()) {
                 // If EID is blank, could either mean state is not initialized or user is not logged in
                 // Attempt to load state in case it is needed, otherwise login composable will show
                 LaunchedEffect(true) {
@@ -96,9 +98,10 @@ class VirtueWidgetNormal : GlanceAppWidget() {
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank()) {
-                    NoVirtueContent(assetManager, textColor)
+                    NoWidgetContent(assetManager, "Waiting for virtue data...", 80.dp, textColor)
                 } else {
-                    FarmData(assetManager, context, virtueInfo, textColor)
+                    FarmData(assetManager, virtueInfo, textColor)
+                    FarmProgress(assetManager, virtueInfo, textColor)
                 }
             }
         }
@@ -106,42 +109,13 @@ class VirtueWidgetNormal : GlanceAppWidget() {
 }
 
 @Composable
-fun LogoContentVirtue(assetManager: AssetManager) {
-    val bitmapImage =
-        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
-
-    Image(
-        provider = ImageProvider(bitmapImage),
-        contentDescription = "Empty Widget Logo",
-        modifier = GlanceModifier.size(80.dp)
-    )
-}
-
-@Composable
-fun NoVirtueContent(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContentVirtue(assetManager)
-        Text(
-            text = "Waiting for virtue data...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
-    }
-}
-
-@Composable
 fun FarmData(
     assetManager: AssetManager,
-    context: Context,
     virtueInfo: VirtueInfo,
     textColor: Color
 ) {
     Row(
-        modifier = GlanceModifier.fillMaxSize(),
+        modifier = GlanceModifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -157,7 +131,7 @@ fun FarmData(
         Image(
             provider = ImageProvider(eggBitmap),
             contentDescription = "Home Egg",
-            modifier = GlanceModifier.size(40.dp).padding(start = 5.dp)
+            modifier = GlanceModifier.size(35.dp).padding(start = 5.dp)
         )
         Column(
             modifier = GlanceModifier.fillMaxWidth(),
@@ -166,17 +140,41 @@ fun FarmData(
         ) {
             if (true) {
 //            if (virtueInfo.isOnVirtue) {
-                Text(
-                    text = "Shifts: ${virtueInfo.shifts}",
-                    style = TextStyle(color = ColorProvider(textColor))
-                )
                 Row(
                     modifier = GlanceModifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    horizontalAlignment = Alignment.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val truthEggBitmap = bitmapResize(
+                        BitmapFactory.decodeStream(
+                            getAsset(
+                                assetManager,
+                                "eggs/egg_truth.png"
+                            )
+                        )
+                    )
+                    Image(
+                        provider = ImageProvider(truthEggBitmap),
+                        contentDescription = "Truth Egg",
+                        modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
+                    )
+                    Text(
+                        text = "${virtueInfo.totalTruthEggs} (${virtueInfo.totalPendingTruthEggs}) ",
+                        style = TextStyle(color = ColorProvider(textColor))
+                    )
+                    Text(
+                        text = "Shifts: ${virtueInfo.shifts}",
+                        style = TextStyle(color = ColorProvider(textColor))
+                    )
+                }
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Next shift: 1.1Q",
+                        modifier = GlanceModifier.padding(start = 3.dp),
+                        text = "Shift SE: ${virtueInfo.nextShiftCost}",
                         style = TextStyle(color = ColorProvider(textColor))
                     )
                     val soulEggBitmap = bitmapResize(
@@ -193,6 +191,11 @@ fun FarmData(
                         modifier = GlanceModifier.size(20.dp).padding(start = 2.dp)
                     )
                 }
+            } else {
+                Text(
+                    text = "Not on Virtue",
+                    style = TextStyle(color = ColorProvider(textColor))
+                )
             }
             Silos(assetManager, virtueInfo, textColor)
         }
@@ -207,21 +210,21 @@ fun Silos(
 ) {
     Row(
         modifier = GlanceModifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        horizontalAlignment = Alignment.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         val siloBitmap = bitmapResize(
             BitmapFactory.decodeStream(
                 getAsset(
                     assetManager,
-                    "research/r_icon_silo_capacity.png"
+                    "other/icon_silos.png"
                 )
             )
         )
         Image(
             provider = ImageProvider(siloBitmap),
             contentDescription = "Silos",
-            modifier = GlanceModifier.size(25.dp).padding(end = 2.dp)
+            modifier = GlanceModifier.size(25.dp).padding(end = 5.dp)
         )
         val siloTimeRemaining =
             getRemainingSiloTime(virtueInfo.lastBackupDate, virtueInfo.maximumOfflineTime)
@@ -244,64 +247,45 @@ fun Artifacts(
     }
     if (artifacts.isNotEmpty()) {
         Row(
-            modifier = GlanceModifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp),
+            horizontalAlignment = Alignment.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            artifacts.forEachIndexed { index, artifact ->
-                val artifactName =
-                    getImageNameFromAfxId(artifact.name, artifact.level)
-                val artifactBitmap = bitmapResize(
-                    BitmapFactory.decodeStream(
-                        getAsset(
-                            assetManager,
-                            "artifacts/$artifactName.png"
-                        )
+            ArtifactsContent(assetManager, artifacts)
+        }
+    }
+}
+
+@Composable
+fun FarmProgress(
+    assetManager: AssetManager,
+    virtueInfo: VirtueInfo,
+    textColor: Color
+) {
+    virtueInfo.farms.forEach { farm ->
+        Row(
+            modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 5.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val eggName = getEggName(farm.eggId)
+            val eggBitmap = bitmapResize(
+                BitmapFactory.decodeStream(
+                    getAsset(
+                        assetManager,
+                        "eggs/$eggName.png"
                     )
                 )
-                Box(
-                    modifier = GlanceModifier.size(30.dp).padding(start = 2.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (artifact.rarity > 0) {
-                        Image(
-                            provider = ImageProvider(createGlowBitmap(artifact.rarity)),
-                            contentDescription = null,
-                            modifier = GlanceModifier.fillMaxSize()
-                        )
-                    }
-                    Image(
-                        provider = ImageProvider(artifactBitmap),
-                        contentDescription = "Virtue Artifact $index",
-                        modifier = GlanceModifier.size(25.dp)
-                    )
-                    if (artifact.stones.isNotEmpty()) {
-                        Box(
-                            modifier = GlanceModifier.fillMaxSize().padding(end = 2.dp),
-                            contentAlignment = Alignment.BottomEnd
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                artifact.stones.forEachIndexed { index, stone ->
-                                    val stoneName =
-                                        getImageNameFromAfxId(stone.name, stone.level + 1)
-                                    val stoneBitmap = bitmapResize(
-                                        BitmapFactory.decodeStream(
-                                            getAsset(assetManager, "artifacts/$stoneName.png")
-                                        )
-                                    )
-                                    Image(
-                                        provider = ImageProvider(stoneBitmap),
-                                        contentDescription = "Stone Icon $index",
-                                        modifier = GlanceModifier.size(8.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            )
+            Image(
+                provider = ImageProvider(eggBitmap),
+                contentDescription = eggName,
+                modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
+            )
+            Text(
+                text = "${farm.truthEggs} (${farm.pendingTruthEggs}) ",
+                style = TextStyle(color = ColorProvider(textColor))
+            )
         }
     }
 }
