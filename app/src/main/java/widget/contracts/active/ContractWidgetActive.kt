@@ -39,10 +39,10 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import data.ContractInfoEntry
-import data.DEFAULT_BROWSER
-import data.DEFAULT_WIDGET_BACKGROUND_COLOR
-import data.DEFAULT_WIDGET_TEXT_COLOR
-import data.PROBLEMATIC_BROWSERS
+import data.constants.DEFAULT_BROWSER
+import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.PROBLEMATIC_BROWSERS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

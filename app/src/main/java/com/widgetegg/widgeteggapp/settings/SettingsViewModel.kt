@@ -12,8 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import data.CalendarEntry
-import data.DEFAULT_WIDGET_BACKGROUND_COLOR
-import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

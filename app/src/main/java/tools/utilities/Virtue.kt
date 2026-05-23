@@ -2,11 +2,11 @@ package tools.utilities
 
 import data.Artifact
 import data.Event
-import data.IHR_RESEARCHES
+import data.constants.IHR_RESEARCHES
 import data.PeriodicalsData
 import data.Stone
-import data.VIRTUE_DELIVERY_GOALS
-import data.VIRTUE_EGGS
+import data.constants.VIRTUE_DELIVERY_GOALS
+import data.constants.VIRTUE_EGGS
 import data.VirtueFarmInfo
 import data.VirtueInfo
 import ei.Ei.ArtifactsDB.ActiveArtifactSet

@@ -9,15 +9,14 @@ import android.graphics.Paint
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
-import data.NUMBER_UNITS
-import data.PROGRESS_BACKGROUND_COLOR
+import data.constants.NUMBER_UNITS
+import data.constants.PROGRESS_BACKGROUND_COLOR
 import ei.Ei.Egg
 import java.io.File
 import java.io.InputStream
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.util.Locale
 
 data class ProgressData(
     val progress: Float,

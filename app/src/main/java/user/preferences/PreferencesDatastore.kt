@@ -12,8 +12,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.CalendarEntry
 import data.ContractInfoEntry
-import data.DEFAULT_WIDGET_BACKGROUND_COLOR
-import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import data.PeriodicalsContractInfoEntry
 import data.SeasonGradeAndGoals

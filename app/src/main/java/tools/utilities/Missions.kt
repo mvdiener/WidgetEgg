@@ -1,11 +1,11 @@
 package tools.utilities
 
 import android.graphics.Bitmap
-import data.ALL_SHIPS
+import data.constants.ALL_SHIPS
 import data.FuelLevelInfo
 import data.MissionData
 import data.MissionInfoEntry
-import data.TANK_SIZES
+import data.constants.TANK_SIZES
 import data.TankInfo
 import ei.Ei.Backup
 import java.time.Instant

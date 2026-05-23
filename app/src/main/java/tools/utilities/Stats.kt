@@ -1,14 +1,14 @@
 package tools.utilities
 
 import androidx.compose.ui.graphics.Color
-import data.ALL_GRADES
-import data.ALL_ROLES
+import data.constants.ALL_GRADES
+import data.constants.ALL_ROLES
 import data.Badges
-import data.CRAFTING_LEVELS
-import data.MAX_ENLIGHTEN_FARM_POP
-import data.MAX_FARM_POP
+import data.constants.CRAFTING_LEVELS
+import data.constants.MAX_ENLIGHTEN_FARM_POP
+import data.constants.MAX_FARM_POP
 import data.PeriodicalsData
-import data.SHIP_MAX_LAUNCH_POINTS
+import data.constants.SHIP_MAX_LAUNCH_POINTS
 import data.StatsInfo
 import ei.Ei.ArtifactInventoryItem
 import ei.Ei.ArtifactSpec

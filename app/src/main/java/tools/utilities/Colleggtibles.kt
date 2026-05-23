@@ -3,7 +3,7 @@ package tools.utilities
 import android.content.Context
 import api.downloadImageBytes
 import data.CustomEggInfoEntry
-import data.FARM_SIZE_TIERS
+import data.constants.FARM_SIZE_TIERS
 import data.PeriodicalsData
 import ei.Ei.Backup
 import ei.Ei.GameModifier.GameDimension

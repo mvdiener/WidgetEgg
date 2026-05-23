@@ -1,8 +1,16 @@
 package data
 
 import ei.Ei.Contract.PlayerGrade
+import ei.Ei.ContractCoopStatusResponse
+import ei.Ei.LocalContract
 import ei.Ei.RewardType
 import kotlinx.serialization.Serializable
+
+// Data class used as return object from api.fetchContractData
+data class ContractData(
+    val contracts: List<LocalContract>,
+    val contractStatuses: List<ContractCoopStatusResponse>
+)
 
 // Data class used to save contract information to preferences
 @Serializable

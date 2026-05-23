@@ -1,14 +1,14 @@
 package api
 
 import com.widgetegg.widgeteggapp.BuildConfig
-import data.BACKUP_ENDPOINT
-import data.CONTRACTS_ARCHIVE_ENDPOINT
-import data.CONTRACT_ENDPOINT
-import data.CURRENT_CLIENT_VERSION
+import data.constants.BACKUP_ENDPOINT
+import data.constants.CONTRACTS_ARCHIVE_ENDPOINT
+import data.constants.CONTRACT_ENDPOINT
+import data.constants.CURRENT_CLIENT_VERSION
 import data.ContractData
-import data.MISSION_ENDPOINT
+import data.constants.MISSION_ENDPOINT
 import data.MissionData
-import data.PERIODICALS_ENDPOINT
+import data.constants.PERIODICALS_ENDPOINT
 import data.PeriodicalsData
 import ei.Ei.Backup
 import ei.Ei.BasicRequestInfo

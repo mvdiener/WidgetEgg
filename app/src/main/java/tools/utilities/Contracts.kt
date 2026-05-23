@@ -10,8 +10,8 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import data.ArchivedContractInfoEntry
 import data.Artifact
-import data.CONTRACT_OFFLINE_PROGRESS_COLOR
-import data.CONTRACT_PROGRESS_COLOR
+import data.constants.CONTRACT_OFFLINE_PROGRESS_COLOR
+import data.constants.CONTRACT_PROGRESS_COLOR
 import data.ContractData
 import data.ContractInfoEntry
 import data.ContributorInfoEntry

@@ -2,6 +2,7 @@ package data
 
 import kotlinx.serialization.Serializable
 
+// Data class used to save virtue information to preferences
 @Serializable
 data class VirtueInfo(
     var stateId: String = "",

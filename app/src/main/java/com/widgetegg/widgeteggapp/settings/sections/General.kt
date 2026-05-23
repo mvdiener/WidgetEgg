@@ -41,8 +41,8 @@ import com.widgetegg.widgeteggapp.settings.SettingsHeaderAndDescription
 import com.widgetegg.widgeteggapp.settings.SettingsViewModel
 import com.widgetegg.widgeteggapp.settings.settingsRowModifier
 import com.widgetegg.widgeteggapp.settings.widgetGroupingModifier
-import data.DEFAULT_WIDGET_BACKGROUND_COLOR
-import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
 

@@ -28,10 +28,7 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.state.PreferencesGlanceStateDefinition
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
-import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

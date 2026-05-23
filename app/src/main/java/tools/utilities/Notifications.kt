@@ -9,7 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.widgetegg.widgeteggapp.R
-import data.CONTRACT_NOTIFICATION_CHANNEL_ID
+import data.constants.CONTRACT_NOTIFICATION_CHANNEL_ID
 import data.ContractInfoEntry
 import data.PeriodicalsContractInfoEntry
 
