@@ -16,7 +16,6 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import tools.utilities.formatContractData
-import tools.utilities.formatCustomEggs
 import tools.utilities.formatMissionData
 import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatSeasonInfo
@@ -344,19 +343,11 @@ class WidgetUpdater {
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
         val prefShowCommunityBadges = preferences.getShowCommunityBadges()
-        val prefCustomEggs = preferences.getCustomEggs()
 
         try {
             if (prefEid.isNotBlank()) {
-                val formattedCustomEggs = if (periodicalsInfo != null) {
-                    formatCustomEggs(periodicalsInfo)
-                } else {
-                    prefCustomEggs
-                }
-
-                prefStatsInfo = formatStatsData(backup, formattedCustomEggs)
+                prefStatsInfo = formatStatsData(backup, periodicalsInfo)
                 preferences.saveStatsInfo(prefStatsInfo)
-                preferences.saveCustomEggs(formattedCustomEggs)
 
                 StatsWidgetDataStore().updateStatsWidgetDataStore(
                     context,

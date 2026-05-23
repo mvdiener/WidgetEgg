@@ -14,7 +14,6 @@ import api.fetchPeriodicalsData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
-import tools.utilities.formatCustomEggs
 import tools.utilities.formatMissionData
 import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatSeasonInfo
@@ -151,9 +150,9 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         periodicalsResult,
                         backupResult
                     )
-                    val formattedCustomEggs = formatCustomEggs(periodicalsResult)
-                    val formattedStatsData = formatStatsData(backupResult, formattedCustomEggs)
-                    val formattedVirtueData = formatVirtueData(backupResult, periodicalsResult)
+                    val formattedStatsData = formatStatsData(backupResult, periodicalsResult)
+                    val formattedVirtueData =
+                        formatVirtueData(backupResult, periodicalsResult)
                     saveColleggtibleImagesToCache(periodicalsResult, context)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
@@ -163,7 +162,6 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     preferences.savePeriodicalsContractInfo(formattedPeriodicalsContracts)
                     preferences.saveSeasonInfo(formattedSeasonInfo)
                     preferences.saveStatsInfo(formattedStatsData)
-                    preferences.saveCustomEggs(formattedCustomEggs)
                     preferences.saveVirtueInfo(formattedVirtueData)
                     MissionWidgetDataStore().updateMissionWidgetDataStore(
                         context,

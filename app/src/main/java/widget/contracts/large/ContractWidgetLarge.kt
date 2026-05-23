@@ -56,7 +56,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
-import tools.utilities.createGlowBitmap
 import tools.utilities.formatTokenTimeText
 import tools.utilities.getAsset
 import tools.utilities.getColleggtibleBitmap
@@ -67,7 +66,6 @@ import tools.utilities.getContractTimeTextColor
 import tools.utilities.getContractTotalTimeText
 import tools.utilities.getCoopEggsPerHour
 import tools.utilities.getEggName
-import tools.utilities.getImageNameFromAfxId
 import tools.utilities.getIndividualEggsPerHour
 import tools.utilities.getOfflineEggsDelivered
 import tools.utilities.getOfflineTimeHoursAndMinutes

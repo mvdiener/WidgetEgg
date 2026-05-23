@@ -12,7 +12,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.CalendarEntry
 import data.ContractInfoEntry
-import data.CustomEggInfoEntry
 import data.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
@@ -64,7 +63,6 @@ class PreferencesDatastore(context: Context) {
         private val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
         private val STATS_INFO = stringPreferencesKey("statsInfo")
         private val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
-        private val CUSTOM_EGGS = stringPreferencesKey("customEggs")
         private val VIRTUE_INFO = stringPreferencesKey("virtueInfo")
     }
 
@@ -440,24 +438,6 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveShowCommunityBadges(showCommunityBadges: Boolean) {
         dataStore.edit {
             it[SHOW_COMMUNITY_BADGES] = showCommunityBadges
-        }
-    }
-
-    suspend fun getCustomEggs(): List<CustomEggInfoEntry> {
-        return dataStore.data.map {
-            it[CUSTOM_EGGS]?.let { customEggsJson ->
-                try {
-                    Json.decodeFromString<List<CustomEggInfoEntry>>(customEggsJson)
-                } catch (e: Exception) {
-                    emptyList()
-                }
-            } ?: emptyList()
-        }.first()
-    }
-
-    suspend fun saveCustomEggs(customEggs: List<CustomEggInfoEntry>) {
-        dataStore.edit {
-            it[CUSTOM_EGGS] = Json.encodeToString(customEggs)
         }
     }
 
