@@ -15,3 +15,11 @@ data class Stone(
     var name: Int,
     var level: Int
 )
+
+data class Research(
+    val id: String,
+    val perLevelValue: Double,
+    val isEpic: Boolean,
+    val isMultiplicative: Boolean,
+    val isOfflineOnly: Boolean
+)

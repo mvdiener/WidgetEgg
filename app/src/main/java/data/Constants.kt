@@ -205,6 +205,73 @@ const val PROGRESS_BACKGROUND_COLOR = "#464646"
 const val CONTRACT_PROGRESS_COLOR = "#008531"
 const val CONTRACT_OFFLINE_PROGRESS_COLOR = "#51dda8"
 
+// Tiers for colleggtible rewards
+val FARM_SIZE_TIERS = arrayOf(
+    10_000_000.0, // Tier 1: 10M chickens
+    100_000_000.0, // Tier 2: 100M chickens
+    1_000_000_000.0, // Tier 3: 1B chickens
+    10_000_000_000.0, // Tier 4: 10B chickens
+)
+
+val IHR_RESEARCHES = arrayOf(
+    Research(
+        id = "internal_hatchery1",
+        perLevelValue = 2.0,
+        isEpic = false,
+        isMultiplicative = false,
+        isOfflineOnly = false
+    ),
+    Research(
+        id = "internal_hatchery2",
+        perLevelValue = 5.0,
+        isEpic = false,
+        isMultiplicative = false,
+        isOfflineOnly = false
+    ),
+    Research(
+        id = "internal_hatchery3",
+        perLevelValue = 10.0,
+        isEpic = false,
+        isMultiplicative = false,
+        isOfflineOnly = false
+    ),
+    Research(
+        id = "internal_hatchery4",
+        perLevelValue = 25.0,
+        isEpic = false,
+        isMultiplicative = false,
+        isOfflineOnly = false
+    ),
+    Research(
+        id = "internal_hatchery5",
+        perLevelValue = 5.0,
+        isEpic = false,
+        isMultiplicative = false,
+        isOfflineOnly = false
+    ),
+    Research(
+        id = "neural_linking",
+        perLevelValue = 30.0,
+        isEpic = false,
+        isMultiplicative = false,
+        isOfflineOnly = false
+    ),
+    Research(
+        id = "epic_internal_incubators",
+        perLevelValue = 0.05,
+        isEpic = true,
+        isMultiplicative = true,
+        isOfflineOnly = false
+    ),
+    Research(
+        id = "int_hatch_calm",
+        perLevelValue = 0.1,
+        isEpic = true,
+        isMultiplicative = true,
+        isOfflineOnly = true
+    ),
+)
+
 //Order of virtue egg list is important, do not alter
 val VIRTUE_EGGS = arrayOf(
     Egg.CURIOSITY.number,
@@ -213,6 +280,7 @@ val VIRTUE_EGGS = arrayOf(
     Egg.RESILIENCE.number,
     Egg.KINDNESS.number
 )
+
 val VIRTUE_DELIVERY_GOALS = arrayOf(
     5e7, // 50M - TE #1
     1e9, // 1B

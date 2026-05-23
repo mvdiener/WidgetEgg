@@ -37,13 +37,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
-import tools.utilities.createGlowBitmap
 import tools.utilities.getAsset
 import tools.utilities.getEggName
-import tools.utilities.getImageNameFromAfxId
 import tools.utilities.getRemainingSiloTime
 import widget.WidgetUpdater
-import widget.shared.ArtifactsContent
 import widget.shared.NoWidgetContent
 import widget.virtue.VirtueWidgetDataStore
 import widget.virtue.VirtueWidgetDataStorePreferencesKeys
@@ -100,7 +97,8 @@ class VirtueWidgetNormal : GlanceAppWidget() {
                 if (eid.isBlank()) {
                     NoWidgetContent(assetManager, "Waiting for virtue data...", 80.dp, textColor)
                 } else {
-                    FarmData(assetManager, virtueInfo, textColor)
+                    HomeFarmInfo(assetManager, virtueInfo, textColor)
+                    ShiftInfo(assetManager, virtueInfo, textColor)
                     FarmProgress(assetManager, virtueInfo, textColor)
                 }
             }
@@ -109,14 +107,88 @@ class VirtueWidgetNormal : GlanceAppWidget() {
 }
 
 @Composable
-fun FarmData(
+fun ShiftInfo(
+    assetManager: AssetManager,
+    virtueInfo: VirtueInfo,
+    textColor: Color
+) {
+    if (true) {
+//            if (virtueInfo.isOnVirtue) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val truthEggBitmap = bitmapResize(
+                BitmapFactory.decodeStream(
+                    getAsset(
+                        assetManager,
+                        "eggs/egg_truth.png"
+                    )
+                )
+            )
+            Image(
+                provider = ImageProvider(truthEggBitmap),
+                contentDescription = "Truth Egg",
+                modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
+            )
+            Text(
+                text = "${virtueInfo.totalTruthEggs} (${virtueInfo.totalPendingTruthEggs}) ",
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+            Box(modifier = GlanceModifier.defaultWeight()) {}
+            Text(
+                text = "Shifts: ${virtueInfo.shifts}",
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
+        Row(
+            modifier = GlanceModifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = GlanceModifier,
+                text = "Next shift: ${virtueInfo.nextShiftCost}",
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+            val soulEggBitmap = bitmapResize(
+                BitmapFactory.decodeStream(
+                    getAsset(
+                        assetManager,
+                        "eggs/egg_soul.png"
+                    )
+                )
+            )
+            Image(
+                provider = ImageProvider(soulEggBitmap),
+                contentDescription = "Soul Egg",
+                modifier = GlanceModifier.size(20.dp).padding(start = 2.dp)
+            )
+        }
+    } else {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Not on Virtue",
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+        }
+    }
+}
+
+@Composable
+fun HomeFarmInfo(
     assetManager: AssetManager,
     virtueInfo: VirtueInfo,
     textColor: Color
 ) {
     Row(
-        modifier = GlanceModifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
+        horizontalAlignment = Alignment.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         val eggName = getEggName(virtueInfo.eggId)
@@ -131,88 +203,25 @@ fun FarmData(
         Image(
             provider = ImageProvider(eggBitmap),
             contentDescription = "Home Egg",
-            modifier = GlanceModifier.size(35.dp).padding(start = 5.dp)
+            modifier = GlanceModifier.size(20.dp)
         )
-        Column(
-            modifier = GlanceModifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (true) {
-//            if (virtueInfo.isOnVirtue) {
-                Row(
-                    modifier = GlanceModifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val truthEggBitmap = bitmapResize(
-                        BitmapFactory.decodeStream(
-                            getAsset(
-                                assetManager,
-                                "eggs/egg_truth.png"
-                            )
-                        )
+        if (virtueInfo.isOnVirtue) {
+//            val virtueFunctionPath = getVirtueFunctionIconPath(virtueInfo.eggId)
+            val virtueFunctionBitmap = bitmapResize(
+                BitmapFactory.decodeStream(
+                    getAsset(
+                        assetManager,
+                        "eggs/$eggName.png"
                     )
-                    Image(
-                        provider = ImageProvider(truthEggBitmap),
-                        contentDescription = "Truth Egg",
-                        modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
-                    )
-                    Text(
-                        text = "${virtueInfo.totalTruthEggs} (${virtueInfo.totalPendingTruthEggs}) ",
-                        style = TextStyle(color = ColorProvider(textColor))
-                    )
-                    Text(
-                        text = "Shifts: ${virtueInfo.shifts}",
-                        style = TextStyle(color = ColorProvider(textColor))
-                    )
-                }
-                Row(
-                    modifier = GlanceModifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        modifier = GlanceModifier.padding(start = 3.dp),
-                        text = "Shift SE: ${virtueInfo.nextShiftCost}",
-                        style = TextStyle(color = ColorProvider(textColor))
-                    )
-                    val soulEggBitmap = bitmapResize(
-                        BitmapFactory.decodeStream(
-                            getAsset(
-                                assetManager,
-                                "eggs/egg_soul.png"
-                            )
-                        )
-                    )
-                    Image(
-                        provider = ImageProvider(soulEggBitmap),
-                        contentDescription = "Soul Egg",
-                        modifier = GlanceModifier.size(20.dp).padding(start = 2.dp)
-                    )
-                }
-            } else {
-                Text(
-                    text = "Not on Virtue",
-                    style = TextStyle(color = ColorProvider(textColor))
                 )
-            }
-            Silos(assetManager, virtueInfo, textColor)
+            )
+            Image(
+                provider = ImageProvider(eggBitmap),
+                contentDescription = "Home Egg",
+                modifier = GlanceModifier.size(20.dp)
+            )
         }
-    }
-}
 
-@Composable
-fun Silos(
-    assetManager: AssetManager,
-    virtueInfo: VirtueInfo,
-    textColor: Color
-) {
-    Row(
-        modifier = GlanceModifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
         val siloBitmap = bitmapResize(
             BitmapFactory.decodeStream(
                 getAsset(
@@ -221,10 +230,11 @@ fun Silos(
                 )
             )
         )
+        Box(modifier = GlanceModifier.defaultWeight()) {}
         Image(
             provider = ImageProvider(siloBitmap),
             contentDescription = "Silos",
-            modifier = GlanceModifier.size(25.dp).padding(end = 5.dp)
+            modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
         )
         val siloTimeRemaining =
             getRemainingSiloTime(virtueInfo.lastBackupDate, virtueInfo.maximumOfflineTime)
@@ -235,26 +245,26 @@ fun Silos(
     }
 }
 
-@Composable
-fun Artifacts(
-    assetManager: AssetManager,
-    virtueInfo: VirtueInfo
-) {
-    val artifacts = if (virtueInfo.isOnVirtue) {
-        virtueInfo.virtueEquippedArtifacts
-    } else {
-        virtueInfo.homeEquippedArtifacts
-    }
-    if (artifacts.isNotEmpty()) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ArtifactsContent(assetManager, artifacts)
-        }
-    }
-}
+//@Composable
+//fun Artifacts(
+//    assetManager: AssetManager,
+//    virtueInfo: VirtueInfo
+//) {
+//    val artifacts = if (virtueInfo.isOnVirtue) {
+//        virtueInfo.virtueEquippedArtifacts
+//    } else {
+//        virtueInfo.homeEquippedArtifacts
+//    }
+//    if (artifacts.isNotEmpty()) {
+//        Row(
+//            modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp),
+//            horizontalAlignment = Alignment.Start,
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            ArtifactsContent(assetManager, artifacts)
+//        }
+//    }
+//}
 
 @Composable
 fun FarmProgress(
@@ -264,7 +274,7 @@ fun FarmProgress(
 ) {
     virtueInfo.farms.forEach { farm ->
         Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(horizontal = 5.dp),
+            modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
             horizontalAlignment = Alignment.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -283,7 +293,12 @@ fun FarmProgress(
                 modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
             )
             Text(
-                text = "${farm.truthEggs} (${farm.pendingTruthEggs}) ",
+                text = "${farm.truthEggs} (${farm.pendingTruthEggs})",
+                style = TextStyle(color = ColorProvider(textColor))
+            )
+            Box(modifier = GlanceModifier.defaultWeight()) {}
+            Text(
+                text = "Sample date",
                 style = TextStyle(color = ColorProvider(textColor))
             )
         }
