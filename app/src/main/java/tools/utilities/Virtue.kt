@@ -9,6 +9,8 @@ import data.constants.VIRTUE_DELIVERY_GOALS
 import data.constants.VIRTUE_EGGS
 import data.VirtueFarmInfo
 import data.VirtueInfo
+import data.constants.IHR_ARTIFACTS
+import data.constants.IHR_STONES
 import ei.Ei.ArtifactsDB.ActiveArtifactSet
 import ei.Ei.ArtifactInventoryItem
 import ei.Ei.Backup
@@ -46,7 +48,7 @@ fun formatVirtueData(
     val isOnVirtue = homeFarm.eggType.number in VIRTUE_EGGS
 
     val (onlineHatcheryRate, offlineHatcheryRate) = if (isOnVirtue) {
-        getInternalHatcheryRate(backup, periodicalsData, homeFarm, virtueArtifacts)
+        getInternalHatcheryRate(backup, periodicalsData, homeFarm, homeArtifacts)
     } else {
         Pair(0.0, 0.0)
     }
@@ -174,18 +176,32 @@ private fun getInternalHatcheryRate(
     homeFarm: Backup.Simulation,
     virtueArtifacts: List<Artifact>
 ): Pair<Double, Double> {
-    val colleggtibleMultiplier = getIhrColleggtiblesMultiplier(backup, periodicalsData)
-    val (onlineMultiplier, offlineMultiplier) = getResearchIhrMultiplier(backup, homeFarm)
-    val truthEggBonus = (1.1).pow(backup.virtue.eovEarnedList.sumOf { it })
-    val artifactsMultiplier = getArtifactsIhrMultiplier(virtueArtifacts)
+    val (onlineMultiplier, offlineMultiplier, researchBaseRate) = getResearchIhrMultiplier(
+        backup,
+        homeFarm
+    )
+    if (onlineMultiplier == 0.0) return Pair(0.0, 0.0)
 
-    return Pair(0.0, 0.0)
+    val colleggtibleMultiplier = getIhrColleggtiblesMultiplier(backup, periodicalsData)
+    val truthEggBonus = (1.1).pow(backup.virtue.eovEarnedList.sumOf { it })
+    val artifactsMultiplier = getArtifactsMultiplier(virtueArtifacts, IHR_ARTIFACTS, IHR_STONES)
+
+    val onlineRatePerHab =
+        researchBaseRate * onlineMultiplier * colleggtibleMultiplier * artifactsMultiplier * truthEggBonus
+    // Technically we should calculate the online rate based on the internal hatchery sharing ER
+    // We are assuming people probably have their ER finished by the time they do virtue
+    // So we have a hard coded 4x for all habs
+    val onlineRate = 4 * onlineRatePerHab
+    val offlineRate = onlineRate * offlineMultiplier
+
+
+    return Pair(onlineRate, offlineRate)
 }
 
 private fun getResearchIhrMultiplier(
     backup: Backup,
     homeFarm: Backup.Simulation
-): Pair<Double, Double> {
+): Triple<Double, Double, Double> {
     var baseRate = 0.0
     var onlineMultiplier = 1.0
     var offlineMultiplier = 1.0
@@ -193,15 +209,8 @@ private fun getResearchIhrMultiplier(
     val commonResearch = homeFarm.commonResearchList
     val epicResearch = backup.game.epicResearchList
     IHR_RESEARCHES.forEach { research ->
-        val level = if (research.isEpic) {
-            epicResearch.find { it.id == research.id }?.level ?: 0
-        } else {
-            commonResearch.find { it.id == research.id }?.level ?: 0
-        }
-
-        if (level == 0) return@forEach
-
         if (research.isMultiplicative) {
+            val level = epicResearch.find { it.id == research.id }?.level ?: 0
             val multiplier = 1.0 + (level * research.perLevelValue)
             if (research.isOfflineOnly) {
                 offlineMultiplier *= multiplier
@@ -209,57 +218,38 @@ private fun getResearchIhrMultiplier(
                 onlineMultiplier *= multiplier
             }
         } else {
+            val level = commonResearch.find { it.id == research.id }?.level ?: 0
             baseRate += level * research.perLevelValue
         }
     }
 
-    return Pair(onlineMultiplier, offlineMultiplier)
+    return Triple(onlineMultiplier, offlineMultiplier, baseRate)
 }
 
-private fun getArtifactsIhrMultiplier(artifacts: List<Artifact>): Double {
+private fun getArtifactsMultiplier(
+    equippedArtifacts: List<Artifact>,
+    artifactSearchList: Array<Artifact>,
+    stoneSearchList: Array<Stone>
+): Double {
+    var baseRate = 1.0
 
-}
+    equippedArtifacts.forEach { artifact ->
+        val matchingArtifact = artifactSearchList.find {
+            it.name == artifact.name && it.level == artifact.level && it.rarity == artifact.rarity
+        }
+        if (matchingArtifact != null) {
+            baseRate *= (1.0 + matchingArtifact.effectValue!!)
+        }
 
-/*
-export function farmInternalHatcheryRates(
-  researches: InternalHatcheryResearchInstance[],
-  artifacts: Artifact[],
-  modifier = 1,
-  truthEggs = 0
-): {
-  onlineRatePerHab: number;
-  onlineRate: number;
-  offlineRatePerHab: number;
-  offlineRate: number;
-} {
-  let baseRate = 0;
-  let onlineMultiplier = 1;
-  let offlineMultiplier = 1;
-  for (const research of researches) {
-    if (research.multiplicative) {
-      const multiplier = 1 + research.level * research.perLevel;
-      if (research.offlineOnly) {
-        offlineMultiplier *= multiplier;
-      } else {
-        onlineMultiplier *= multiplier;
-      }
-    } else {
-      baseRate += research.level * research.perLevel;
+        artifact.stones.forEach { stone ->
+            val matchingStone = stoneSearchList.find {
+                it.name == stone.name && it.level == stone.level
+            }
+            if (matchingStone != null) {
+                baseRate *= (1.0 + matchingStone.effectValue!!)
+            }
+        }
     }
-  }
-  const truthEggBonus = 1.1 ** truthEggs;
-  const artifactsMultiplier = internalHatcheryRateMultiplier(artifacts);
-  // With max internal hatchery sharing, four internal hatcheries are constantly
-  // at work even if not all habs are bought;
-  const onlineRatePerHab = baseRate * onlineMultiplier * artifactsMultiplier * modifier * truthEggBonus;
-  const onlineRate = 4 * onlineRatePerHab;
-  const offlineRatePerHab = onlineRatePerHab * offlineMultiplier;
-  const offlineRate = onlineRate * offlineMultiplier;
-  return {
-    onlineRatePerHab,
-    onlineRate,
-    offlineRatePerHab,
-    offlineRate,
-  };
+
+    return baseRate
 }
- */

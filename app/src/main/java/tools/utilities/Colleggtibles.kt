@@ -39,7 +39,7 @@ fun getIhrColleggtiblesMultiplier(backup: Backup, periodicalsData: PeriodicalsDa
     val contracts = backup.contracts.archiveList + backup.contracts.contractsList
 
     return customEggs.fold(1.0) { total, egg ->
-        val maxPop = contracts.filter { it.contract.identifier == egg.name }
+        val maxPop = contracts.filter { it.contract.customEggId == egg.name }
             .maxOfOrNull { it.maxFarmSizeReached } ?: 0.0
 
         val reachedTierIndex = FARM_SIZE_TIERS.indexOfLast { maxPop >= it }

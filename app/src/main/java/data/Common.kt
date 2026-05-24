@@ -7,13 +7,15 @@ data class Artifact(
     var name: Int,
     var rarity: Int,
     var level: Int,
+    var effectValue: Double? = null,
     var stones: List<Stone>
 )
 
 @Serializable
 data class Stone(
     var name: Int,
-    var level: Int
+    var level: Int,
+    var effectValue: Double? = null,
 )
 
 data class Research(

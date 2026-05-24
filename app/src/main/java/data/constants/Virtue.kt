@@ -1,6 +1,8 @@
 package data.constants
 
+import data.Artifact
 import data.Research
+import data.Stone
 import ei.Ei.Egg
 
 val IHR_RESEARCHES = arrayOf(
@@ -41,7 +43,7 @@ val IHR_RESEARCHES = arrayOf(
     ),
     Research(
         id = "neural_linking",
-        perLevelValue = 30.0,
+        perLevelValue = 50.0,
         isEpic = false,
         isMultiplicative = false,
         isOfflineOnly = false
@@ -60,6 +62,101 @@ val IHR_RESEARCHES = arrayOf(
         isMultiplicative = true,
         isOfflineOnly = true
     ),
+)
+
+// Chalices
+val IHR_ARTIFACTS = arrayOf(
+    // T1C
+    Artifact(
+        name = 9,
+        rarity = 0,
+        level = 0,
+        effectValue = 0.05,
+        stones = emptyList()
+    ),
+    // T2C
+    Artifact(
+        name = 9,
+        rarity = 0,
+        level = 1,
+        effectValue = 0.1,
+        stones = emptyList()
+    ),
+    // T2E
+    Artifact(
+        name = 9,
+        rarity = 2,
+        level = 1,
+        effectValue = 0.15,
+        stones = emptyList()
+    ),
+    // T3C
+    Artifact(
+        name = 9,
+        rarity = 0,
+        level = 2,
+        effectValue = 0.2,
+        stones = emptyList()
+    ),
+    // T3R
+    Artifact(
+        name = 9,
+        rarity = 1,
+        level = 2,
+        effectValue = 0.23,
+        stones = emptyList()
+    ),
+    // T3E
+    Artifact(
+        name = 9,
+        rarity = 2,
+        level = 2,
+        effectValue = 0.25,
+        stones = emptyList()
+    ),
+    // T4C
+    Artifact(
+        name = 9,
+        rarity = 0,
+        level = 3,
+        effectValue = 0.3,
+        stones = emptyList()
+    ),
+    // T4E
+    Artifact(
+        name = 9,
+        rarity = 2,
+        level = 3,
+        effectValue = 0.35,
+        stones = emptyList()
+    ),
+    // T4L
+    Artifact(
+        name = 9,
+        rarity = 3,
+        level = 3,
+        effectValue = 0.4,
+        stones = emptyList()
+    )
+)
+
+// Life stones
+val IHR_STONES = arrayOf(
+    Stone(
+        name = 38,
+        level = 0,
+        effectValue = 0.02
+    ),
+    Stone(
+        name = 38,
+        level = 1,
+        effectValue = 0.03
+    ),
+    Stone(
+        name = 38,
+        level = 2,
+        effectValue = 0.04
+    )
 )
 
 //Order of virtue egg list is important, do not alter
