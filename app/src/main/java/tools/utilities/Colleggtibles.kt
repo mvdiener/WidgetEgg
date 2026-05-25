@@ -31,11 +31,15 @@ fun getHabsColleggtiblesMultiplier(periodicalsData: PeriodicalsData?): Double {
 }
 
 // Gets the total ihr multiplier that the user has achieved
-fun getIhrColleggtiblesMultiplier(backup: Backup, periodicalsData: PeriodicalsData?): Double {
+fun getColleggtiblesMultiplier(
+    backup: Backup,
+    periodicalsData: PeriodicalsData?,
+    colleggtibleType: GameDimension
+): Double {
     if (periodicalsData == null) return 1.0
 
     val customEggs =
-        formatCustomEggs(periodicalsData).filter { egg -> egg.buffType == GameDimension.INTERNAL_HATCHERY_RATE }
+        formatCustomEggs(periodicalsData).filter { egg -> egg.buffType == colleggtibleType }
     val contracts = backup.contracts.archiveList + backup.contracts.contractsList
 
     return customEggs.fold(1.0) { total, egg ->

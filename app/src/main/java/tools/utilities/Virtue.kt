@@ -11,10 +11,18 @@ import data.VirtueFarmInfo
 import data.VirtueInfo
 import data.constants.IHR_ARTIFACTS
 import data.constants.IHR_STONES
+import data.constants.LAY_RATE_ARTIFACTS
+import data.constants.LAY_RATE_RESEARCHES
+import data.constants.LAY_RATE_STONES
+import data.constants.SHIPPING_CAPACITY_ARTIFACTS
+import data.constants.SHIPPING_CAPACITY_RESEARCHES
+import data.constants.SHIPPING_CAPACITY_STONES
+import data.constants.VEHICLES
 import ei.Ei.ArtifactsDB.ActiveArtifactSet
 import ei.Ei.ArtifactInventoryItem
 import ei.Ei.Backup
 import ei.Ei.FarmType
+import ei.Ei.GameModifier.GameDimension
 import java.util.UUID
 import kotlin.math.max
 import java.time.Instant
@@ -182,7 +190,8 @@ private fun getInternalHatcheryRate(
     )
     if (onlineMultiplier == 0.0) return Pair(0.0, 0.0)
 
-    val colleggtibleMultiplier = getIhrColleggtiblesMultiplier(backup, periodicalsData)
+    val colleggtibleMultiplier =
+        getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.INTERNAL_HATCHERY_RATE)
     val truthEggBonus = (1.1).pow(backup.virtue.eovEarnedList.sumOf { it })
     val artifactsMultiplier = getArtifactsMultiplier(virtueArtifacts, IHR_ARTIFACTS, IHR_STONES)
 
@@ -210,20 +219,129 @@ private fun getResearchIhrMultiplier(
     val epicResearch = backup.game.epicResearchList
     IHR_RESEARCHES.forEach { research ->
         if (research.isMultiplicative) {
-            val level = epicResearch.find { it.id == research.id }?.level ?: 0
-            val multiplier = 1.0 + (level * research.perLevelValue)
+            val researchLevel = epicResearch.find { it.id == research.id }?.level ?: 0
+            val multiplier = 1.0 + (researchLevel * research.perLevelValue)
             if (research.isOfflineOnly) {
                 offlineMultiplier *= multiplier
             } else {
                 onlineMultiplier *= multiplier
             }
         } else {
-            val level = commonResearch.find { it.id == research.id }?.level ?: 0
-            baseRate += level * research.perLevelValue
+            val researchLevel = commonResearch.find { it.id == research.id }?.level ?: 0
+            baseRate += researchLevel * research.perLevelValue
         }
     }
 
     return Triple(onlineMultiplier, offlineMultiplier, baseRate)
+}
+
+private fun getEggLayingRate(
+    backup: Backup,
+    periodicalsData: PeriodicalsData?,
+    homeFarm: Backup.Simulation,
+    virtueArtifacts: List<Artifact>
+): Double {
+    val colleggtibleMultiplier =
+        getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.EGG_LAYING_RATE)
+    val artifactsMultiplier = getArtifactsMultiplier(
+        virtueArtifacts, LAY_RATE_ARTIFACTS,
+        LAY_RATE_STONES
+    )
+    val researchLayRate = getResearchLayRate(backup, homeFarm)
+
+    return 60 * homeFarm.numChickens * researchLayRate * artifactsMultiplier * colleggtibleMultiplier
+}
+
+private fun getResearchLayRate(
+    backup: Backup,
+    homeFarm: Backup.Simulation
+): Double {
+    var baseRate = 1.0 / 30.0 // 1 egg per 30 seconds
+    val commonResearch = homeFarm.commonResearchList
+    val epicResearch = backup.game.epicResearchList
+
+    LAY_RATE_RESEARCHES.forEach { research ->
+        val researchLevel = if (research.isEpic) {
+            epicResearch.find { it.id == research.id }?.level ?: 0
+        } else {
+            commonResearch.find { it.id == research.id }?.level ?: 0
+        }
+
+        baseRate *= 1.0 + (researchLevel * research.perLevelValue)
+    }
+
+    return baseRate
+}
+
+private fun getShippingCapacity(
+    backup: Backup,
+    periodicalsData: PeriodicalsData?,
+    homeFarm: Backup.Simulation,
+    virtueArtifacts: List<Artifact>
+): Double {
+    val colleggtibleMultiplier =
+        getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.SHIPPING_CAPACITY)
+    val artifactsMultiplier = getArtifactsMultiplier(
+        virtueArtifacts, SHIPPING_CAPACITY_ARTIFACTS,
+        SHIPPING_CAPACITY_STONES
+    )
+    val (universalMultiplier, hoverOnlyMultiplier, hyperloopOnlyMultiplier) = getResearchShippingCapacity(
+        backup,
+        homeFarm
+    )
+
+    val vehicles = homeFarm.vehiclesList
+    val trainLengths = homeFarm.trainLengthList
+
+    if (vehicles.size != trainLengths.size || vehicles.any { it !in 0..11 }) return 0.0
+
+    val totalCapacity = vehicles.mapIndexed { index, vehicleId ->
+        var capacity = (VEHICLES.find { it.id == vehicleId }?.capacity
+            ?: 0.0) * universalMultiplier * artifactsMultiplier * colleggtibleMultiplier
+
+        if (vehicleId >= 9) {
+            capacity *= hoverOnlyMultiplier
+        }
+
+        if (vehicleId == 11) {
+            val trainLength = trainLengths.getOrElse(index) { 1 }
+            capacity *= (trainLength * hyperloopOnlyMultiplier)
+        }
+
+        capacity
+    }.sum()
+
+    return totalCapacity
+}
+
+private fun getResearchShippingCapacity(
+    backup: Backup,
+    homeFarm: Backup.Simulation
+): Triple<Double, Double, Double> {
+    var universalMultiplier = 1.0
+    var hoverOnlyMultiplier = 1.0
+    var hyperloopOnlyMultiplier = 1.0
+    val commonResearch = homeFarm.commonResearchList
+    val epicResearch = backup.game.epicResearchList
+
+    SHIPPING_CAPACITY_RESEARCHES.forEach { research ->
+        val researchLevel = if (research.isEpic) {
+            epicResearch.find { it.id == research.id }?.level ?: 0
+        } else {
+            commonResearch.find { it.id == research.id }?.level ?: 0
+        }
+
+        val multiplier = 1 + researchLevel * research.perLevelValue
+        if (research.isHoverOnly) {
+            hoverOnlyMultiplier *= multiplier
+        } else if (research.isHyperloopOnly) {
+            hyperloopOnlyMultiplier *= multiplier
+        } else {
+            universalMultiplier *= multiplier
+        }
+    }
+
+    return Triple(universalMultiplier, hoverOnlyMultiplier, hyperloopOnlyMultiplier)
 }
 
 private fun getArtifactsMultiplier(
