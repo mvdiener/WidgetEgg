@@ -3,57 +3,39 @@ package data.constants
 import data.Artifact
 import data.Research
 import data.Stone
+import data.Vehicle
 import ei.Ei.Egg
 
 val IHR_RESEARCHES = arrayOf(
     Research(
         id = "internal_hatchery1",
-        perLevelValue = 2.0,
-        isEpic = false,
-        isMultiplicative = false,
-        isOfflineOnly = false
+        perLevelValue = 2.0
     ),
     Research(
         id = "internal_hatchery2",
-        perLevelValue = 5.0,
-        isEpic = false,
-        isMultiplicative = false,
-        isOfflineOnly = false
+        perLevelValue = 5.0
     ),
     Research(
         id = "internal_hatchery3",
-        perLevelValue = 10.0,
-        isEpic = false,
-        isMultiplicative = false,
-        isOfflineOnly = false
+        perLevelValue = 10.0
     ),
     Research(
         id = "internal_hatchery4",
-        perLevelValue = 25.0,
-        isEpic = false,
-        isMultiplicative = false,
-        isOfflineOnly = false
+        perLevelValue = 25.0
     ),
     Research(
         id = "internal_hatchery5",
-        perLevelValue = 5.0,
-        isEpic = false,
-        isMultiplicative = false,
-        isOfflineOnly = false
+        perLevelValue = 5.0
     ),
     Research(
         id = "neural_linking",
-        perLevelValue = 50.0,
-        isEpic = false,
-        isMultiplicative = false,
-        isOfflineOnly = false
+        perLevelValue = 50.0
     ),
     Research(
         id = "epic_internal_incubators",
         perLevelValue = 0.05,
         isEpic = true,
-        isMultiplicative = true,
-        isOfflineOnly = false
+        isMultiplicative = true
     ),
     Research(
         id = "int_hatch_calm",
@@ -61,10 +43,88 @@ val IHR_RESEARCHES = arrayOf(
         isEpic = true,
         isMultiplicative = true,
         isOfflineOnly = true
-    ),
+    )
 )
 
-// Chalices
+val LAY_RATE_RESEARCHES = arrayOf(
+    Research(
+        id = "comfy_nests",
+        perLevelValue = 0.1
+    ),
+    Research(
+        id = "hen_house_ac",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "improved_genetics",
+        perLevelValue = 0.15
+    ),
+    Research(
+        id = "time_compress",
+        perLevelValue = 0.1
+    ),
+    Research(
+        id = "timeline_diversion",
+        perLevelValue = 0.02
+    ),
+    Research(
+        id = "relativity_optimization",
+        perLevelValue = 0.1
+    ),
+    Research(
+        id = "epic_egg_laying",
+        perLevelValue = 0.05,
+        isEpic = true
+    )
+)
+
+val SHIPPING_CAPACITY_RESEARCHES = arrayOf(
+    Research(
+        id = "leafsprings",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "lightweight_boxes",
+        perLevelValue = 0.1
+    ),
+    Research(
+        id = "driver_training",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "super_alloy",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "quantum_storage",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "hover_upgrades",
+        perLevelValue = 0.05,
+        isHoverOnly = true
+    ),
+    Research(
+        id = "dark_containment",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "neural_net_refine",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "hyper_portalling",
+        perLevelValue = 0.05,
+        isHyperloopOnly = true
+    ),
+    Research(
+        id = "transportation_lobbyist",
+        perLevelValue = 0.05,
+        isEpic = true
+    )
+)
+
+// Chalice
 val IHR_ARTIFACTS = arrayOf(
     // T1C
     Artifact(
@@ -140,7 +200,7 @@ val IHR_ARTIFACTS = arrayOf(
     )
 )
 
-// Life stones
+// Life stone
 val IHR_STONES = arrayOf(
     Stone(
         name = 38,
@@ -156,6 +216,247 @@ val IHR_STONES = arrayOf(
         name = 38,
         level = 2,
         effectValue = 0.04
+    )
+)
+
+// Metronome
+val LAY_RATE_ARTIFACTS = arrayOf(
+    // T1C
+    Artifact(
+        name = 24,
+        rarity = 0,
+        level = 0,
+        effectValue = 0.05,
+        stones = emptyList()
+    ),
+    // T2C
+    Artifact(
+        name = 24,
+        rarity = 0,
+        level = 1,
+        effectValue = 0.1,
+        stones = emptyList()
+    ),
+    // T2R
+    Artifact(
+        name = 24,
+        rarity = 1,
+        level = 1,
+        effectValue = 0.12,
+        stones = emptyList()
+    ),
+    // T3C
+    Artifact(
+        name = 24,
+        rarity = 0,
+        level = 2,
+        effectValue = 0.15,
+        stones = emptyList()
+    ),
+    // T3R
+    Artifact(
+        name = 24,
+        rarity = 1,
+        level = 2,
+        effectValue = 0.17,
+        stones = emptyList()
+    ),
+    // T3E
+    Artifact(
+        name = 24,
+        rarity = 2,
+        level = 2,
+        effectValue = 0.2,
+        stones = emptyList()
+    ),
+    // T4C
+    Artifact(
+        name = 24,
+        rarity = 0,
+        level = 3,
+        effectValue = 0.25,
+        stones = emptyList()
+    ),
+    // T4R
+    Artifact(
+        name = 24,
+        rarity = 1,
+        level = 3,
+        effectValue = 0.27,
+        stones = emptyList()
+    ),
+    // T4E
+    Artifact(
+        name = 24,
+        rarity = 2,
+        level = 3,
+        effectValue = 0.3,
+        stones = emptyList()
+    ),
+    // T4L
+    Artifact(
+        name = 24,
+        rarity = 3,
+        level = 3,
+        effectValue = 0.35,
+        stones = emptyList()
+    )
+)
+
+// Tachyon stone
+val LAY_RATE_STONES = arrayOf(
+    Stone(
+        name = 1,
+        level = 0,
+        effectValue = 0.02
+    ),
+    Stone(
+        name = 1,
+        level = 1,
+        effectValue = 0.04
+    ),
+    Stone(
+        name = 1,
+        level = 2,
+        effectValue = 0.05
+    )
+)
+
+// Compass
+val SHIPPING_CAPACITY_ARTIFACTS = arrayOf(
+    // T1C
+    Artifact(
+        name = 27,
+        rarity = 0,
+        level = 0,
+        effectValue = 0.05,
+        stones = emptyList()
+    ),
+    // T2C
+    Artifact(
+        name = 27,
+        rarity = 0,
+        level = 1,
+        effectValue = 0.1,
+        stones = emptyList()
+    ),
+    // T3C
+    Artifact(
+        name = 27,
+        rarity = 0,
+        level = 2,
+        effectValue = 0.2,
+        stones = emptyList()
+    ),
+    // T3R
+    Artifact(
+        name = 27,
+        rarity = 1,
+        level = 2,
+        effectValue = 0.22,
+        stones = emptyList()
+    ),
+    // T4C
+    Artifact(
+        name = 27,
+        rarity = 0,
+        level = 3,
+        effectValue = 0.3,
+        stones = emptyList()
+    ),
+    // T4R
+    Artifact(
+        name = 27,
+        rarity = 1,
+        level = 3,
+        effectValue = 0.35,
+        stones = emptyList()
+    ),
+    // T4E
+    Artifact(
+        name = 27,
+        rarity = 2,
+        level = 3,
+        effectValue = 0.4,
+        stones = emptyList()
+    ),
+    // T4L
+    Artifact(
+        name = 27,
+        rarity = 3,
+        level = 3,
+        effectValue = 0.5,
+        stones = emptyList()
+    )
+)
+
+// Quantum stone
+val SHIPPING_CAPACITY_STONES = arrayOf(
+    Stone(
+        name = 36,
+        level = 0,
+        effectValue = 0.02
+    ),
+    Stone(
+        name = 36,
+        level = 1,
+        effectValue = 0.04
+    ),
+    Stone(
+        name = 36,
+        level = 2,
+        effectValue = 0.05
+    )
+)
+
+val VEHICLES = arrayOf(
+    Vehicle(
+        id = 0,
+        capacity = 5e3 / 60
+    ),
+    Vehicle(
+        id = 1,
+        capacity = 15e3 / 60
+    ),
+    Vehicle(
+        id = 2,
+        capacity = 50e3 / 60
+    ),
+    Vehicle(
+        id = 3,
+        capacity = 100e3 / 60
+    ),
+    Vehicle(
+        id = 4,
+        capacity = 250e3 / 60
+    ),
+    Vehicle(
+        id = 5,
+        capacity = 500e3 / 60
+    ),
+    Vehicle(
+        id = 6,
+        capacity = 1e6 / 60
+    ),
+    Vehicle(
+        id = 7,
+        capacity = 5e6 / 60
+    ),
+    Vehicle(
+        id = 8,
+        capacity = 15e6 / 60
+    ),
+    Vehicle(
+        id = 9,
+        capacity = 30e6 / 60
+    ),
+    Vehicle(
+        id = 10,
+        capacity = 50e6 / 60
+    ),
+    Vehicle(
+        id = 11,
+        capacity = 50e6 / 60
     )
 )
 

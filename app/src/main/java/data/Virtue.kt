@@ -38,3 +38,18 @@ data class Event(
     var multiplier: Double,
     var isUltra: Boolean
 )
+
+data class Research(
+    val id: String,
+    val perLevelValue: Double,
+    val isEpic: Boolean = false,
+    val isMultiplicative: Boolean = false,
+    val isOfflineOnly: Boolean = false,
+    val isHoverOnly: Boolean = false,
+    val isHyperloopOnly: Boolean = false
+)
+
+data class Vehicle(
+    val id: Int,
+    val capacity: Double
+)

@@ -17,11 +17,3 @@ data class Stone(
     var level: Int,
     var effectValue: Double? = null,
 )
-
-data class Research(
-    val id: String,
-    val perLevelValue: Double,
-    val isEpic: Boolean,
-    val isMultiplicative: Boolean,
-    val isOfflineOnly: Boolean
-)
