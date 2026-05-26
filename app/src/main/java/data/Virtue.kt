@@ -13,6 +13,9 @@ data class VirtueInfo(
     var totalPendingTruthEggs: String = "",
     var onlineHatcheryRate: Double = 0.0,
     var offlineHatcheryRate: Double = 0.0,
+    var eggLayingRate: Double = 0.0,
+    var shippingCapacity: Double = 0.0,
+    var habCapacity: Double = 0.0,
     var eggId: Int = 0,
     var population: String = "",
     var lastBackupDate: Double = 0.0,
@@ -46,10 +49,16 @@ data class Research(
     val isMultiplicative: Boolean = false,
     val isOfflineOnly: Boolean = false,
     val isHoverOnly: Boolean = false,
-    val isHyperloopOnly: Boolean = false
+    val isHyperloopOnly: Boolean = false,
+    val isPortalHabsOnly: Boolean = false
 )
 
 data class Vehicle(
     val id: Int,
-    val capacity: Double
+    val baseCapacity: Double
+)
+
+data class Hab(
+    val id: Int,
+    val baseHabSpace: Double
 )

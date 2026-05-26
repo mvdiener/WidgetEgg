@@ -9,6 +9,9 @@ import data.constants.VIRTUE_DELIVERY_GOALS
 import data.constants.VIRTUE_EGGS
 import data.VirtueFarmInfo
 import data.VirtueInfo
+import data.constants.HABS
+import data.constants.HAB_SPACE_ARTIFACTS
+import data.constants.HAB_SPACE_RESEARCHES
 import data.constants.IHR_ARTIFACTS
 import data.constants.IHR_STONES
 import data.constants.LAY_RATE_ARTIFACTS
@@ -26,6 +29,7 @@ import ei.Ei.GameModifier.GameDimension
 import java.util.UUID
 import kotlin.math.max
 import java.time.Instant
+import kotlin.math.ceil
 import kotlin.math.pow
 
 fun formatVirtueData(
@@ -61,6 +65,24 @@ fun formatVirtueData(
         Pair(0.0, 0.0)
     }
 
+    val eggLayingRate = if (isOnVirtue) {
+        getEggLayingRate(backup, periodicalsData, homeFarm, homeArtifacts)
+    } else {
+        0.0
+    }
+
+    val shippingCapacity = if (isOnVirtue) {
+        getShippingCapacity(backup, periodicalsData, homeFarm, homeArtifacts)
+    } else {
+        0.0
+    }
+
+    val habCapacity = if (isOnVirtue) {
+        getHabCapacity(backup, periodicalsData, homeFarm, homeArtifacts)
+    } else {
+        0.0
+    }
+
     return VirtueInfo(
         stateId = UUID.randomUUID().toString(),
         resets = backup.virtue.resets,
@@ -68,6 +90,11 @@ fun formatVirtueData(
         nextShiftCost = numberToString(getNextShiftCost(backup)),
         totalTruthEggs = backup.virtue.eovEarnedList.sumOf { it }.toString(),
         totalPendingTruthEggs = virtueFarms.sumOf { it.pendingTruthEggs }.toString(),
+        onlineHatcheryRate = onlineHatcheryRate,
+        offlineHatcheryRate = offlineHatcheryRate,
+        habCapacity = habCapacity,
+        eggLayingRate = eggLayingRate,
+        shippingCapacity = shippingCapacity,
         eggId = homeFarm.eggType.number,
         population = numberToString(homeFarm.numChickens.toDouble()),
         lastBackupDate = homeFarm.lastStepTime,
@@ -156,13 +183,13 @@ private fun formatDailyEvents(periodicalsData: PeriodicalsData?): List<Event> {
 private fun formatVirtueFarms(virtue: Backup.Virtue): List<VirtueFarmInfo> {
     return VIRTUE_EGGS.mapIndexed { index, egg ->
         val eggsDelivered = virtue.eggsDeliveredList.elementAtOrNull(index) ?: 0.0
-        val pendingTruthEggs = countTruthEggThresholdsPassed(eggsDelivered)
         val truthEggs = virtue.eovEarnedList.elementAtOrNull(index) ?: 0
+        val pendingTruthEggs = countTruthEggThresholdsPassed(eggsDelivered) - truthEggs
 
         VirtueFarmInfo(
             eggId = egg,
             truthEggs = truthEggs,
-            pendingTruthEggs = max(0, pendingTruthEggs - truthEggs),
+            pendingTruthEggs = max(0, pendingTruthEggs),
             eggsDelivered = eggsDelivered
         )
     }
@@ -295,8 +322,8 @@ private fun getShippingCapacity(
 
     if (vehicles.size != trainLengths.size || vehicles.any { it !in 0..11 }) return 0.0
 
-    val totalCapacity = vehicles.mapIndexed { index, vehicleId ->
-        var capacity = (VEHICLES.find { it.id == vehicleId }?.capacity
+    return vehicles.mapIndexed { index, vehicleId ->
+        var capacity = (VEHICLES.find { it.id == vehicleId }?.baseCapacity
             ?: 0.0) * universalMultiplier * artifactsMultiplier * colleggtibleMultiplier
 
         if (vehicleId >= 9) {
@@ -310,8 +337,6 @@ private fun getShippingCapacity(
 
         capacity
     }.sum()
-
-    return totalCapacity
 }
 
 private fun getResearchShippingCapacity(
@@ -342,6 +367,55 @@ private fun getResearchShippingCapacity(
     }
 
     return Triple(universalMultiplier, hoverOnlyMultiplier, hyperloopOnlyMultiplier)
+}
+
+private fun getHabCapacity(
+    backup: Backup,
+    periodicalsData: PeriodicalsData?,
+    homeFarm: Backup.Simulation,
+    virtueArtifacts: List<Artifact>
+): Double {
+    val colleggtibleMultiplier =
+        getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.HAB_CAPACITY)
+    val artifactsMultiplier =
+        getArtifactsMultiplier(virtueArtifacts, HAB_SPACE_ARTIFACTS, emptyArray())
+    val (universalMultiplier, portalOnlyMultiplier) = getResearchHabCapacity(homeFarm)
+
+    val habs = homeFarm.habsList
+
+    return habs.map { hab ->
+        if (hab == 19) return@map 0.0 // id 19 represents unpurchased hab
+        var habSpace = HABS.find { it.id == hab }?.baseHabSpace ?: 0.0
+
+        habSpace *= universalMultiplier * artifactsMultiplier * colleggtibleMultiplier
+
+        if (hab >= 17) {
+            habSpace *= portalOnlyMultiplier
+        }
+
+        ceil(habSpace)
+    }.sum()
+}
+
+private fun getResearchHabCapacity(
+    homeFarm: Backup.Simulation
+): Pair<Double, Double> {
+    var universalMultiplier = 1.0
+    var portalOnlyMultiplier = 1.0
+    val commonResearch = homeFarm.commonResearchList
+
+    HAB_SPACE_RESEARCHES.forEach { research ->
+        val researchLevel = commonResearch.find { it.id == research.id }?.level ?: 0
+        val multiplier = 1.0 + (researchLevel * research.perLevelValue)
+
+        if (research.isPortalHabsOnly) {
+            portalOnlyMultiplier *= multiplier
+        } else {
+            universalMultiplier *= multiplier
+        }
+    }
+
+    return Pair(universalMultiplier, portalOnlyMultiplier)
 }
 
 private fun getArtifactsMultiplier(

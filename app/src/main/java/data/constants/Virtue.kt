@@ -1,6 +1,7 @@
 package data.constants
 
 import data.Artifact
+import data.Hab
 import data.Research
 import data.Stone
 import data.Vehicle
@@ -121,6 +122,26 @@ val SHIPPING_CAPACITY_RESEARCHES = arrayOf(
         id = "transportation_lobbyist",
         perLevelValue = 0.05,
         isEpic = true
+    )
+)
+
+val HAB_SPACE_RESEARCHES = arrayOf(
+    Research(
+        id = "hab_capacity1",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "microlux",
+        perLevelValue = 0.05
+    ),
+    Research(
+        id = "grav_plating",
+        perLevelValue = 0.02
+    ),
+    Research(
+        id = "wormhole_dampening",
+        perLevelValue = 0.02,
+        isPortalHabsOnly = true
     )
 )
 
@@ -390,6 +411,74 @@ val SHIPPING_CAPACITY_ARTIFACTS = arrayOf(
     )
 )
 
+// Gusset
+val HAB_SPACE_ARTIFACTS = arrayOf(
+    // T1C
+    Artifact(
+        name = 8,
+        rarity = 0,
+        level = 0,
+        effectValue = 0.05,
+        stones = emptyList()
+    ),
+    // T2C
+    Artifact(
+        name = 8,
+        rarity = 0,
+        level = 1,
+        effectValue = 0.1,
+        stones = emptyList()
+    ),
+    // T2E
+    Artifact(
+        name = 8,
+        rarity = 2,
+        level = 1,
+        effectValue = 0.12,
+        stones = emptyList()
+    ),
+    // T3C
+    Artifact(
+        name = 8,
+        rarity = 0,
+        level = 2,
+        effectValue = 0.15,
+        stones = emptyList()
+    ),
+    // T3R
+    Artifact(
+        name = 8,
+        rarity = 1,
+        level = 2,
+        effectValue = 0.16,
+        stones = emptyList()
+    ),
+    // T4C
+    Artifact(
+        name = 8,
+        rarity = 0,
+        level = 3,
+        effectValue = 0.2,
+        stones = emptyList()
+    ),
+    // T4E
+    Artifact(
+        name = 8,
+        rarity = 2,
+        level = 3,
+        effectValue = 0.22,
+        stones = emptyList()
+    ),
+    // T4L
+    Artifact(
+        name = 8,
+        rarity = 3,
+        level = 3,
+        effectValue = 0.25,
+        stones = emptyList()
+    )
+)
+
 // Quantum stone
 val SHIPPING_CAPACITY_STONES = arrayOf(
     Stone(
@@ -412,51 +501,130 @@ val SHIPPING_CAPACITY_STONES = arrayOf(
 val VEHICLES = arrayOf(
     Vehicle(
         id = 0,
-        capacity = 5e3 / 60
+        baseCapacity = 5e3 / 60
     ),
     Vehicle(
         id = 1,
-        capacity = 15e3 / 60
+        baseCapacity = 15e3 / 60
     ),
     Vehicle(
         id = 2,
-        capacity = 50e3 / 60
+        baseCapacity = 50e3 / 60
     ),
     Vehicle(
         id = 3,
-        capacity = 100e3 / 60
+        baseCapacity = 100e3 / 60
     ),
     Vehicle(
         id = 4,
-        capacity = 250e3 / 60
+        baseCapacity = 250e3 / 60
     ),
     Vehicle(
         id = 5,
-        capacity = 500e3 / 60
+        baseCapacity = 500e3 / 60
     ),
     Vehicle(
         id = 6,
-        capacity = 1e6 / 60
+        baseCapacity = 1e6 / 60
     ),
     Vehicle(
         id = 7,
-        capacity = 5e6 / 60
+        baseCapacity = 5e6 / 60
     ),
     Vehicle(
         id = 8,
-        capacity = 15e6 / 60
+        baseCapacity = 15e6 / 60
     ),
     Vehicle(
         id = 9,
-        capacity = 30e6 / 60
+        baseCapacity = 30e6 / 60
     ),
     Vehicle(
         id = 10,
-        capacity = 50e6 / 60
+        baseCapacity = 50e6 / 60
     ),
     Vehicle(
         id = 11,
-        capacity = 50e6 / 60
+        baseCapacity = 50e6 / 60
+    )
+)
+
+val HABS = arrayOf(
+    Hab(
+        id = 0,
+        baseHabSpace = 250.0
+    ),
+    Hab(
+        id = 1,
+        baseHabSpace = 500.0
+    ),
+    Hab(
+        id = 2,
+        baseHabSpace = 1000.0
+    ),
+    Hab(
+        id = 3,
+        baseHabSpace = 2000.0
+    ),
+    Hab(
+        id = 4,
+        baseHabSpace = 5000.0
+    ),
+    Hab(
+        id = 5,
+        baseHabSpace = 10000.0
+    ),
+    Hab(
+        id = 6,
+        baseHabSpace = 20000.0
+    ),
+    Hab(
+        id = 7,
+        baseHabSpace = 50000.0
+    ),
+    Hab(
+        id = 8,
+        baseHabSpace = 100000.0
+    ),
+    Hab(
+        id = 9,
+        baseHabSpace = 200000.0
+    ),
+    Hab(
+        id = 10,
+        baseHabSpace = 500000.0
+    ),
+    Hab(
+        id = 11,
+        baseHabSpace = 1e6
+    ),
+    Hab(
+        id = 12,
+        baseHabSpace = 2e6
+    ),
+    Hab(
+        id = 13,
+        baseHabSpace = 5e6
+    ),
+    Hab(
+        id = 14,
+        baseHabSpace = 1e7
+    ),
+    Hab(
+        id = 15,
+        baseHabSpace = 2.5e7
+    ),
+    Hab(
+        id = 16,
+        baseHabSpace = 5e7
+    ),
+    Hab(
+        id = 17,
+        baseHabSpace = 1e8
+    ),
+    Hab(
+        id = 18,
+        baseHabSpace = 6e8
     )
 )
 
