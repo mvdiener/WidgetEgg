@@ -132,18 +132,6 @@ fun getRemainingSiloTime(lastBackupDate: Double, maximumOfflineTime: Double): St
     }
 }
 
-//TODO: get correct image paths
-fun getVirtueFunctionIconPath(eggId: Int): String {
-    return when (eggId) {
-        50 -> "eggs/egg_soul.png"
-        51 -> "eggs/egg_of_prophecy.png"
-        52 -> "eggs/egg_truth.png"
-        53 -> "eggs/egg_truth.png"
-        54 -> "eggs/egg_truth.png"
-        else -> ""
-    }
-}
-
 private fun getArtifacts(
     activeArtifactList: ActiveArtifactSet?,
     inventory: List<ArtifactInventoryItem>

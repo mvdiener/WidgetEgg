@@ -40,6 +40,7 @@ import tools.utilities.bitmapResize
 import tools.utilities.getAsset
 import tools.utilities.getEggName
 import tools.utilities.getRemainingSiloTime
+import tools.utilities.getVirtueFunctionIconPath
 import widget.WidgetUpdater
 import widget.shared.NoWidgetContent
 import widget.virtue.VirtueWidgetDataStore
@@ -206,19 +207,19 @@ fun HomeFarmInfo(
             modifier = GlanceModifier.size(20.dp)
         )
         if (virtueInfo.isOnVirtue) {
-//            val virtueFunctionPath = getVirtueFunctionIconPath(virtueInfo.eggId)
+            val virtueFunctionPath = getVirtueFunctionIconPath(virtueInfo.eggId)
             val virtueFunctionBitmap = bitmapResize(
                 BitmapFactory.decodeStream(
                     getAsset(
                         assetManager,
-                        "eggs/$eggName.png"
+                        "eggs/$virtueFunctionPath"
                     )
                 )
             )
             Image(
-                provider = ImageProvider(eggBitmap),
-                contentDescription = "Home Egg",
-                modifier = GlanceModifier.size(20.dp)
+                provider = ImageProvider(virtueFunctionBitmap),
+                contentDescription = "Virtue Egg Function",
+                modifier = GlanceModifier.size(20.dp).padding(start = 2.dp)
             )
         }
 
