@@ -287,11 +287,10 @@ fun FindMyEidDialog(signInViewModel: SignInViewModel) {
             val instructions = listOf(
                 "1. Open Egg, Inc.",
                 "2. Open the Settings menu by pressing the nine dots at the bottom.",
-                "3. Open the Help menu by pressing the question mark icon.",
-                """4. Select "Data Loss Issue".""",
-                "5. Copy your EID (EI...) from the subject line.",
-                "6. Open WidgetEgg.",
-                """7. Paste your EID into the text box and press "Submit EID"."""
+                "3. Open the Settings menu by pressing the gear icon.",
+                "4. Copy your EID (EI...) from the bottom.",
+                "5. Open WidgetEgg.",
+                """6. Paste your EID into the text box and press "Submit EID"."""
             )
             val length = instructions.size
             Column(
