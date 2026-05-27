@@ -255,33 +255,33 @@ fun truncateString(text: String, maxLength: Int): String {
 
 fun getEventImage(eventType: String): String {
     return when (eventType) {
-        "epic-research-sale" -> "events/icon_research_sale.png"
-        "piggy-boost", "piggy-cap-boost" -> "events/icon_piggy.png"
-        "prestige-boost" -> "events/icon_prestige_boost.png"
-        "earnings-boost" -> "events/icon_earnings_boost.png"
-        "gift-boost" -> "events/icon_gift_boost.png"
-        "drone-boost" -> "events/icon_drone_boost.png"
-        "research-sale" -> "events/icon_research_sale.png"
-        "hab-sale" -> "events/icon_hab_sale.png"
-        "vehicle-sale" -> "events/icon_vehicle_sale.png"
-        "boost-sale" -> "events/icon_lightning.png"
-        "boost-duration" -> "events/icon_boost_duration.png"
-        "crafting-sale" -> "events/icon_afx_craft.png"
-        "mission-fuel" -> "events/icon_afx_mission_fuel.png"
-        "mission-capacity" -> "events/icon_afx_chest_2.png"
-        "mission-duration" -> "events/icon_afx_mission_duration.png"
-        "shell-sale" -> "events/icon_shells_v2.png"
+        "epic-research-sale" -> "icon_research_sale"
+        "piggy-boost", "piggy-cap-boost" -> "icon_piggy"
+        "prestige-boost" -> "icon_prestige_boost"
+        "earnings-boost" -> "icon_earnings_boost"
+        "gift-boost" -> "icon_gift_boost"
+        "drone-boost" -> "icon_drone_boost"
+        "research-sale" -> "icon_research_sale"
+        "hab-sale" -> "icon_hab_sale"
+        "vehicle-sale" -> "icon_vehicle_sale"
+        "boost-sale" -> "icon_lightning"
+        "boost-duration" -> "icon_boost_duration"
+        "crafting-sale" -> "icon_afx_craft"
+        "mission-fuel" -> "icon_afx_mission_fuel"
+        "mission-capacity" -> "icon_afx_chest_2"
+        "mission-duration" -> "icon_afx_mission_duration"
+        "shell-sale" -> "icon_shells_v2"
         else -> ""
     }
 }
 
 fun getVirtueFunctionIconPath(eggId: Int): String {
     return when (eggId) {
-        50 -> "other/icon_virtue_research.png"
-        51 -> "other/icon_virtue_habs.png"
-        52 -> "other/icon_virtue_missions.png"
-        53 -> "other/icon_virtue_silos.png"
-        54 -> "other/icon_virtue_shipping.png"
+        50 -> "icon_virtue_research"
+        51 -> "icon_virtue_habs"
+        52 -> "icon_virtue_missions"
+        53 -> "icon_virtue_silos"
+        54 -> "icon_virtue_shipping"
         else -> ""
     }
 }

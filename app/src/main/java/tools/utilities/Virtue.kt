@@ -29,8 +29,12 @@ import ei.Ei.GameModifier.GameDimension
 import java.util.UUID
 import kotlin.math.max
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
+import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sqrt
 
 fun formatVirtueData(
     backup: Backup,
@@ -55,33 +59,33 @@ fun formatVirtueData(
         backup.artifactsDb.inventoryItemsList
     )
 
-    val virtueFarms = formatVirtueFarms(backup.virtue)
-
     val isOnVirtue = homeFarm.eggType.number in VIRTUE_EGGS
 
     val (onlineHatcheryRate, offlineHatcheryRate) = if (isOnVirtue) {
-        getInternalHatcheryRate(backup, periodicalsData, homeFarm, homeArtifacts)
+        getInternalHatcheryRate(backup, periodicalsData, homeFarm, virtueArtifacts)
     } else {
         Pair(0.0, 0.0)
     }
 
-    val eggLayingRate = if (isOnVirtue) {
-        getEggLayingRate(backup, periodicalsData, homeFarm, homeArtifacts)
+    val (activeVirtueFarmEggLayingRate, inactiveVirtueFarmEggLayingRate) = if (isOnVirtue) {
+        getEggLayingRate(backup, periodicalsData, homeFarm, virtueArtifacts)
     } else {
-        0.0
+        Pair(0.0, 0.0)
     }
 
     val shippingCapacity = if (isOnVirtue) {
-        getShippingCapacity(backup, periodicalsData, homeFarm, homeArtifacts)
+        getShippingCapacity(backup, periodicalsData, homeFarm, virtueArtifacts)
     } else {
         0.0
     }
 
     val habCapacity = if (isOnVirtue) {
-        getHabCapacity(backup, periodicalsData, homeFarm, homeArtifacts)
+        getHabCapacity(backup, periodicalsData, homeFarm, virtueArtifacts)
     } else {
         0.0
     }
+
+    val virtueFarms = formatVirtueFarms(backup.virtue, inactiveVirtueFarmEggLayingRate)
 
     return VirtueInfo(
         stateId = UUID.randomUUID().toString(),
@@ -93,10 +97,10 @@ fun formatVirtueData(
         onlineHatcheryRate = onlineHatcheryRate,
         offlineHatcheryRate = offlineHatcheryRate,
         habCapacity = habCapacity,
-        eggLayingRate = eggLayingRate,
+        eggLayingRate = activeVirtueFarmEggLayingRate,
         shippingCapacity = shippingCapacity,
         eggId = homeFarm.eggType.number,
-        population = numberToString(homeFarm.numChickens.toDouble()),
+        population = homeFarm.numChickens.toDouble(),
         lastBackupDate = homeFarm.lastStepTime,
         maximumOfflineTime = maximumOfflineTimeSeconds,
         isOnVirtue = isOnVirtue,
@@ -105,15 +109,6 @@ fun formatVirtueData(
         dailyEvents = formatDailyEvents(periodicalsData),
         farms = virtueFarms
     )
-}
-
-fun countTruthEggThresholdsPassed(delivered: Double): Int {
-    var count = 0
-    val maxTe = VIRTUE_DELIVERY_GOALS.size
-    while (count < maxTe && delivered >= VIRTUE_DELIVERY_GOALS[count]) {
-        count++
-    }
-    return count
 }
 
 fun getRemainingSiloTime(lastBackupDate: Double, maximumOfflineTime: Double): String {
@@ -130,6 +125,66 @@ fun getRemainingSiloTime(lastBackupDate: Double, maximumOfflineTime: Double): St
         hours > 0 -> "${hours}h"
         else -> "${minutes}m"
     }
+}
+
+fun getTimeRemainingToNextTruthEgg(virtueInfo: VirtueInfo, farm: VirtueFarmInfo): String {
+    val isOnActiveFarm = virtueInfo.eggId == farm.eggId
+    val offlineHatcheryRate = virtueInfo.offlineHatcheryRate
+    val habCapacity = virtueInfo.habCapacity
+    val eggsDelivered = farm.eggsDelivered
+    val eggLayingRate = 60 * if (isOnActiveFarm) {
+        virtueInfo.eggLayingRate
+    } else {
+        farm.inactiveLayRate
+    }
+    val shippingCapacity = 60 * virtueInfo.shippingCapacity
+    val timeElapsedSeconds = if (isOnActiveFarm) {
+        Instant.now().epochSecond.toDouble() - virtueInfo.lastBackupDate
+    } else {
+        0.0
+    }
+    val population = if (isOnActiveFarm) {
+        max(1.0, virtueInfo.population)
+    } else {
+        1.0
+    }
+
+    val perChickenPerMinuteLayingRate = eggLayingRate / population
+    val effectivePopulationCap = shippingCapacity / perChickenPerMinuteLayingRate
+    val maxPopulation = min(habCapacity, effectivePopulationCap)
+    val startingEggLayingRate = if (isOnActiveFarm) {
+        min(eggLayingRate, shippingCapacity)
+    } else {
+        perChickenPerMinuteLayingRate
+    }
+    val offlineEggsDelivered = if (isOnActiveFarm) {
+        getVirtueOfflineEggsDelivered(virtueInfo, eggsDelivered)
+    } else {
+        eggsDelivered
+    }
+    val targetEggAmount =
+        getNextTruthEggThreshold(offlineEggsDelivered)
+    val targetEggsRemaining = targetEggAmount - eggsDelivered
+
+    // No population growth possible - either no IHR or already at max capacity
+    if (offlineHatcheryRate == 0.0 || population >= maxPopulation) {
+        val remainingSeconds =
+            ((60 * targetEggsRemaining) / startingEggLayingRate) - timeElapsedSeconds
+        return formatTimeText(remainingSeconds, false, false) //TODO: pass in booleans
+    }
+
+    var timeToTarget =
+        (sqrt(
+            population.pow(2) + (2 * offlineHatcheryRate * population * targetEggsRemaining) / startingEggLayingRate
+        ) - population) / offlineHatcheryRate
+    if (timeToTarget > (maxPopulation - population) / offlineHatcheryRate) {
+        timeToTarget =
+            ((population * targetEggsRemaining) / startingEggLayingRate +
+                    ((maxPopulation - population) * (maxPopulation - population)) / (2 * offlineHatcheryRate)) /
+                    maxPopulation
+    }
+    val remainingSeconds = 60 * timeToTarget - timeElapsedSeconds
+    return formatTimeText(remainingSeconds, false, false) //TODO: pass in booleans
 }
 
 private fun getArtifacts(
@@ -168,7 +223,10 @@ private fun formatDailyEvents(periodicalsData: PeriodicalsData?): List<Event> {
     } ?: emptyList()
 }
 
-private fun formatVirtueFarms(virtue: Backup.Virtue): List<VirtueFarmInfo> {
+private fun formatVirtueFarms(
+    virtue: Backup.Virtue,
+    inactiveLayRate: Double
+): List<VirtueFarmInfo> {
     return VIRTUE_EGGS.mapIndexed { index, egg ->
         val eggsDelivered = virtue.eggsDeliveredList.elementAtOrNull(index) ?: 0.0
         val truthEggs = virtue.eovEarnedList.elementAtOrNull(index) ?: 0
@@ -178,9 +236,87 @@ private fun formatVirtueFarms(virtue: Backup.Virtue): List<VirtueFarmInfo> {
             eggId = egg,
             truthEggs = truthEggs,
             pendingTruthEggs = max(0, pendingTruthEggs),
-            eggsDelivered = eggsDelivered
+            eggsDelivered = eggsDelivered,
+            inactiveLayRate = inactiveLayRate
         )
     }
+}
+
+private fun countTruthEggThresholdsPassed(delivered: Double): Int {
+    var count = 0
+    val maxTe = VIRTUE_DELIVERY_GOALS.size
+    while (count < maxTe && delivered >= VIRTUE_DELIVERY_GOALS[count]) {
+        count++
+    }
+    return count
+}
+
+private fun getNextTruthEggThreshold(delivered: Double): Double {
+    val basePassed = countTruthEggThresholdsPassed(delivered)
+
+    if (basePassed >= VIRTUE_DELIVERY_GOALS.size) {
+        return 0.0
+    }
+
+    return VIRTUE_DELIVERY_GOALS[basePassed]
+}
+
+private fun getVirtueOfflineEggsDelivered(
+    virtueInfo: VirtueInfo,
+    currentEggsDelivered: Double
+): Double {
+    val timeElapsedSeconds = Instant.now().epochSecond.toDouble() - virtueInfo.lastBackupDate
+    val ihrPerSecond = virtueInfo.offlineHatcheryRate / 60.0
+    val lastRefreshedPopulation = virtueInfo.population
+
+    // Calculate population at which shipping capacity is maxed out
+    val maxEffectivePopulation =
+        (virtueInfo.shippingCapacity / virtueInfo.eggLayingRate) * lastRefreshedPopulation
+
+    // Effective capacity is the minimum of hab capacity and shipping-limited population
+    val effectiveCapacity = min(virtueInfo.habCapacity, maxEffectivePopulation)
+
+    // If we're already at or above effective capacity, ELR is static
+    if (lastRefreshedPopulation >= effectiveCapacity) {
+        val staticELR = min(virtueInfo.eggLayingRate, virtueInfo.shippingCapacity)
+        val eggsDeliveredWhileOffline = staticELR * timeElapsedSeconds
+        return currentEggsDelivered + eggsDeliveredWhileOffline
+    }
+
+    // If we reach effective capacity during this period
+    val currentPopulation = min(
+        (lastRefreshedPopulation + (virtueInfo.offlineHatcheryRate / 60.0) * timeElapsedSeconds),
+        max(lastRefreshedPopulation, virtueInfo.habCapacity)
+    )
+    if (currentPopulation >= effectiveCapacity) {
+        // Calculate time to reach effective capacity
+        val timeToCapacity = (effectiveCapacity - lastRefreshedPopulation) / ihrPerSecond
+
+        // Phase 1: Growing population until effective capacity is reached (use growth formula)
+        val initialELR = virtueInfo.eggLayingRate
+        val linearTerm1 = initialELR * timeToCapacity
+        val quadraticTerm1 =
+            (initialELR * ihrPerSecond * timeToCapacity * timeToCapacity) / (2 * lastRefreshedPopulation)
+        val eggsPhase1 = linearTerm1 + quadraticTerm1
+
+        // Phase 2: Static ELR after effective capacity is reached
+        val timeAfterCapacity = timeElapsedSeconds - timeToCapacity
+        val staticELR = min(
+            virtueInfo.eggLayingRate * (effectiveCapacity / lastRefreshedPopulation),
+            virtueInfo.shippingCapacity
+        )
+        val eggsPhase2 = staticELR * timeAfterCapacity
+
+        return currentEggsDelivered + eggsPhase1 + eggsPhase2
+    }
+
+    // Population stays below effective capacity - use standard growth formula
+    val linearTerm = virtueInfo.eggLayingRate * timeElapsedSeconds
+    val quadraticTerm =
+        (virtueInfo.eggLayingRate * ihrPerSecond * timeElapsedSeconds * timeElapsedSeconds) / (2 * lastRefreshedPopulation)
+    val eggsDeliveredWhileOffline = linearTerm + quadraticTerm
+
+    return currentEggsDelivered + eggsDeliveredWhileOffline
 }
 
 private fun getNextShiftCost(backup: Backup): Double {
@@ -255,7 +391,7 @@ private fun getEggLayingRate(
     periodicalsData: PeriodicalsData?,
     homeFarm: Backup.Simulation,
     virtueArtifacts: List<Artifact>
-): Double {
+): Pair<Double, Double> {
     val colleggtibleMultiplier =
         getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.EGG_LAYING_RATE)
     val artifactsMultiplier = getArtifactsMultiplier(
@@ -264,7 +400,10 @@ private fun getEggLayingRate(
     )
     val researchLayRate = getResearchLayRate(backup, homeFarm)
 
-    return 60 * homeFarm.numChickens * researchLayRate * artifactsMultiplier * colleggtibleMultiplier
+    val multipliers = researchLayRate * artifactsMultiplier * colleggtibleMultiplier
+
+    // the lay rate of the active farm with population, and the lay rate of in active farms with 1 chicken
+    return Pair(homeFarm.numChickens * multipliers, multipliers)
 }
 
 private fun getResearchLayRate(
@@ -414,22 +553,91 @@ private fun getArtifactsMultiplier(
     var baseRate = 1.0
 
     equippedArtifacts.forEach { artifact ->
-        val matchingArtifact = artifactSearchList.find {
-            it.name == artifact.name && it.level == artifact.level && it.rarity == artifact.rarity
-        }
-        if (matchingArtifact != null) {
-            baseRate *= (1.0 + matchingArtifact.effectValue!!)
+        if (artifactSearchList.isNotEmpty()) {
+            val matchingArtifact = artifactSearchList.find {
+                it.name == artifact.name && it.level == artifact.level && it.rarity == artifact.rarity
+            }
+            if (matchingArtifact != null) {
+                baseRate *= (1.0 + matchingArtifact.effectValue!!)
+            }
         }
 
-        artifact.stones.forEach { stone ->
-            val matchingStone = stoneSearchList.find {
-                it.name == stone.name && it.level == stone.level
-            }
-            if (matchingStone != null) {
-                baseRate *= (1.0 + matchingStone.effectValue!!)
+        if (stoneSearchList.isNotEmpty()) {
+            artifact.stones.forEach { stone ->
+                val matchingStone = stoneSearchList.find {
+                    it.name == stone.name && it.level == stone.level
+                }
+                if (matchingStone != null) {
+                    baseRate *= (1.0 + matchingStone.effectValue!!)
+                }
             }
         }
     }
 
     return baseRate
+}
+
+private fun formatTimeText(
+    timeRemainingSeconds: Double,
+    useAbsoluteTime: Boolean,
+    use24HrFormat: Boolean
+): String {
+    if (timeRemainingSeconds.isInfinite()) {
+        return "Infinity"
+    }
+
+    val years = timeRemainingSeconds / 31536000
+    if (years >= 10) {
+        return ">10y"
+    }
+
+    val days = timeRemainingSeconds / 86400
+
+    if (useAbsoluteTime) {
+        val currentTime = LocalDateTime.now()
+        val endingTime = currentTime.plusSeconds(timeRemainingSeconds.toLong())
+        return if (years > 1) {
+            endingTime.format(DateTimeFormatter.ofPattern("yyyy MMM d"))
+        } else if (days > 1) {
+            if (use24HrFormat) {
+                endingTime.format(DateTimeFormatter.ofPattern("MMM d, HH:mm"))
+            } else {
+                endingTime.format(DateTimeFormatter.ofPattern("MMM d, h:mm a"))
+            }
+        } else {
+            if (use24HrFormat) {
+                endingTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+            } else {
+                endingTime.format(DateTimeFormatter.ofPattern("h:mm a"))
+            }
+        }
+
+    }
+
+    val remainingSecondsAfterDays = timeRemainingSeconds % 86400
+
+    val hours = remainingSecondsAfterDays / 3600
+    val remainingSecondsAfterHours = remainingSecondsAfterDays % 3600
+
+    val minutes = remainingSecondsAfterHours / 60
+
+    return if (years >= 1) {
+        if (days.toInt() % 365 == 0) {
+            "${years.toInt()}y"
+        } else {
+            "${years.toInt()}y ${days.toInt() % 365}d"
+        }
+    } else if (days > 1) {
+        if (hours.toInt() == 0) {
+            "${days.toInt()}d"
+        } else {
+            "${days.toInt()}d ${hours.toInt()}h"
+        }
+    } else {
+        if (hours.toInt() == 0) {
+            "${minutes.toInt()}m"
+        } else {
+            "${hours.toInt()}h ${minutes.toInt()}m"
+        }
+    }
 }

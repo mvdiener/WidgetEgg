@@ -40,6 +40,7 @@ import tools.utilities.bitmapResize
 import tools.utilities.getAsset
 import tools.utilities.getEggName
 import tools.utilities.getRemainingSiloTime
+import tools.utilities.getTimeRemainingToNextTruthEgg
 import tools.utilities.getVirtueFunctionIconPath
 import widget.WidgetUpdater
 import widget.shared.NoWidgetContent
@@ -95,7 +96,7 @@ class VirtueWidgetNormal : GlanceAppWidget() {
                     }
             ) {
                 val assetManager = context.assets
-                if (eid.isBlank()) {
+                if (eid.isBlank() || virtueInfo.stateId.isBlank()) {
                     NoWidgetContent(assetManager, "Waiting for virtue data...", 80.dp, textColor)
                 } else {
                     HomeFarmInfo(assetManager, virtueInfo, textColor)
@@ -212,7 +213,7 @@ fun HomeFarmInfo(
                 BitmapFactory.decodeStream(
                     getAsset(
                         assetManager,
-                        "eggs/$virtueFunctionPath"
+                        "other/$virtueFunctionPath.png"
                     )
                 )
             )
@@ -298,10 +299,18 @@ fun FarmProgress(
                 style = TextStyle(color = ColorProvider(textColor))
             )
             Box(modifier = GlanceModifier.defaultWeight()) {}
-            Text(
-                text = "Sample date",
-                style = TextStyle(color = ColorProvider(textColor))
-            )
+            if (virtueInfo.isOnVirtue) {
+                val timeRemaining =
+                    if (virtueInfo.offlineHatcheryRate == 0.0 && virtueInfo.eggLayingRate == 0.0) {
+                        "Infinity"
+                    } else {
+                        getTimeRemainingToNextTruthEgg(virtueInfo, farm)
+                    }
+                Text(
+                    text = timeRemaining,
+                    style = TextStyle(color = ColorProvider(textColor))
+                )
+            }
         }
     }
 }

@@ -17,7 +17,7 @@ data class VirtueInfo(
     var shippingCapacity: Double = 0.0,
     var habCapacity: Double = 0.0,
     var eggId: Int = 0,
-    var population: String = "",
+    var population: Double = 0.0,
     var lastBackupDate: Double = 0.0,
     var maximumOfflineTime: Double = 0.0,
     var isOnVirtue: Boolean = false,
@@ -32,7 +32,8 @@ data class VirtueFarmInfo(
     val eggId: Int = 0,
     val truthEggs: Int = 0,
     val pendingTruthEggs: Int = 0,
-    val eggsDelivered: Double = 0.0
+    val eggsDelivered: Double = 0.0,
+    val inactiveLayRate: Double = 0.0
 )
 
 @Serializable
