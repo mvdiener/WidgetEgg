@@ -87,6 +87,26 @@ fun createCircularProgressBarBitmap(
     return bitmap
 }
 
+fun createLinearGradientBitmap(
+    startColor: Int,
+    endColor: Int,
+    heightPx: Int,
+    widthPx: Int
+): Bitmap {
+    val bitmap = createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val paint = Paint().apply {
+        isAntiAlias = true
+        shader = android.graphics.LinearGradient(
+            0f, 0f, widthPx.toFloat(), 0f, // Left to Right
+            startColor, endColor,
+            android.graphics.Shader.TileMode.CLAMP
+        )
+    }
+    canvas.drawRect(0f, 0f, widthPx.toFloat(), heightPx.toFloat(), paint)
+    return bitmap
+}
+
 // Widgets have a maximum bitmap memory that will cause a render failure if it is exceeded
 // This resize function scales down images. Image quality is worse, but not noticeable if image is already small
 // Useful in places like fuel tank egg icons, target artifacts, contract rewards, or stats icons
@@ -255,13 +275,12 @@ fun truncateString(text: String, maxLength: Int): String {
 
 fun getEventImage(eventType: String): String {
     return when (eventType) {
-        "epic-research-sale" -> "icon_research_sale"
+        "epic-research-sale", "research-sale" -> "icon_research_sale"
         "piggy-boost", "piggy-cap-boost" -> "icon_piggy"
         "prestige-boost" -> "icon_prestige_boost"
         "earnings-boost" -> "icon_earnings_boost"
         "gift-boost" -> "icon_gift_boost"
         "drone-boost" -> "icon_drone_boost"
-        "research-sale" -> "icon_research_sale"
         "hab-sale" -> "icon_hab_sale"
         "vehicle-sale" -> "icon_vehicle_sale"
         "boost-sale" -> "icon_lightning"

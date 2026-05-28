@@ -41,6 +41,7 @@ import widget.missions.normal.VirtueMissionWidgetNormal
 import widget.stats.StatsWidgetDataStore
 import widget.stats.normal.StatsWidgetNormal
 import widget.virtue.VirtueWidgetDataStore
+import widget.virtue.large.VirtueWidgetLarge
 import widget.virtue.normal.VirtueWidgetNormal
 import java.time.Instant
 
@@ -443,6 +444,8 @@ class WidgetUpdater {
     private suspend fun hasVirtueWidgets(context: Context): Boolean {
         return GlanceAppWidgetManager(context).getGlanceIds(
             VirtueWidgetNormal::class.java
+        ).isNotEmpty() || GlanceAppWidgetManager(context).getGlanceIds(
+            VirtueWidgetLarge::class.java
         ).isNotEmpty()
     }
 

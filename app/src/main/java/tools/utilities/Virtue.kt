@@ -139,7 +139,9 @@ fun getTimeRemainingToNextTruthEgg(virtueInfo: VirtueInfo, farm: VirtueFarmInfo)
     }
     val shippingCapacity = 60 * virtueInfo.shippingCapacity
     val timeElapsedSeconds = if (isOnActiveFarm) {
-        Instant.now().epochSecond.toDouble() - virtueInfo.lastBackupDate
+        val offlineTime = Instant.now().epochSecond.toDouble() - virtueInfo.lastBackupDate
+        // Progress stops as soon as silos are empty
+        min(offlineTime, virtueInfo.maximumOfflineTime)
     } else {
         0.0
     }
@@ -185,6 +187,21 @@ fun getTimeRemainingToNextTruthEgg(virtueInfo: VirtueInfo, farm: VirtueFarmInfo)
     }
     val remainingSeconds = 60 * timeToTarget - timeElapsedSeconds
     return formatTimeText(remainingSeconds, false, false) //TODO: pass in booleans
+}
+
+fun getTruthEggPercentComplete(delivered: Double): Float {
+    val nextTEThreshold = getNextTruthEggThreshold(delivered)
+    if (nextTEThreshold == 0.0) return 1.0f
+    val previousTEThreshold = getPreviousTruthEggThreshold(delivered)
+
+    val totalNeeded = nextTEThreshold - previousTEThreshold
+    return ((delivered - previousTEThreshold) / totalNeeded).toFloat()
+}
+
+fun getNextTruthEggThreshold(delivered: Double): Double {
+    val basePassed = countTruthEggThresholdsPassed(delivered)
+
+    return VIRTUE_DELIVERY_GOALS.getOrElse(basePassed) { 0.0 }
 }
 
 private fun getArtifacts(
@@ -251,14 +268,10 @@ private fun countTruthEggThresholdsPassed(delivered: Double): Int {
     return count
 }
 
-private fun getNextTruthEggThreshold(delivered: Double): Double {
+private fun getPreviousTruthEggThreshold(delivered: Double): Double {
     val basePassed = countTruthEggThresholdsPassed(delivered)
 
-    if (basePassed >= VIRTUE_DELIVERY_GOALS.size) {
-        return 0.0
-    }
-
-    return VIRTUE_DELIVERY_GOALS[basePassed]
+    return VIRTUE_DELIVERY_GOALS.getOrElse(basePassed - 1) { 0.0 }
 }
 
 private fun getVirtueOfflineEggsDelivered(
@@ -266,6 +279,8 @@ private fun getVirtueOfflineEggsDelivered(
     currentEggsDelivered: Double
 ): Double {
     val timeElapsedSeconds = Instant.now().epochSecond.toDouble() - virtueInfo.lastBackupDate
+    // Progress stops as soon as silos are empty
+    min(timeElapsedSeconds, virtueInfo.maximumOfflineTime)
     val ihrPerSecond = virtueInfo.offlineHatcheryRate / 60.0
     val lastRefreshedPopulation = virtueInfo.population
 
@@ -621,7 +636,7 @@ private fun formatTimeText(
 
     val minutes = remainingSecondsAfterHours / 60
 
-    return if (years >= 1) {
+    return if (years > 1) {
         if (days.toInt() % 365 == 0) {
             "${years.toInt()}y"
         } else {

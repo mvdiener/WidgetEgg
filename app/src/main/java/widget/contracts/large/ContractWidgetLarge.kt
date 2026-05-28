@@ -41,8 +41,8 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import data.constants.CONTRACT_OFFLINE_PROGRESS_COLOR
-import data.constants.CONTRACT_PROGRESS_COLOR
+import data.constants.OFFLINE_PROGRESS_COLOR
+import data.constants.PROGRESS_COLOR
 import data.ContractInfoEntry
 import data.ContributorInfoEntry
 import data.constants.DEFAULT_BROWSER
@@ -766,7 +766,7 @@ fun Goals(
                             LinearProgressIndicator(
                                 modifier = GlanceModifier.fillMaxSize(),
                                 progress = offlinePercentComplete,
-                                color = ColorProvider(Color(CONTRACT_OFFLINE_PROGRESS_COLOR.toColorInt())),
+                                color = ColorProvider(Color(OFFLINE_PROGRESS_COLOR.toColorInt())),
                                 backgroundColor = ColorProvider(Color(PROGRESS_BACKGROUND_COLOR.toColorInt()))
                             )
                         }
@@ -776,7 +776,7 @@ fun Goals(
                         LinearProgressIndicator(
                             modifier = GlanceModifier.fillMaxSize(),
                             progress = percentComplete,
-                            color = ColorProvider(Color(CONTRACT_PROGRESS_COLOR.toColorInt())),
+                            color = ColorProvider(Color(PROGRESS_COLOR.toColorInt())),
                             backgroundColor = ColorProvider(progressBackground)
                         )
                     }
@@ -1001,7 +1001,7 @@ fun SeasonContent(
                         LinearProgressIndicator(
                             modifier = GlanceModifier.fillMaxSize(),
                             progress = percentComplete,
-                            color = ColorProvider(Color(CONTRACT_PROGRESS_COLOR.toColorInt())),
+                            color = ColorProvider(Color(PROGRESS_COLOR.toColorInt())),
                             backgroundColor = ColorProvider(Color(PROGRESS_BACKGROUND_COLOR.toColorInt()))
                         )
                     }

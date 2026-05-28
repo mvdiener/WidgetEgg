@@ -47,5 +47,5 @@ val PROBLEMATIC_BROWSERS = arrayOf(
 const val DEFAULT_BROWSER = "com.android.chrome"
 
 const val PROGRESS_BACKGROUND_COLOR = "#464646"
-const val CONTRACT_PROGRESS_COLOR = "#008531"
-const val CONTRACT_OFFLINE_PROGRESS_COLOR = "#51dda8"
+const val PROGRESS_COLOR = "#008531"
+const val OFFLINE_PROGRESS_COLOR = "#51dda8"

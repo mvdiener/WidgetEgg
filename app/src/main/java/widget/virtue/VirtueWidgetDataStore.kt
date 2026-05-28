@@ -5,11 +5,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.VirtueInfo
 import kotlinx.serialization.json.Json
+import widget.virtue.large.VirtueWidgetLarge
 import widget.virtue.normal.VirtueWidgetNormal
 
 data object VirtueWidgetDataStorePreferencesKeys {
@@ -27,8 +29,7 @@ class VirtueWidgetDataStore {
         backgroundColor: Color? = null,
         textColor: Color? = null
     ) {
-        val virtueWidgetIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueWidgetNormal::class.java)
+        val virtueWidgetIds = getVirtueWidgetIds(context)
 
         virtueWidgetIds.forEach { glanceId ->
             updateAppWidgetState(context, glanceId) { prefs ->
@@ -59,8 +60,7 @@ class VirtueWidgetDataStore {
     }
 
     suspend fun clearAllData(context: Context) {
-        val virtueWidgetIds =
-            GlanceAppWidgetManager(context).getGlanceIds(VirtueWidgetNormal::class.java)
+        val virtueWidgetIds = getVirtueWidgetIds(context)
         (virtueWidgetIds)
             .forEach { glanceId ->
                 updateAppWidgetState(context, glanceId) { prefs ->
@@ -71,7 +71,17 @@ class VirtueWidgetDataStore {
         updateAllWidgets(context)
     }
 
+    private suspend fun getVirtueWidgetIds(context: Context): List<GlanceId> {
+        val virtueWidgetNormalIds =
+            GlanceAppWidgetManager(context).getGlanceIds(VirtueWidgetNormal::class.java)
+        val virtueWidgetLargeIds =
+            GlanceAppWidgetManager(context).getGlanceIds(VirtueWidgetLarge::class.java)
+
+        return virtueWidgetNormalIds + virtueWidgetLargeIds
+    }
+
     private suspend fun updateAllWidgets(context: Context) {
         VirtueWidgetNormal().updateAll(context)
+        VirtueWidgetLarge().updateAll(context)
     }
 }

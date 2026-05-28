@@ -10,8 +10,8 @@ import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import data.ArchivedContractInfoEntry
 import data.Artifact
-import data.constants.CONTRACT_OFFLINE_PROGRESS_COLOR
-import data.constants.CONTRACT_PROGRESS_COLOR
+import data.constants.OFFLINE_PROGRESS_COLOR
+import data.constants.PROGRESS_COLOR
 import data.ContractData
 import data.ContractInfoEntry
 import data.ContributorInfoEntry
@@ -242,8 +242,8 @@ fun createContractCircularProgressBarBitmap(
     offlineProgress: Float?,
     size: Int
 ): Bitmap {
-    val totalProgressColor = CONTRACT_PROGRESS_COLOR.toColorInt()
-    val offlineProgressColor = CONTRACT_OFFLINE_PROGRESS_COLOR.toColorInt()
+    val totalProgressColor = PROGRESS_COLOR.toColorInt()
+    val offlineProgressColor = OFFLINE_PROGRESS_COLOR.toColorInt()
     val progressData = mutableListOf(ProgressData(totalProgress, totalProgressColor))
     if (offlineProgress != null) {
         progressData.add(ProgressData(offlineProgress, offlineProgressColor))
