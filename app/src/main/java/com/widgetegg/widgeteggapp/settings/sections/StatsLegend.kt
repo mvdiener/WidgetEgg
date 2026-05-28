@@ -29,15 +29,6 @@ import user.preferences.PreferencesDatastore
 
 @Composable
 fun StatsLegend(navController: NavController) {
-    val settingsViewModel = viewModel<SettingsViewModel>()
-
-    val context = LocalContext.current
-
-    runBlocking {
-        val preferences = PreferencesDatastore(context)
-        settingsViewModel.updateShowCommunityBadges(preferences.getShowCommunityBadges())
-    }
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally

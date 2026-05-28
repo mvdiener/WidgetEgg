@@ -64,6 +64,10 @@ class PreferencesDatastore(context: Context) {
         private val STATS_INFO = stringPreferencesKey("statsInfo")
         private val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
         private val VIRTUE_INFO = stringPreferencesKey("virtueInfo")
+        private val USE_ABSOLUTE_TIME_VIRTUE_SILOS =
+            booleanPreferencesKey("useAbsoluteTimeVirtueSilos")
+        private val USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG =
+            booleanPreferencesKey("useAbsoluteTimeVirtueNextTruthEgg")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -456,6 +460,26 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveVirtueInfo(virtueInfo: VirtueInfo) {
         dataStore.edit {
             it[VIRTUE_INFO] = Json.encodeToString(virtueInfo)
+        }
+    }
+
+    suspend fun getUseAbsoluteTimeVirtueSilos() = dataStore.data.map {
+        it[USE_ABSOLUTE_TIME_VIRTUE_SILOS] == true
+    }.first()
+
+    suspend fun saveUseAbsoluteTimeVirtueSilos(useAbsoluteTimeVirtueSilos: Boolean) {
+        dataStore.edit {
+            it[USE_ABSOLUTE_TIME_VIRTUE_SILOS] = useAbsoluteTimeVirtueSilos
+        }
+    }
+
+    suspend fun getUseAbsoluteTimeVirtueNextTruthEgg() = dataStore.data.map {
+        it[USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG] == true
+    }.first()
+
+    suspend fun saveUseAbsoluteTimeVirtueNextTruthEgg(useAbsoluteTimeVirtueNextTruthEgg: Boolean) {
+        dataStore.edit {
+            it[USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG] = useAbsoluteTimeVirtueNextTruthEgg
         }
     }
 

@@ -21,6 +21,7 @@ import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
 import widget.missions.MissionWidgetDataStore
 import widget.stats.StatsWidgetDataStore
+import widget.virtue.VirtueWidgetDataStore
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val preferences: PreferencesDatastore
@@ -350,5 +351,33 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         preferences.saveShowCommunityBadges(input)
         val context = getApplication<Application>().applicationContext
         StatsWidgetDataStore().updateStatsWidgetDataStore(context, showCommunityBadges = input)
+    }
+
+    // Virtue
+
+    var useAbsoluteTimeVirtueSilos by mutableStateOf(false)
+        private set
+
+    suspend fun updateUseAbsoluteTimeVirtueSilos(input: Boolean) {
+        useAbsoluteTimeVirtueSilos = input
+        preferences.saveUseAbsoluteTimeVirtueSilos(input)
+        val context = getApplication<Application>().applicationContext
+        VirtueWidgetDataStore().updateVirtueWidgetDataStore(
+            context,
+            useAbsoluteTimeVirtueSilos = input
+        )
+    }
+
+    var useAbsoluteTimeVirtueNextTruthEgg by mutableStateOf(false)
+        private set
+
+    suspend fun updateUseAbsoluteTimeVirtueNextTruthEgg(input: Boolean) {
+        useAbsoluteTimeVirtueNextTruthEgg = input
+        preferences.saveUseAbsoluteTimeVirtueNextTruthEgg(input)
+        val context = getApplication<Application>().applicationContext
+        VirtueWidgetDataStore().updateVirtueWidgetDataStore(
+            context,
+            useAbsoluteTimeVirtueNextTruthEgg = input
+        )
     }
 }

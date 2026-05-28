@@ -3,6 +3,7 @@ package widget.virtue.large
 import android.content.Context
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
+import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,6 +73,11 @@ class VirtueWidgetLarge : GlanceAppWidget() {
             val virtueInfo = VirtueWidgetDataStore().decodeVirtueInfo(
                 state[VirtueWidgetDataStorePreferencesKeys.VIRTUE_INFO] ?: ""
             )
+            val useAbsoluteTimeVirtueSilos =
+                state[VirtueWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_VIRTUE_SILOS] ?: false
+            val useAbsoluteTimeVirtueNextTruthEgg =
+                state[VirtueWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG]
+                    ?: false
             val backgroundColor =
                 state[VirtueWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR]?.let { colorInt ->
                     Color(colorInt)
@@ -111,10 +117,17 @@ class VirtueWidgetLarge : GlanceAppWidget() {
                     }
             ) {
                 val assetManager = context.assets
+                val use24HrFormat = DateFormat.is24HourFormat(context)
                 if (eid.isBlank() || virtueInfo.stateId.isBlank()) {
                     NoWidgetContent(assetManager, "Waiting for virtue data...", 80.dp, textColor)
                 } else {
-                    HomeFarmInfo(assetManager, virtueInfo, textColor)
+                    HomeFarmInfo(
+                        assetManager,
+                        virtueInfo,
+                        useAbsoluteTimeVirtueSilos,
+                        use24HrFormat,
+                        textColor
+                    )
                     ShiftInfo(assetManager, virtueInfo, textColor)
                     ArtifactsAndEvents(assetManager, virtueInfo)
                     FarmProgress(assetManager, virtueInfo, textColor)
@@ -165,6 +178,8 @@ fun ShiftInfo(
 fun HomeFarmInfo(
     assetManager: AssetManager,
     virtueInfo: VirtueInfo,
+    useAbsoluteTimeVirtueSilos: Boolean,
+    use24HrFormat: Boolean,
     textColor: Color
 ) {
     Row(
@@ -237,7 +252,12 @@ fun HomeFarmInfo(
             modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
         )
         val siloTimeRemaining =
-            getRemainingSiloTime(virtueInfo.lastBackupDate, virtueInfo.maximumOfflineTime)
+            getRemainingSiloTime(
+                virtueInfo.lastBackupDate,
+                virtueInfo.maximumOfflineTime,
+                useAbsoluteTimeVirtueSilos,
+                use24HrFormat
+            )
         Text(
             text = siloTimeRemaining,
             style = TextStyle(color = ColorProvider(textColor))

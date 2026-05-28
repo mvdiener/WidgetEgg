@@ -111,7 +111,12 @@ fun formatVirtueData(
     )
 }
 
-fun getRemainingSiloTime(lastBackupDate: Double, maximumOfflineTime: Double): String {
+fun getRemainingSiloTime(
+    lastBackupDate: Double,
+    maximumOfflineTime: Double,
+    useAbsoluteTime: Boolean,
+    use24HrFormat: Boolean
+): String {
     val offlineTime = Instant.now().epochSecond.toDouble() - lastBackupDate
     val timeRemaining = maximumOfflineTime - offlineTime
 
@@ -120,10 +125,19 @@ fun getRemainingSiloTime(lastBackupDate: Double, maximumOfflineTime: Double): St
     val hours = (timeRemaining / 3600).toInt()
     val minutes = ((timeRemaining % 3600) / 60).toInt()
 
-    return when {
-        hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
-        hours > 0 -> "${hours}h"
-        else -> "${minutes}m"
+    return if (useAbsoluteTime) {
+        val currentTime = LocalDateTime.now()
+        val endingTime = currentTime.plusSeconds(timeRemaining.toLong())
+        val extraTime = if (hours >= 24) "⁺¹" else ""
+        val pattern = if (use24HrFormat) "HH:mm" else "h:mm a"
+
+        endingTime.format(DateTimeFormatter.ofPattern(pattern)) + extraTime
+    } else {
+        when {
+            hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+            hours > 0 -> "${hours}h"
+            else -> "${minutes}m"
+        }
     }
 }
 
