@@ -198,6 +198,16 @@ fun getTruthEggPercentComplete(delivered: Double): Float {
     return ((delivered - previousTEThreshold) / totalNeeded).toFloat()
 }
 
+fun getOfflineTruthEggPercentComplete(virtueInfo: VirtueInfo, delivered: Double): Float {
+    val offlineDelivered = getVirtueOfflineEggsDelivered(virtueInfo, delivered)
+    val nextTEThreshold = getNextTruthEggThreshold(delivered)
+    if (nextTEThreshold == 0.0 || offlineDelivered >= nextTEThreshold) return 1.0f
+    val previousTEThreshold = getPreviousTruthEggThreshold(delivered)
+
+    val totalNeeded = nextTEThreshold - previousTEThreshold
+    return ((offlineDelivered - previousTEThreshold) / totalNeeded).toFloat()
+}
+
 fun getNextTruthEggThreshold(delivered: Double): Double {
     val basePassed = countTruthEggThresholdsPassed(delivered)
 

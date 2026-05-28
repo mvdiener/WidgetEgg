@@ -240,7 +240,13 @@ fun FarmProgress(
     virtueInfo: VirtueInfo,
     textColor: Color
 ) {
-    virtueInfo.farms.forEach { farm ->
+    val farms = if (virtueInfo.isOnVirtue) {
+        val (activeFarm, otherFarms) = virtueInfo.farms.partition { it.eggId == virtueInfo.eggId }
+        activeFarm + otherFarms
+    } else {
+        virtueInfo.farms
+    }
+    farms.forEach { farm ->
         Row(
             modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
             horizontalAlignment = Alignment.Start,

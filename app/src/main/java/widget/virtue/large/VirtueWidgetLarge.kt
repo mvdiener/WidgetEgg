@@ -38,6 +38,7 @@ import androidx.glance.unit.ColorProvider
 import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.VirtueInfo
+import data.constants.OFFLINE_PROGRESS_COLOR
 import data.constants.PROGRESS_BACKGROUND_COLOR
 import data.constants.PROGRESS_COLOR
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +50,7 @@ import tools.utilities.getAsset
 import tools.utilities.getEggName
 import tools.utilities.getEventImage
 import tools.utilities.getNextTruthEggThreshold
+import tools.utilities.getOfflineTruthEggPercentComplete
 import tools.utilities.getRemainingSiloTime
 import tools.utilities.getTimeRemainingToNextTruthEgg
 import tools.utilities.getTruthEggPercentComplete
@@ -317,7 +319,13 @@ fun FarmProgress(
     virtueInfo: VirtueInfo,
     textColor: Color
 ) {
-    virtueInfo.farms.forEach { farm ->
+    val farms = if (virtueInfo.isOnVirtue) {
+        val (activeFarm, otherFarms) = virtueInfo.farms.partition { it.eggId == virtueInfo.eggId }
+        activeFarm + otherFarms
+    } else {
+        virtueInfo.farms
+    }
+    farms.forEach { farm ->
         Row(
             modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
             horizontalAlignment = Alignment.Start,
@@ -376,12 +384,27 @@ fun FarmProgress(
                         .padding(start = 5.dp),
                     contentAlignment = Alignment.CenterStart
                 ) {
+                    if (virtueInfo.eggId == farm.eggId) {
+                        val offlinePercentComplete =
+                            getOfflineTruthEggPercentComplete(virtueInfo, farm.eggsDelivered)
+                        LinearProgressIndicator(
+                            modifier = GlanceModifier.fillMaxSize(),
+                            progress = offlinePercentComplete,
+                            color = ColorProvider(Color(OFFLINE_PROGRESS_COLOR.toColorInt())),
+                            backgroundColor = ColorProvider(Color(PROGRESS_BACKGROUND_COLOR.toColorInt()))
+                        )
+                    }
+                    val progressBackground = if (virtueInfo.eggId == farm.eggId) {
+                        Color.Transparent
+                    } else {
+                        Color(PROGRESS_BACKGROUND_COLOR.toColorInt())
+                    }
                     val percentComplete = getTruthEggPercentComplete(farm.eggsDelivered)
                     LinearProgressIndicator(
                         modifier = GlanceModifier.fillMaxSize(),
                         progress = percentComplete,
                         color = ColorProvider(Color(PROGRESS_COLOR.toColorInt())),
-                        backgroundColor = ColorProvider(Color(PROGRESS_BACKGROUND_COLOR.toColorInt()))
+                        backgroundColor = ColorProvider(progressBackground)
                     )
                 }
                 Box(
