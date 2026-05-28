@@ -296,11 +296,11 @@ fun getEventImage(eventType: String): String {
 
 fun getVirtueFunctionIconPath(eggId: Int): String {
     return when (eggId) {
-        50 -> "icon_virtue_research"
-        51 -> "icon_virtue_habs"
-        52 -> "icon_virtue_missions"
-        53 -> "icon_virtue_silos"
-        54 -> "icon_virtue_shipping"
+        50 -> "icon_research"
+        51 -> "icon_habs"
+        52 -> "icon_missions"
+        53 -> "icon_silos"
+        54 -> "icon_shipping"
         else -> ""
     }
 }

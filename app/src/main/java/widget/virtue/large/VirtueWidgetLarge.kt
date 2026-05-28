@@ -197,7 +197,7 @@ fun HomeFarmInfo(
             Image(
                 provider = ImageProvider(virtueFunctionBitmap),
                 contentDescription = "Virtue Egg Function",
-                modifier = GlanceModifier.size(20.dp).padding(start = 2.dp)
+                modifier = GlanceModifier.size(25.dp).padding(start = 2.dp)
             )
         }
 
