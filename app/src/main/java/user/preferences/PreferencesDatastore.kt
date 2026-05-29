@@ -68,6 +68,8 @@ class PreferencesDatastore(context: Context) {
             booleanPreferencesKey("useAbsoluteTimeVirtueSilos")
         private val USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG =
             booleanPreferencesKey("useAbsoluteTimeVirtueNextTruthEgg")
+        private val SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT =
+            booleanPreferencesKey("showNextTruthEggGoalAmount")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -480,6 +482,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveUseAbsoluteTimeVirtueNextTruthEgg(useAbsoluteTimeVirtueNextTruthEgg: Boolean) {
         dataStore.edit {
             it[USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG] = useAbsoluteTimeVirtueNextTruthEgg
+        }
+    }
+
+    suspend fun getShowNextTruthEggGoalAmount() = dataStore.data.map {
+        it[SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] == true
+    }.first()
+
+    suspend fun saveShowNextTruthEggGoalAmount(showNextTruthEggGoalAmount: Boolean) {
+        dataStore.edit {
+            it[SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] = showNextTruthEggGoalAmount
         }
     }
 

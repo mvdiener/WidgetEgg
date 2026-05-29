@@ -380,4 +380,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             useAbsoluteTimeVirtueNextTruthEgg = input
         )
     }
+
+    var showNextTruthEggGoalAmount by mutableStateOf(false)
+        private set
+
+    suspend fun updateShowNextTruthEggGoalAmount(input: Boolean) {
+        showNextTruthEggGoalAmount = input
+        preferences.saveShowNextTruthEggGoalAmount(input)
+        val context = getApplication<Application>().applicationContext
+        VirtueWidgetDataStore().updateVirtueWidgetDataStore(
+            context,
+            showNextTruthEggGoalAmount = input
+        )
+    }
 }

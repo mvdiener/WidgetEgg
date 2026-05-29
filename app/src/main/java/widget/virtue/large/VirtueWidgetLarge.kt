@@ -78,6 +78,8 @@ class VirtueWidgetLarge : GlanceAppWidget() {
             val useAbsoluteTimeVirtueNextTruthEgg =
                 state[VirtueWidgetDataStorePreferencesKeys.USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG]
                     ?: false
+            val showNextTruthEggGoalAmount =
+                state[VirtueWidgetDataStorePreferencesKeys.SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] ?: false
             val backgroundColor =
                 state[VirtueWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR]?.let { colorInt ->
                     Color(colorInt)
@@ -130,7 +132,14 @@ class VirtueWidgetLarge : GlanceAppWidget() {
                     )
                     ShiftInfo(assetManager, virtueInfo, textColor)
                     ArtifactsAndEvents(assetManager, virtueInfo)
-                    FarmProgress(assetManager, virtueInfo, textColor)
+                    FarmProgress(
+                        assetManager,
+                        virtueInfo,
+                        useAbsoluteTimeVirtueNextTruthEgg,
+                        use24HrFormat,
+                        showNextTruthEggGoalAmount,
+                        textColor
+                    )
                 }
             }
         }
@@ -337,6 +346,9 @@ fun ArtifactsAndEvents(
 fun FarmProgress(
     assetManager: AssetManager,
     virtueInfo: VirtueInfo,
+    useAbsoluteTimeVirtueNextTruthEgg: Boolean,
+    use24HrFormat: Boolean,
+    showNextTruthEggGoalAmount: Boolean,
     textColor: Color
 ) {
     val farms = if (virtueInfo.isOnVirtue) {
@@ -353,7 +365,7 @@ fun FarmProgress(
         ) {
 
             Box(
-                modifier = GlanceModifier.defaultWeight()
+                modifier = GlanceModifier.width(75.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -378,25 +390,33 @@ fun FarmProgress(
                     )
                 }
             }
-            Box(
-                modifier = GlanceModifier.defaultWeight().padding(end = 5.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                val nextTEThreshold = getNextTruthEggThreshold(farm.eggsDelivered)
-                var shippingText = if (nextTEThreshold == 0.0) {
-                    "Winner!"
-                } else {
-                    "${numberToString(farm.eggsDelivered)}/${numberToString(nextTEThreshold)}"
+            if (!virtueInfo.isOnVirtue) {
+                Box(
+                    modifier = GlanceModifier.defaultWeight().padding(end = 2.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    val nextTEThreshold = getNextTruthEggThreshold(farm.eggsDelivered)
+                    val shippingText = if (nextTEThreshold == 0.0) {
+                        "Winner!"
+                    } else {
+                        "${numberToString(farm.eggsDelivered)} shipped"
+                    }
+                    Text(
+                        text = shippingText,
+                        style = TextStyle(color = ColorProvider(textColor))
+                    )
                 }
-                if (!virtueInfo.isOnVirtue) {
-                    shippingText += " shipped"
-                }
-                Text(
-                    text = shippingText,
-                    style = TextStyle(color = ColorProvider(textColor))
-                )
             }
             if (virtueInfo.isOnVirtue) {
+                val offlinePercentComplete =
+                    if (virtueInfo.eggId == farm.eggId) {
+                        getOfflineTruthEggPercentComplete(
+                            virtueInfo,
+                            farm.eggsDelivered
+                        )
+                    } else {
+                        0.0f
+                    }
                 Box(
                     modifier = GlanceModifier
                         .defaultWeight()
@@ -405,8 +425,6 @@ fun FarmProgress(
                     contentAlignment = Alignment.CenterStart
                 ) {
                     if (virtueInfo.eggId == farm.eggId) {
-                        val offlinePercentComplete =
-                            getOfflineTruthEggPercentComplete(virtueInfo, farm.eggsDelivered)
                         LinearProgressIndicator(
                             modifier = GlanceModifier.fillMaxSize(),
                             progress = offlinePercentComplete,
@@ -427,28 +445,41 @@ fun FarmProgress(
                         backgroundColor = ColorProvider(progressBackground)
                     )
                 }
+                val width = if (showNextTruthEggGoalAmount && useAbsoluteTimeVirtueNextTruthEgg) {
+                    175.dp
+                } else if (showNextTruthEggGoalAmount || useAbsoluteTimeVirtueNextTruthEgg) {
+                    150.dp
+                } else {
+                    100.dp
+                }
                 Box(
-                    modifier = GlanceModifier.defaultWeight(),
+                    modifier = GlanceModifier.width(width),
                     contentAlignment = Alignment.CenterEnd
                 ) {
-                    if (virtueInfo.isOnVirtue) {
-                        val timeRemaining =
-                            if (virtueInfo.offlineHatcheryRate == 0.0 && virtueInfo.eggLayingRate == 0.0) {
-                                "Infinity"
-                            } else {
-                                getTimeRemainingToNextTruthEgg(virtueInfo, farm)
-                            }
-                        Text(
-                            text = timeRemaining,
-                            style = TextStyle(color = ColorProvider(textColor))
-                        )
+                    val nextTEThreshold = getNextTruthEggThreshold(farm.eggsDelivered)
+                    var goalText = if (showNextTruthEggGoalAmount) {
+                        "${numberToString(nextTEThreshold)} @ "
                     } else {
-                        val delivered = numberToString(farm.eggsDelivered)
-                        Text(
-                            text = "$delivered shipped",
-                            style = TextStyle(color = ColorProvider(textColor))
-                        )
+                        ""
                     }
+                    val timeRemaining =
+                        if (virtueInfo.offlineHatcheryRate == 0.0 && virtueInfo.eggLayingRate == 0.0) {
+                            "Infinity"
+                        } else if (offlinePercentComplete >= 1.0f) {
+                            goalText = ""
+                            "TE ready"
+                        } else {
+                            getTimeRemainingToNextTruthEgg(
+                                virtueInfo,
+                                farm,
+                                useAbsoluteTimeVirtueNextTruthEgg,
+                                use24HrFormat
+                            )
+                        }
+                    Text(
+                        text = "$goalText$timeRemaining",
+                        style = TextStyle(color = ColorProvider(textColor))
+                    )
                 }
             }
         }

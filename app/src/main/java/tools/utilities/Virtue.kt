@@ -141,7 +141,12 @@ fun getRemainingSiloTime(
     }
 }
 
-fun getTimeRemainingToNextTruthEgg(virtueInfo: VirtueInfo, farm: VirtueFarmInfo): String {
+fun getTimeRemainingToNextTruthEgg(
+    virtueInfo: VirtueInfo,
+    farm: VirtueFarmInfo,
+    useAbsoluteTime: Boolean,
+    use24HrFormat: Boolean
+): String {
     val isOnActiveFarm = virtueInfo.eggId == farm.eggId
     val offlineHatcheryRate = virtueInfo.offlineHatcheryRate
     val habCapacity = virtueInfo.habCapacity
@@ -186,7 +191,7 @@ fun getTimeRemainingToNextTruthEgg(virtueInfo: VirtueInfo, farm: VirtueFarmInfo)
     if (offlineHatcheryRate == 0.0 || population >= maxPopulation) {
         val remainingSeconds =
             ((60 * targetEggsRemaining) / startingEggLayingRate) - timeElapsedSeconds
-        return formatTimeText(remainingSeconds, false, false) //TODO: pass in booleans
+        return formatTimeText(remainingSeconds, useAbsoluteTime, use24HrFormat)
     }
 
     var timeToTarget =
@@ -200,7 +205,7 @@ fun getTimeRemainingToNextTruthEgg(virtueInfo: VirtueInfo, farm: VirtueFarmInfo)
                     maxPopulation
     }
     val remainingSeconds = 60 * timeToTarget - timeElapsedSeconds
-    return formatTimeText(remainingSeconds, false, false) //TODO: pass in booleans
+    return formatTimeText(remainingSeconds, useAbsoluteTime, use24HrFormat)
 }
 
 fun getTruthEggPercentComplete(delivered: Double): Float {

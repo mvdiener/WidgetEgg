@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
 import tools.utilities.getAsset
 import tools.utilities.getEggName
+import tools.utilities.getNextTruthEggThreshold
 import tools.utilities.getRemainingSiloTime
 import tools.utilities.getTimeRemainingToNextTruthEgg
 import tools.utilities.getVirtueFunctionIconPath
@@ -115,7 +116,13 @@ class VirtueWidgetNormal : GlanceAppWidget() {
                         textColor
                     )
                     ShiftInfo(assetManager, virtueInfo, textColor)
-                    FarmProgress(assetManager, virtueInfo, textColor)
+                    FarmProgress(
+                        assetManager,
+                        virtueInfo,
+                        useAbsoluteTimeVirtueNextTruthEgg,
+                        use24HrFormat,
+                        textColor
+                    )
                 }
             }
         }
@@ -258,6 +265,8 @@ fun HomeFarmInfo(
 fun FarmProgress(
     assetManager: AssetManager,
     virtueInfo: VirtueInfo,
+    useAbsoluteTimeVirtueNextTruthEgg: Boolean,
+    use24HrFormat: Boolean,
     textColor: Color
 ) {
     val farms = if (virtueInfo.isOnVirtue) {
@@ -287,6 +296,7 @@ fun FarmProgress(
                 modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
             )
             Text(
+                modifier = GlanceModifier.padding(end = 2.dp),
                 text = "${farm.truthEggs} (${farm.pendingTruthEggs})",
                 style = TextStyle(color = ColorProvider(textColor))
             )
@@ -296,16 +306,26 @@ fun FarmProgress(
                     if (virtueInfo.offlineHatcheryRate == 0.0 && virtueInfo.eggLayingRate == 0.0) {
                         "Infinity"
                     } else {
-                        getTimeRemainingToNextTruthEgg(virtueInfo, farm)
+                        getTimeRemainingToNextTruthEgg(
+                            virtueInfo,
+                            farm,
+                            useAbsoluteTimeVirtueNextTruthEgg,
+                            use24HrFormat
+                        )
                     }
                 Text(
                     text = timeRemaining,
                     style = TextStyle(color = ColorProvider(textColor))
                 )
             } else {
-                val delivered = numberToString(farm.eggsDelivered)
+                val nextTEThreshold = getNextTruthEggThreshold(farm.eggsDelivered)
+                val shippingText = if (nextTEThreshold == 0.0) {
+                    "Winner!"
+                } else {
+                    "${numberToString(farm.eggsDelivered)} shipped"
+                }
                 Text(
-                    text = "$delivered shipped",
+                    text = shippingText,
                     style = TextStyle(color = ColorProvider(textColor))
                 )
             }

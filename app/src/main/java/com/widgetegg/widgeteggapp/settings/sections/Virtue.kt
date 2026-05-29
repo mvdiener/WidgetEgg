@@ -25,6 +25,7 @@ import com.widgetegg.widgeteggapp.settings.SettingsHeader
 import com.widgetegg.widgeteggapp.settings.SettingsHeaderAndDescription
 import com.widgetegg.widgeteggapp.settings.SettingsViewModel
 import com.widgetegg.widgeteggapp.settings.settingsRowModifier
+import com.widgetegg.widgeteggapp.settings.widgetGroupingModifier
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
@@ -39,6 +40,7 @@ fun Virtue(navController: NavController) {
         val preferences = PreferencesDatastore(context)
         settingsViewModel.updateUseAbsoluteTimeVirtueSilos(preferences.getUseAbsoluteTimeVirtueSilos())
         settingsViewModel.updateUseAbsoluteTimeVirtueNextTruthEgg(preferences.getUseAbsoluteTimeVirtueNextTruthEgg())
+        settingsViewModel.updateShowNextTruthEggGoalAmount(preferences.getShowNextTruthEggGoalAmount())
     }
 
     Column(
@@ -58,10 +60,25 @@ fun Virtue(navController: NavController) {
             verticalArrangement = Arrangement.Top
         ) {
             Text(text = "Virtue Settings", fontSize = TextUnit(24f, TextUnitType.Sp))
-            AbsoluteTimeVirtueSilosRow(settingsViewModel)
-            AbsoluteTimeVirtueTruthEggRow(settingsViewModel)
+            VirtueGeneralGroup(settingsViewModel)
+            LargeVirtueWidgetGroup(settingsViewModel)
             ScrollBottomPadding()
         }
+    }
+}
+
+@Composable
+fun VirtueGeneralGroup(
+    settingsViewModel: SettingsViewModel
+) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(text = "Virtue General", fontSize = TextUnit(18f, TextUnitType.Sp))
+        AbsoluteTimeVirtueSilosRow(settingsViewModel)
+        AbsoluteTimeVirtueTruthEggRow(settingsViewModel)
     }
 }
 
@@ -118,6 +135,48 @@ fun AbsoluteTimeVirtueTruthEggRow(settingsViewModel: SettingsViewModel) {
                 onCheckedChange = {
                     scope.launch {
                         settingsViewModel.updateUseAbsoluteTimeVirtueNextTruthEgg(!settingsViewModel.useAbsoluteTimeVirtueNextTruthEgg)
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun LargeVirtueWidgetGroup(settingsViewModel: SettingsViewModel) {
+    Column(
+        modifier = Modifier.widgetGroupingModifier(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text(text = "Large Virtue Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
+        ShowTruthEggGoalRow(settingsViewModel)
+    }
+}
+
+@Composable
+fun ShowTruthEggGoalRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Show next TE goal amount",
+                null,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.showNextTruthEggGoalAmount,
+                onCheckedChange = {
+                    scope.launch {
+                        settingsViewModel.updateShowNextTruthEggGoalAmount(!settingsViewModel.showNextTruthEggGoalAmount)
                     }
                 }
             )
