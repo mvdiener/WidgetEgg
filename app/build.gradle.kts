@@ -40,9 +40,11 @@ android {
         debug {
             buildConfigField("String", "SECRET_KEY", secretKey)
             buildConfigField("String", "DEV_ACCOUNT", devAccount)
+            isDebuggable = true
         }
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
