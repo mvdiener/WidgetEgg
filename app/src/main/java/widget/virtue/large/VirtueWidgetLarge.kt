@@ -390,23 +390,6 @@ fun FarmProgress(
                     )
                 }
             }
-            if (!virtueInfo.isOnVirtue) {
-                Box(
-                    modifier = GlanceModifier.defaultWeight().padding(end = 2.dp),
-                    contentAlignment = Alignment.CenterEnd
-                ) {
-                    val nextTEThreshold = getNextTruthEggThreshold(farm.eggsDelivered)
-                    val shippingText = if (nextTEThreshold == 0.0) {
-                        "Winner!"
-                    } else {
-                        "${numberToString(farm.eggsDelivered)} shipped"
-                    }
-                    Text(
-                        text = shippingText,
-                        style = TextStyle(color = ColorProvider(textColor))
-                    )
-                }
-            }
             if (virtueInfo.isOnVirtue) {
                 val offlinePercentComplete =
                     if (virtueInfo.eggId == farm.eggId) {
@@ -457,8 +440,8 @@ fun FarmProgress(
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     val nextTEThreshold = getNextTruthEggThreshold(farm.eggsDelivered)
-                    var goalText = if (showNextTruthEggGoalAmount) {
-                        "${numberToString(nextTEThreshold)} @ "
+                    var goalText = if (showNextTruthEggGoalAmount && nextTEThreshold != 0.0) {
+                        "${numberToString(nextTEThreshold)} - "
                     } else {
                         ""
                     }
@@ -478,6 +461,22 @@ fun FarmProgress(
                         }
                     Text(
                         text = "$goalText$timeRemaining",
+                        style = TextStyle(color = ColorProvider(textColor))
+                    )
+                }
+            } else {
+                Box(
+                    modifier = GlanceModifier.defaultWeight().padding(end = 2.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    val nextTEThreshold = getNextTruthEggThreshold(farm.eggsDelivered)
+                    val shippingText = if (nextTEThreshold == 0.0) {
+                        "Winner!"
+                    } else {
+                        "${numberToString(farm.eggsDelivered)} shipped"
+                    }
+                    Text(
+                        text = shippingText,
                         style = TextStyle(color = ColorProvider(textColor))
                     )
                 }

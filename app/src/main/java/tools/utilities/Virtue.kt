@@ -185,6 +185,8 @@ fun getTimeRemainingToNextTruthEgg(
     }
     val targetEggAmount =
         getNextTruthEggThreshold(offlineEggsDelivered)
+    if (targetEggAmount == 0.0) return "Winner!"
+
     val targetEggsRemaining = targetEggAmount - eggsDelivered
 
     // No population growth possible - either no IHR or already at max capacity
@@ -628,6 +630,10 @@ private fun formatTimeText(
 ): String {
     if (timeRemainingSeconds.isInfinite()) {
         return "Infinity"
+    }
+
+    if (timeRemainingSeconds <= 0.0) {
+        return "TE Ready"
     }
 
     val years = timeRemainingSeconds / 31536000

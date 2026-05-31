@@ -277,7 +277,7 @@ fun FarmProgress(
     }
     farms.forEach { farm ->
         Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
+            modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp),
             horizontalAlignment = Alignment.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -297,7 +297,7 @@ fun FarmProgress(
             )
             Text(
                 modifier = GlanceModifier.padding(end = 2.dp),
-                text = "${farm.truthEggs} (${farm.pendingTruthEggs})",
+                text = "${farm.truthEggs}(${farm.pendingTruthEggs})",
                 style = TextStyle(color = ColorProvider(textColor))
             )
             Box(modifier = GlanceModifier.defaultWeight()) {}
