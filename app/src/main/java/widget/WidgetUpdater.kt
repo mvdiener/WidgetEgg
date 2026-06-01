@@ -373,6 +373,11 @@ class WidgetUpdater {
         var prefVirtueInfo = preferences.getVirtueInfo()
 
         val prefEid = preferences.getEid()
+        val prefUseAbsoluteTimeVirtueSilos = preferences.getUseAbsoluteTimeVirtueSilos()
+        val prefUseAbsoluteTimeVirtueNextTruthEgg =
+            preferences.getUseAbsoluteTimeVirtueNextTruthEgg()
+        val prefShowNextTruthEggGoalAmount = preferences.getShowNextTruthEggGoalAmount()
+        val prefOpenVirtueCompanion = preferences.getOpenVirtueCompanion()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
 
@@ -387,6 +392,10 @@ class WidgetUpdater {
                     context,
                     eid = prefEid,
                     virtueInfo = prefVirtueInfo,
+                    useAbsoluteTimeVirtueSilos = prefUseAbsoluteTimeVirtueSilos,
+                    useAbsoluteTimeVirtueNextTruthEgg = prefUseAbsoluteTimeVirtueNextTruthEgg,
+                    showNextTruthEggGoalAmount = prefShowNextTruthEggGoalAmount,
+                    openVirtueCompanion = prefOpenVirtueCompanion,
                     backgroundColor = prefWidgetBackgroundColor,
                     textColor = prefWidgetTextColor
                 )

@@ -40,6 +40,7 @@ fun Virtue(navController: NavController) {
         val preferences = PreferencesDatastore(context)
         settingsViewModel.updateUseAbsoluteTimeVirtueSilos(preferences.getUseAbsoluteTimeVirtueSilos())
         settingsViewModel.updateUseAbsoluteTimeVirtueNextTruthEgg(preferences.getUseAbsoluteTimeVirtueNextTruthEgg())
+        settingsViewModel.updateOpenVirtueCompanion(preferences.getOpenVirtueCompanion())
         settingsViewModel.updateShowNextTruthEggGoalAmount(preferences.getShowNextTruthEggGoalAmount())
     }
 
@@ -79,6 +80,7 @@ fun VirtueGeneralGroup(
         Text(text = "Virtue General", fontSize = TextUnit(18f, TextUnitType.Sp))
         AbsoluteTimeVirtueSilosRow(settingsViewModel)
         AbsoluteTimeVirtueTruthEggRow(settingsViewModel)
+        OpenVirtueCompanionRow(settingsViewModel)
     }
 }
 
@@ -135,6 +137,36 @@ fun AbsoluteTimeVirtueTruthEggRow(settingsViewModel: SettingsViewModel) {
                 onCheckedChange = {
                     scope.launch {
                         settingsViewModel.updateUseAbsoluteTimeVirtueNextTruthEgg(!settingsViewModel.useAbsoluteTimeVirtueNextTruthEgg)
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun OpenVirtueCompanionRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Open virtue companion",
+                "Tapping any virtue widget will open the wasmegg virtue companion, instead of manually refreshing all widgets. Uses Chrome if the default browser fails to open.",
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.openVirtueCompanion,
+                onCheckedChange = {
+                    scope.launch {
+                        settingsViewModel.updateOpenVirtueCompanion(!settingsViewModel.openVirtueCompanion)
                     }
                 }
             )

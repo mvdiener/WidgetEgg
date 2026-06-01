@@ -1,6 +1,8 @@
 package widget.virtue.large
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.graphics.BitmapFactory
 import android.text.format.DateFormat
@@ -10,6 +12,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -39,7 +42,9 @@ import androidx.glance.unit.ColorProvider
 import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.VirtueInfo
+import data.constants.DEFAULT_BROWSER
 import data.constants.OFFLINE_PROGRESS_COLOR
+import data.constants.PROBLEMATIC_BROWSERS
 import data.constants.PROGRESS_BACKGROUND_COLOR
 import data.constants.PROGRESS_COLOR
 import kotlinx.coroutines.CoroutineScope
@@ -62,6 +67,7 @@ import widget.shared.ArtifactsContent
 import widget.shared.NoWidgetContent
 import widget.virtue.VirtueWidgetDataStore
 import widget.virtue.VirtueWidgetDataStorePreferencesKeys
+import kotlin.collections.contains
 
 class VirtueWidgetLarge : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -80,6 +86,8 @@ class VirtueWidgetLarge : GlanceAppWidget() {
                     ?: false
             val showNextTruthEggGoalAmount =
                 state[VirtueWidgetDataStorePreferencesKeys.SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] ?: false
+            val openVirtueCompanion =
+                state[VirtueWidgetDataStorePreferencesKeys.OPEN_VIRTUE_COMPANION] ?: false
             val backgroundColor =
                 state[VirtueWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR]?.let { colorInt ->
                     Color(colorInt)
@@ -110,10 +118,31 @@ class VirtueWidgetLarge : GlanceAppWidget() {
                     .fillMaxSize()
                     .background(backgroundColor)
                     .clickable {
-                        scope.launch {
-                            try {
-                                WidgetUpdater().updateWidgets(context)
-                            } catch (_: Exception) {
+                        if (openVirtueCompanion) {
+                            val packageManager: PackageManager = context.packageManager
+                            var browserPackage: String? = packageManager.resolveActivity(
+                                Intent(Intent.ACTION_VIEW, "https://www.example.com".toUri()),
+                                PackageManager.MATCH_DEFAULT_ONLY
+                            )?.activityInfo?.packageName
+
+                            if (browserPackage != null) {
+                                // Not all browsers play nicely with opening a link from a widget
+                                // If using any of these browsers, attempt to use chrome instead
+                                if (browserPackage in PROBLEMATIC_BROWSERS) {
+                                    browserPackage = DEFAULT_BROWSER
+                                }
+                                val launchIntent: Intent? =
+                                    packageManager.getLaunchIntentForPackage(browserPackage)
+                                launchIntent?.data =
+                                    "https://wasmegg-carpet.netlify.app/virtue-companion?playerId=$eid".toUri()
+                                context.startActivity(launchIntent)
+                            }
+                        } else {
+                            scope.launch {
+                                try {
+                                    WidgetUpdater().updateWidgets(context)
+                                } catch (_: Exception) {
+                                }
                             }
                         }
                     }

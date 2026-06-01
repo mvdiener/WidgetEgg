@@ -409,4 +409,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             showNextTruthEggGoalAmount = input
         )
     }
+
+    var openVirtueCompanion by mutableStateOf(false)
+        private set
+
+    suspend fun updateOpenVirtueCompanion(input: Boolean) {
+        openVirtueCompanion = input
+        preferences.saveOpenVirtueCompanion(input)
+        val context = getApplication<Application>().applicationContext
+        VirtueWidgetDataStore().updateVirtueWidgetDataStore(
+            context,
+            openVirtueCompanion = input
+        )
+    }
 }

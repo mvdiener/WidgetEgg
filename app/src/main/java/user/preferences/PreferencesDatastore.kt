@@ -70,6 +70,7 @@ class PreferencesDatastore(context: Context) {
             booleanPreferencesKey("useAbsoluteTimeVirtueNextTruthEgg")
         private val SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT =
             booleanPreferencesKey("showNextTruthEggGoalAmount")
+        private val OPEN_VIRTUE_COMPANION = booleanPreferencesKey("openVirtueCompanion")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -492,6 +493,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveShowNextTruthEggGoalAmount(showNextTruthEggGoalAmount: Boolean) {
         dataStore.edit {
             it[SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] = showNextTruthEggGoalAmount
+        }
+    }
+
+    suspend fun getOpenVirtueCompanion() = dataStore.data.map {
+        it[OPEN_VIRTUE_COMPANION] == true
+    }.first()
+
+    suspend fun saveOpenVirtueCompanion(openVirtueCompanion: Boolean) {
+        dataStore.edit {
+            it[OPEN_VIRTUE_COMPANION] = openVirtueCompanion
         }
     }
 

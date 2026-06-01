@@ -22,6 +22,7 @@ data object VirtueWidgetDataStorePreferencesKeys {
     val USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG =
         booleanPreferencesKey("widgetUseAbsoluteTimeVirtueNextTruthEgg")
     val SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT = booleanPreferencesKey("widgetShowNextTruthEggGoalAmount")
+    val OPEN_VIRTUE_COMPANION = booleanPreferencesKey("widgetOpenVirtueCompanion")
     val WIDGET_BACKGROUND_COLOR = intPreferencesKey("widgetBackgroundColor")
     val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
 }
@@ -34,6 +35,7 @@ class VirtueWidgetDataStore {
         useAbsoluteTimeVirtueSilos: Boolean? = null,
         useAbsoluteTimeVirtueNextTruthEgg: Boolean? = null,
         showNextTruthEggGoalAmount: Boolean? = null,
+        openVirtueCompanion: Boolean? = null,
         backgroundColor: Color? = null,
         textColor: Color? = null
     ) {
@@ -55,6 +57,9 @@ class VirtueWidgetDataStore {
                 }
                 showNextTruthEggGoalAmount?.let {
                     prefs[VirtueWidgetDataStorePreferencesKeys.SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] = it
+                }
+                openVirtueCompanion?.let {
+                    prefs[VirtueWidgetDataStorePreferencesKeys.OPEN_VIRTUE_COMPANION] = it
                 }
                 backgroundColor?.let {
                     prefs[VirtueWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR] =
