@@ -76,6 +76,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 backgroundColor = input
             )
             StatsWidgetDataStore().updateStatsWidgetDataStore(context, backgroundColor = input)
+            VirtueWidgetDataStore().updateVirtueWidgetDataStore(context, backgroundColor = input)
         }
     }
 
@@ -98,6 +99,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             MissionWidgetDataStore().updateMissionWidgetDataStore(context, textColor = input)
             ContractWidgetDataStore().updateContractWidgetDataStore(context, textColor = input)
             StatsWidgetDataStore().updateStatsWidgetDataStore(context, textColor = input)
+            VirtueWidgetDataStore().updateVirtueWidgetDataStore(context, textColor = input)
         }
     }
 
