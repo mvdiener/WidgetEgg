@@ -1,7 +1,9 @@
 package com.widgetegg.widgeteggapp.settings
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.compose.foundation.background
@@ -48,8 +50,24 @@ fun SettingsScreen(navController: NavController) {
         context.getSystemService(Context.POWER_SERVICE) as PowerManager
     settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
 
+    val am: ActivityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    settingsViewModel.updateIsBackgroundUsageDisabled(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            am.isBackgroundRestricted
+        } else {
+            false
+        }
+    )
+
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
+        settingsViewModel.updateIsBackgroundUsageDisabled(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                am.isBackgroundRestricted
+            } else {
+                false
+            }
+        )
     }
 
     Column(
@@ -76,6 +94,11 @@ fun SettingsScreen(navController: NavController) {
                 .padding(horizontal = 15.dp),
             verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
+            item {
+                if (settingsViewModel.isBackgroundUsageDisabled) {
+                    BackgroundUsageContent(settingsViewModel, packageName, context)
+                }
+            }
             item {
                 if (!settingsViewModel.isOptimizationDisabled) {
                     BatteryPermissionsContent(settingsViewModel, packageName, context)
@@ -175,9 +198,9 @@ fun BatteryPermissionsDialog(
                 Text(
                     text =
                         """
-                        The widgets attempt to update automatically in the background every 15 minutes. In order to do this, they run background processes to fetch mission data.     
+                        The widgets attempt to update automatically in the background every 15 minutes. In order to do this, they run background processes to fetch data.     
                         
-                        Battery optimization can prevent these processes from running. If you notice issues with widget updates, it is recommended that you turn off battery optimization for this app.
+                        Battery optimization can prevent these processes from running. If you notice issues with widget updates, it is recommended that you review battery usage settings for this app.
                     """.trimIndent()
                 )
                 Button(
@@ -186,6 +209,91 @@ fun BatteryPermissionsDialog(
                         .padding(top = 5.dp),
                     onClick = {
                         settingsViewModel.updateShowBatteryOptimizationDialog(false)
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = "package:$packageName".toUri()
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text(text = "App Settings")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BackgroundUsageContent(
+    settingsViewModel: SettingsViewModel,
+    packageName: String,
+    context: Context
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 15.dp)
+            .clickable {
+                settingsViewModel.updateShowBackgroundUsageDialog(true)
+            },
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Rounded.Warning,
+            contentDescription = "Background usage warning",
+            modifier = Modifier
+                .padding(end = 5.dp)
+                .size(35.dp),
+            tint = Color(0xffffa500)
+        )
+        Text(text = "Background Usage Disabled")
+        Icon(
+            Icons.Rounded.Info,
+            contentDescription = "Background usage info",
+            modifier = Modifier
+                .padding(start = 5.dp)
+                .size(15.dp)
+        )
+        BackgroundUsageDialog(settingsViewModel, packageName, context)
+    }
+}
+
+@Composable
+fun BackgroundUsageDialog(
+    settingsViewModel: SettingsViewModel,
+    packageName: String,
+    context: Context
+) {
+    if (settingsViewModel.showBackgroundUsageDialog) {
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateShowBackgroundUsageDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                        """
+                        The widgets attempt to update automatically in the background every 15 minutes. In order to do this, they run background processes to fetch data.     
+                        
+                        With background usage disabled, the widgets will not update unless you update manually by tapping any widget.
+                        
+                        If you would like the widgets to update automatically, enable background usage within the battery settings for this app.
+                    """.trimIndent()
+                )
+                Button(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 5.dp),
+                    onClick = {
+                        settingsViewModel.updateShowBackgroundUsageDialog(false)
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         intent.data = "package:$packageName".toUri()
                         context.startActivity(intent)

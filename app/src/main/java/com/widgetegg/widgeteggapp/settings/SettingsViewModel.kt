@@ -47,6 +47,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         showBatteryOptimizationDialog = input
     }
 
+    var isBackgroundUsageDisabled by mutableStateOf(true)
+        private set
+
+    fun updateIsBackgroundUsageDisabled(input: Boolean) {
+        isBackgroundUsageDisabled = input
+    }
+
+    var showBackgroundUsageDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowBackgroundUsageDialog(input: Boolean) {
+        showBackgroundUsageDialog = input
+    }
+
     var widgetBackgroundColor by mutableStateOf(DEFAULT_WIDGET_BACKGROUND_COLOR)
         private set
 

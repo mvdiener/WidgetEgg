@@ -92,6 +92,20 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         showWhatNextDialog = input
     }
 
+    var isBackgroundUsageDisabled by mutableStateOf(true)
+        private set
+
+    fun updateIsBackgroundUsageDisabled(input: Boolean) {
+        isBackgroundUsageDisabled = input
+    }
+
+    var showBackgroundUsageDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowBackgroundUsageDialog(input: Boolean) {
+        showBackgroundUsageDialog = input
+    }
+
     fun getBackupData() {
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>().applicationContext

@@ -1,6 +1,11 @@
 package com.widgetegg.widgeteggapp.main
 
+import android.app.ActivityManager
+import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
+import android.os.Build
+import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +21,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,6 +46,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.widgetegg.widgeteggapp.Routes
@@ -48,10 +58,31 @@ import user.preferences.PreferencesDatastore
 @Composable
 fun MainScreen(navController: NavController) {
     val signInViewModel = viewModel<SignInViewModel>()
+    val context = LocalContext.current
+    val packageName = context.packageName
     val logoString = if (isSystemInDarkTheme()) {
         "logo-dark-mode"
     } else {
         "logo-light-mode"
+    }
+
+    val am: ActivityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    signInViewModel.updateIsBackgroundUsageDisabled(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            am.isBackgroundRestricted
+        } else {
+            false
+        }
+    )
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        signInViewModel.updateIsBackgroundUsageDisabled(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                am.isBackgroundRestricted
+            } else {
+                false
+            }
+        )
     }
 
     Column(
@@ -80,6 +111,9 @@ fun MainScreen(navController: NavController) {
             BitmapFactory.decodeStream(getAsset(assetManager, "icons/$logoString.png"))
                 .asImageBitmap()
 
+        if (signInViewModel.isBackgroundUsageDisabled) {
+            BackgroundUsageContent(signInViewModel, packageName, context)
+        }
         Image(
             bitmap = bitmapImage,
             contentDescription = "App Logo",
@@ -100,6 +134,91 @@ fun MainScreen(navController: NavController) {
     SignOutDialog(signInViewModel)
     FindMyEidDialog(signInViewModel)
     WhatNextDialog(signInViewModel)
+}
+
+@Composable
+fun BackgroundUsageContent(
+    signInViewModel: SignInViewModel,
+    packageName: String,
+    context: Context
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 15.dp)
+            .clickable {
+                signInViewModel.updateShowBackgroundUsageDialog(true)
+            },
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            Icons.Rounded.Warning,
+            contentDescription = "Background usage warning",
+            modifier = Modifier
+                .padding(end = 5.dp)
+                .size(35.dp),
+            tint = Color(0xffffa500)
+        )
+        Text(text = "Background Usage Disabled")
+        Icon(
+            Icons.Rounded.Info,
+            contentDescription = "Background usage info",
+            modifier = Modifier
+                .padding(start = 5.dp)
+                .size(15.dp)
+        )
+        BackgroundUsageDialog(signInViewModel, packageName, context)
+    }
+}
+
+@Composable
+fun BackgroundUsageDialog(
+    signInViewModel: SignInViewModel,
+    packageName: String,
+    context: Context
+) {
+    if (signInViewModel.showBackgroundUsageDialog) {
+        Dialog(
+            onDismissRequest = {
+                signInViewModel.updateShowBackgroundUsageDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Text(
+                    text =
+                        """
+                        The widgets attempt to update automatically in the background every 15 minutes. In order to do this, they run background processes to fetch data.     
+                        
+                        With background usage disabled, the widgets will not update unless you update manually by tapping any widget.
+                        
+                        If you would like the widgets to update automatically, enable background usage within the battery settings for this app.
+                    """.trimIndent()
+                )
+                Button(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 5.dp),
+                    onClick = {
+                        signInViewModel.updateShowBackgroundUsageDialog(false)
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = "package:$packageName".toUri()
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text(text = "App Settings")
+                }
+            }
+        }
+    }
 }
 
 @Composable
