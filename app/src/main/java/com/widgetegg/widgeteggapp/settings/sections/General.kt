@@ -17,12 +17,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -45,6 +51,7 @@ import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import kotlinx.coroutines.runBlocking
 import user.preferences.PreferencesDatastore
+import androidx.core.graphics.toColorInt
 
 @Composable
 fun General(navController: NavController) {
@@ -196,6 +203,7 @@ fun ColorPickerDialog(
     onColorSelected: (Color) -> Unit
 ) {
     val controller = rememberColorPickerController()
+    var hexInput by remember { mutableStateOf(String.format("%08X", initialColor.toArgb())) }
     Dialog(
         onDismissRequest = {
             onColorSelected(controller.selectedColor.value)
@@ -221,6 +229,11 @@ fun ColorPickerDialog(
                     .height(350.dp),
                 controller = controller,
                 initialColor = initialColor,
+                onColorChanged = { envelope ->
+                    if (envelope.fromUser) {
+                        hexInput = envelope.hexCode
+                    }
+                }
             )
             AlphaSlider(
                 modifier = Modifier
@@ -236,6 +249,22 @@ fun ColorPickerDialog(
                     .height(35.dp),
                 controller = controller,
                 initialColor = initialColor,
+            )
+            TextField(
+                value = "#$hexInput".uppercase(),
+                modifier = Modifier.padding(top = 10.dp),
+                onValueChange = { newValue ->
+                    val sanitized =
+                        newValue.removePrefix("#").uppercase().filter { it in "012345678ABCDEF" }
+                            .take(8)
+                    hexInput = sanitized
+
+                    try {
+                        val color = Color("#$sanitized".toColorInt())
+                        controller.selectByColor(color, false)
+                    } catch (_: Exception) {
+                    }
+                }
             )
             AlphaTile(
                 modifier = Modifier
