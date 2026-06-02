@@ -97,8 +97,8 @@ fun Virtue(navController: NavController, activity: MainActivity) {
             verticalArrangement = Arrangement.Top
         ) {
             Text(text = "Virtue Settings", fontSize = TextUnit(24f, TextUnitType.Sp))
-            VirtueGeneralGroup(settingsViewModel)
-            LargeVirtueWidgetGroup(settingsViewModel, context, activity)
+            VirtueGeneralGroup(settingsViewModel, context, activity)
+            LargeVirtueWidgetGroup(settingsViewModel)
             ScrollBottomPadding()
         }
     }
@@ -106,7 +106,9 @@ fun Virtue(navController: NavController, activity: MainActivity) {
 
 @Composable
 fun VirtueGeneralGroup(
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    context: Context,
+    activity: MainActivity
 ) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
@@ -117,6 +119,7 @@ fun VirtueGeneralGroup(
         AbsoluteTimeVirtueSilosRow(settingsViewModel)
         AbsoluteTimeVirtueTruthEggRow(settingsViewModel)
         OpenVirtueCompanionRow(settingsViewModel)
+        EventNotificationRow(settingsViewModel, context, activity)
     }
 }
 
@@ -211,11 +214,7 @@ fun OpenVirtueCompanionRow(settingsViewModel: SettingsViewModel) {
 }
 
 @Composable
-fun LargeVirtueWidgetGroup(
-    settingsViewModel: SettingsViewModel,
-    context: Context,
-    activity: MainActivity
-) {
+fun LargeVirtueWidgetGroup(settingsViewModel: SettingsViewModel) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
         horizontalAlignment = Alignment.Start,
@@ -223,7 +222,6 @@ fun LargeVirtueWidgetGroup(
     ) {
         Text(text = "Large Virtue Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
         ShowTruthEggGoalRow(settingsViewModel)
-        EventNotificationRow(settingsViewModel, context, activity)
     }
 }
 
@@ -234,26 +232,22 @@ fun ShowTruthEggGoalRow(settingsViewModel: SettingsViewModel) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            SettingsHeaderAndDescription(
-                "Show next TE goal amount",
-                null,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 10.dp)
-            )
-            val scope = rememberCoroutineScope()
-            Switch(
-                checked = settingsViewModel.showNextTruthEggGoalAmount,
-                onCheckedChange = {
-                    scope.launch {
-                        settingsViewModel.updateShowNextTruthEggGoalAmount(!settingsViewModel.showNextTruthEggGoalAmount)
-                    }
+        SettingsHeaderAndDescription(
+            "Show next TE goal amount",
+            null,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 10.dp)
+        )
+        val scope = rememberCoroutineScope()
+        Switch(
+            checked = settingsViewModel.showNextTruthEggGoalAmount,
+            onCheckedChange = {
+                scope.launch {
+                    settingsViewModel.updateShowNextTruthEggGoalAmount(!settingsViewModel.showNextTruthEggGoalAmount)
                 }
-            )
-        }
+            }
+        )
     }
 }
 
@@ -337,7 +331,12 @@ fun EventNotificationDialog(settingsViewModel: SettingsViewModel) {
                     ) {
                         Text(text = "Select Events", fontSize = TextUnit(18f, TextUnitType.Sp))
                         Text(
-                            text = "Timeliness of notification not guaranteed. Notification may arrive at any time after an event starts.",
+                            text =
+                                """
+                                    Timeliness of notifications not guaranteed. Notifications may arrive at any time after an event starts.
+                                    
+                                    Notifications for ultra events will only occur if you have ultra.
+                                """.trimIndent(),
                             fontSize = TextUnit(13f, TextUnitType.Sp),
                             color = MaterialTheme.colorScheme.primary
                         )

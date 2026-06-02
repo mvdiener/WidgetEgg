@@ -12,6 +12,7 @@ import com.widgetegg.widgeteggapp.R
 import data.constants.CONTRACT_NOTIFICATION_CHANNEL_ID
 import data.ContractInfoEntry
 import data.PeriodicalsContractInfoEntry
+import data.VirtueInfo
 
 fun hasNotificationPermissions(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -20,7 +21,7 @@ fun hasNotificationPermissions(context: Context): Boolean {
             android.Manifest.permission.POST_NOTIFICATIONS
         ) == PackageManager.PERMISSION_GRANTED
     } else {
-        return true
+        true
     }
 }
 
@@ -80,6 +81,57 @@ fun sendContractNotification(
             contract.copy(notificationSent = true)
         }
     }
+}
+
+fun sendEventNotification(
+    context: Context,
+    virtueInfo: VirtueInfo,
+    selectedEventNotifications: Set<String>
+): VirtueInfo {
+    if (!hasNotificationPermissions(context) || selectedEventNotifications.isEmpty()) return virtueInfo
+
+    // Find intersection of today's events and the events where the user wants a notification
+    val matchingEvents = virtueInfo.dailyEvents.filter { event ->
+        event.type in selectedEventNotifications && !event.notificationSent
+    }
+
+    if (matchingEvents.isEmpty()) return virtueInfo
+
+    val titleText = if (matchingEvents.size == 1) "New event available" else "New events available"
+    val messageText = matchingEvents.joinToString(separator = ", ") {
+        val name = it.name
+        val multiplierText = if (it.multiplier > 1) {
+            " ${(it.multiplier).toInt()}x"
+        } else if (it.multiplier == 1.0) {
+            ""
+        } else {
+            val percent = ((1.0 - it.multiplier) * 100).toInt()
+            " $percent% off"
+        }
+        val ultraText = if (it.isUltra) {
+            " (Ultra Only)"
+        } else {
+            ""
+        }
+
+        "$name$multiplierText$ultraText"
+    }
+
+    val builder = createNotificationBuilder(context, titleText, messageText)
+    with(NotificationManagerCompat.from(context)) {
+        // Using a specific ID for events to avoid overwriting event notifications
+        notify("event_notifications".hashCode(), builder.build())
+    }
+
+    val updatedEvents = virtueInfo.dailyEvents.map { event ->
+        if (event.type in selectedEventNotifications) {
+            event.copy(notificationSent = true)
+        } else {
+            event
+        }
+    }
+
+    return virtueInfo.copy(dailyEvents = updatedEvents)
 }
 
 private fun createNotificationBuilder(

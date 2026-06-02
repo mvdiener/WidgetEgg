@@ -26,6 +26,7 @@ import tools.utilities.removeCalendarEvents
 import tools.utilities.saveColleggtibleImagesToCache
 import tools.utilities.scheduleCalendarEvents
 import tools.utilities.sendContractNotification
+import tools.utilities.sendEventNotification
 import tools.utilities.updateFuelingMission
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
@@ -386,6 +387,9 @@ class WidgetUpdater {
             if (prefEid.isNotBlank()) {
                 prefVirtueInfo =
                     formatVirtueData(backup, periodicalsInfo, prefVirtueInfo.dailyEvents)
+
+                prefVirtueInfo =
+                    sendEventNotification(context, prefVirtueInfo, prefSelectedEventNotifications)
 
                 preferences.saveVirtueInfo(prefVirtueInfo)
 
