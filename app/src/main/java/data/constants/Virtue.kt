@@ -1,6 +1,7 @@
 package data.constants
 
 import data.Artifact
+import data.EventType
 import data.Hab
 import data.Research
 import data.Stone
@@ -736,4 +737,24 @@ val VIRTUE_DELIVERY_GOALS = arrayOf(
     3.486e19, // 34.86Q
     3.57e19, // 35.7Q
     3.655e19, // 36.55Q - TE #98 (max)
+)
+
+val ALL_EVENT_TYPES = listOf(
+    EventType("epic-research-sale", "Epic Research Sale"),
+    EventType("piggy-boost", "Piggy Growth"),
+    EventType("piggy-cap-boost", "Unlimited Piggy"),
+    EventType("prestige-boost", "Prestige Boost"),
+    EventType("earnings-boost", "Cash Boost"),
+    EventType("gift-boost", "Generous Gifts"),
+    EventType("drone-boost", "Generous Drones"),
+    EventType("research-sale", "Research Sale"),
+    EventType("hab-sale", "Hen House Sale"),
+    EventType("vehicle-sale", "Vehicle Sale"),
+    EventType("boost-sale", "Boost Sale"),
+    EventType("boost-duration", "Boost Time+"),
+    EventType("crafting-sale", "Crafting Sale"),
+    EventType("mission-fuel", "Mission Fuel Boost"),
+    EventType("mission-capacity", "Mission Capacity Boost"),
+    EventType("mission-duration", "Mission Duration Cut"),
+    EventType("shell-sale", "Shell Sale")
 )

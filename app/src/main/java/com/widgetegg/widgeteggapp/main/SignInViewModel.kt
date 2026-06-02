@@ -166,7 +166,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     )
                     val formattedStatsData = formatStatsData(backupResult, periodicalsResult)
                     val formattedVirtueData =
-                        formatVirtueData(backupResult, periodicalsResult)
+                        formatVirtueData(backupResult, periodicalsResult, null)
                     saveColleggtibleImagesToCache(periodicalsResult, context)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)

@@ -2,6 +2,7 @@ package tools.utilities
 
 import data.Artifact
 import data.Event
+import data.PeriodicalsContractInfoEntry
 import data.constants.IHR_RESEARCHES
 import data.PeriodicalsData
 import data.Stone
@@ -9,6 +10,7 @@ import data.constants.VIRTUE_DELIVERY_GOALS
 import data.constants.VIRTUE_EGGS
 import data.VirtueFarmInfo
 import data.VirtueInfo
+import data.constants.ALL_EVENT_TYPES
 import data.constants.HABS
 import data.constants.HAB_SPACE_ARTIFACTS
 import data.constants.HAB_SPACE_RESEARCHES
@@ -38,7 +40,8 @@ import kotlin.math.sqrt
 
 fun formatVirtueData(
     backup: Backup,
-    periodicalsData: PeriodicalsData?
+    periodicalsData: PeriodicalsData?,
+    previousEventInfo: List<Event>?
 ): VirtueInfo {
     val homeFarm = backup.farmsList.first { it.farmType == FarmType.HOME }
     val homeFarmIndex = backup.farmsList.indexOf(homeFarm)
@@ -106,7 +109,7 @@ fun formatVirtueData(
         isOnVirtue = isOnVirtue,
         virtueEquippedArtifacts = virtueArtifacts,
         homeEquippedArtifacts = homeArtifacts,
-        dailyEvents = formatDailyEvents(periodicalsData),
+        dailyEvents = formatDailyEvents(periodicalsData, previousEventInfo),
         farms = virtueFarms
     )
 }
@@ -261,14 +264,24 @@ private fun getArtifacts(
     }
 }
 
-private fun formatDailyEvents(periodicalsData: PeriodicalsData?): List<Event> {
+private fun formatDailyEvents(
+    periodicalsData: PeriodicalsData?,
+    previousEventInfo: List<Event>?
+): List<Event> {
     return periodicalsData?.dailyEvents?.map { event ->
+        val previousEvent = previousEventInfo?.find { it.type == event.type }
         Event(
             type = event.type,
             multiplier = event.multiplier,
-            isUltra = event.ccOnly
+            isUltra = event.ccOnly,
+            name = getEventName(event.type),
+            notificationSent = previousEvent?.notificationSent ?: false
         )
     } ?: emptyList()
+}
+
+private fun getEventName(eventType: String): String {
+    return ALL_EVENT_TYPES.find { it.id == eventType }?.displayName ?: ""
 }
 
 private fun formatVirtueFarms(

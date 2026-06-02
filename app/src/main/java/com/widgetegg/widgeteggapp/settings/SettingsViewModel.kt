@@ -422,4 +422,22 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             openVirtueCompanion = input
         )
     }
+
+    var showEventNotificationDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowEventNotificationDialog(input: Boolean) {
+        showEventNotificationDialog = input
+    }
+
+    var selectedEvents by mutableStateOf<Set<String>>(emptySet())
+        private set
+
+    fun updateSelectedEvents(input: Set<String>) {
+        selectedEvents = input
+        // Changes to this value are tied into lifecycle events and need to wait for this operation to finish
+        runBlocking {
+            preferences.saveSelectedEventNotifications(input)
+        }
+    }
 }

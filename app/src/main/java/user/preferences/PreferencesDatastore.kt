@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.CalendarEntry
 import data.ContractInfoEntry
@@ -71,6 +72,8 @@ class PreferencesDatastore(context: Context) {
         private val SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT =
             booleanPreferencesKey("showNextTruthEggGoalAmount")
         private val OPEN_VIRTUE_COMPANION = booleanPreferencesKey("openVirtueCompanion")
+        private val SELECTED_EVENT_NOTIFICATIONS =
+            stringSetPreferencesKey("selectedEventNotifications")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -503,6 +506,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveOpenVirtueCompanion(openVirtueCompanion: Boolean) {
         dataStore.edit {
             it[OPEN_VIRTUE_COMPANION] = openVirtueCompanion
+        }
+    }
+
+    suspend fun getSelectedEventNotifications() = dataStore.data.map {
+        it[SELECTED_EVENT_NOTIFICATIONS] ?: emptySet()
+    }.first()
+
+    suspend fun saveSelectedEventNotifications(selectedEventNotifications: Set<String>) {
+        dataStore.edit {
+            it[SELECTED_EVENT_NOTIFICATIONS] = selectedEventNotifications
         }
     }
 

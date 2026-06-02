@@ -40,7 +40,9 @@ data class VirtueFarmInfo(
 data class Event(
     var type: String,
     var multiplier: Double,
-    var isUltra: Boolean
+    var isUltra: Boolean,
+    var name: String,
+    var notificationSent: Boolean
 )
 
 data class Research(
@@ -62,4 +64,9 @@ data class Vehicle(
 data class Hab(
     val id: Int,
     val baseHabSpace: Double
+)
+
+data class EventType(
+    val id: String,
+    val displayName: String
 )

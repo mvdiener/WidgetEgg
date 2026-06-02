@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
                                 StatsLegend(navController)
                             }
                             composable(Routes.virtueSettingsScreen) {
-                                Virtue(navController)
+                                Virtue(navController, activity)
                             }
                         },
                         modifier = Modifier.semantics { contentDescription = "WidgetEgg" })

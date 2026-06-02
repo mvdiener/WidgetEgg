@@ -1,16 +1,32 @@
 package com.widgetegg.widgeteggapp.settings.sections
 
+import android.content.Context
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,20 +34,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.widgetegg.widgeteggapp.MainActivity
 import com.widgetegg.widgeteggapp.settings.ScrollBottomPadding
 import com.widgetegg.widgeteggapp.settings.SettingsHeader
 import com.widgetegg.widgeteggapp.settings.SettingsHeaderAndDescription
 import com.widgetegg.widgeteggapp.settings.SettingsViewModel
 import com.widgetegg.widgeteggapp.settings.settingsRowModifier
 import com.widgetegg.widgeteggapp.settings.widgetGroupingModifier
+import data.constants.ALL_EVENT_TYPES
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import tools.utilities.hasNotificationPermissions
 import user.preferences.PreferencesDatastore
 
 @Composable
-fun Virtue(navController: NavController) {
+fun Virtue(navController: NavController, activity: MainActivity) {
     val settingsViewModel = viewModel<SettingsViewModel>()
 
     val context = LocalContext.current
@@ -42,6 +65,19 @@ fun Virtue(navController: NavController) {
         settingsViewModel.updateUseAbsoluteTimeVirtueNextTruthEgg(preferences.getUseAbsoluteTimeVirtueNextTruthEgg())
         settingsViewModel.updateOpenVirtueCompanion(preferences.getOpenVirtueCompanion())
         settingsViewModel.updateShowNextTruthEggGoalAmount(preferences.getShowNextTruthEggGoalAmount())
+        settingsViewModel.updateSelectedEvents(preferences.getSelectedEventNotifications())
+    }
+
+    if (!hasNotificationPermissions(context)) {
+        settingsViewModel.updateSelectedEvents(emptySet())
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        val onResumeNotificationPermissions = hasNotificationPermissions(context)
+
+        if (!onResumeNotificationPermissions) {
+            settingsViewModel.updateSelectedEvents(emptySet())
+        }
     }
 
     Column(
@@ -62,7 +98,7 @@ fun Virtue(navController: NavController) {
         ) {
             Text(text = "Virtue Settings", fontSize = TextUnit(24f, TextUnitType.Sp))
             VirtueGeneralGroup(settingsViewModel)
-            LargeVirtueWidgetGroup(settingsViewModel)
+            LargeVirtueWidgetGroup(settingsViewModel, context, activity)
             ScrollBottomPadding()
         }
     }
@@ -175,7 +211,11 @@ fun OpenVirtueCompanionRow(settingsViewModel: SettingsViewModel) {
 }
 
 @Composable
-fun LargeVirtueWidgetGroup(settingsViewModel: SettingsViewModel) {
+fun LargeVirtueWidgetGroup(
+    settingsViewModel: SettingsViewModel,
+    context: Context,
+    activity: MainActivity
+) {
     Column(
         modifier = Modifier.widgetGroupingModifier(),
         horizontalAlignment = Alignment.Start,
@@ -183,6 +223,7 @@ fun LargeVirtueWidgetGroup(settingsViewModel: SettingsViewModel) {
     ) {
         Text(text = "Large Virtue Widget", fontSize = TextUnit(18f, TextUnitType.Sp))
         ShowTruthEggGoalRow(settingsViewModel)
+        EventNotificationRow(settingsViewModel, context, activity)
     }
 }
 
@@ -212,6 +253,141 @@ fun ShowTruthEggGoalRow(settingsViewModel: SettingsViewModel) {
                     }
                 }
             )
+        }
+    }
+}
+
+@Composable
+fun EventNotificationRow(
+    settingsViewModel: SettingsViewModel,
+    context: Context,
+    activity: MainActivity
+) {
+    Row(
+        modifier = Modifier
+            .settingsRowModifier()
+            .clickable {
+                if (hasNotificationPermissions(context)) {
+                    settingsViewModel.updateShowEventNotificationDialog(true)
+                } else {
+                    ActivityCompat.requestPermissions(
+                        activity, arrayOf(
+                            android.Manifest.permission.POST_NOTIFICATIONS
+                        ),
+                        101
+                    )
+                }
+            },
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            val selectedDescription = if (settingsViewModel.selectedEvents.isNotEmpty()) {
+                val names = ALL_EVENT_TYPES.filter { it.id in settingsViewModel.selectedEvents }
+                    .map { it.displayName }
+                "Selected: " + names.joinToString(separator = ", ")
+            } else {
+                "Selected: none"
+            }
+            SettingsHeaderAndDescription(
+                "Notify on selected events",
+                selectedDescription,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+
+            Icon(
+                Icons.Rounded.Add,
+                contentDescription = "Add event notifications"
+            )
+            if (settingsViewModel.showEventNotificationDialog) {
+                EventNotificationDialog(settingsViewModel)
+            }
+        }
+    }
+}
+
+@Composable
+fun EventNotificationDialog(settingsViewModel: SettingsViewModel) {
+    if (settingsViewModel.showEventNotificationDialog) {
+        var tempSelection by remember { mutableStateOf(settingsViewModel.selectedEvents) }
+        Dialog(
+            onDismissRequest = {
+                settingsViewModel.updateSelectedEvents(tempSelection)
+                settingsViewModel.updateShowEventNotificationDialog(false)
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = RoundedCornerShape(size = 16.dp)
+                    )
+                    .padding(20.dp)
+            ) {
+                Row {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 10.dp)
+                    ) {
+                        Text(text = "Select Events", fontSize = TextUnit(18f, TextUnitType.Sp))
+                        Text(
+                            text = "Timeliness of notification not guaranteed. Notification may arrive at any time after an event starts.",
+                            fontSize = TextUnit(13f, TextUnitType.Sp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        modifier = Modifier
+                            .padding(top = 15.dp, start = 15.dp),
+                        onClick = {
+                            tempSelection = ALL_EVENT_TYPES.map { it.id }.toSet()
+                        }) {
+                        Text(text = "Select All")
+                    }
+                    Button(
+                        modifier = Modifier
+                            .padding(top = 15.dp, start = 15.dp),
+                        onClick = {
+                            tempSelection = emptySet()
+                        }) {
+                        Text(text = "Select None")
+                    }
+                }
+                LazyColumn {
+                    items(ALL_EVENT_TYPES) { event ->
+                        val isChecked = tempSelection.contains(event.id)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = event.displayName)
+                            Checkbox(
+                                checked = isChecked,
+                                onCheckedChange = { checked ->
+                                    tempSelection = if (checked) {
+                                        tempSelection + event.id
+                                    } else {
+                                        tempSelection - event.id
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

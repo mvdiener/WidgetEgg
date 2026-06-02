@@ -378,13 +378,14 @@ class WidgetUpdater {
             preferences.getUseAbsoluteTimeVirtueNextTruthEgg()
         val prefShowNextTruthEggGoalAmount = preferences.getShowNextTruthEggGoalAmount()
         val prefOpenVirtueCompanion = preferences.getOpenVirtueCompanion()
+        val prefSelectedEventNotifications = preferences.getSelectedEventNotifications()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
 
         try {
             if (prefEid.isNotBlank()) {
                 prefVirtueInfo =
-                    formatVirtueData(backup, periodicalsInfo)
+                    formatVirtueData(backup, periodicalsInfo, prefVirtueInfo.dailyEvents)
 
                 preferences.saveVirtueInfo(prefVirtueInfo)
 
