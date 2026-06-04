@@ -258,11 +258,10 @@ class WidgetUpdater {
                     prefPeriodicalsContractInfo =
                         formatPeriodicalsContracts(
                             periodicalsInfo,
-                            backup,
                             contractsArchiveInfo,
                             prefPeriodicalsContractInfo
                         )
-                    prefSeasonInfo = formatSeasonInfo(periodicalsInfo, backup)
+                    prefSeasonInfo = formatSeasonInfo(periodicalsInfo)
                     saveColleggtibleImagesToCache(periodicalsInfo, context)
                 }
 
@@ -331,7 +330,7 @@ class WidgetUpdater {
                     prefCustomEggs
                 }
 
-                prefStatsInfo = formatStatsData(backup, formattedCustomEggs)
+                prefStatsInfo = formatStatsData(backup, formattedCustomEggs, periodicalsInfo)
                 preferences.saveStatsInfo(prefStatsInfo)
                 preferences.saveCustomEggs(formattedCustomEggs)
 

@@ -3,7 +3,9 @@ package api
 import com.widgetegg.widgeteggapp.BuildConfig
 import data.BACKUP_ENDPOINT
 import data.CONTRACTS_ARCHIVE_ENDPOINT
+import data.CONTRACTS_INFO_ENDPOINT
 import data.CONTRACT_ENDPOINT
+import data.CONTRACT_PLAYER_INFO_ENDPOINT
 import data.CURRENT_CLIENT_VERSION
 import data.ContractData
 import data.MISSION_ENDPOINT
@@ -13,6 +15,9 @@ import data.PeriodicalsData
 import ei.Ei.Backup
 import ei.Ei.BasicRequestInfo
 import ei.Ei.ContractsArchive
+import ei.Ei.ContractsInfoRequest
+import ei.Ei.ContractsInfoResponse
+import ei.Ei.ContractPlayerInfo
 import ei.Ei.ContractCoopStatusRequest
 import ei.Ei.ContractCoopStatusResponse
 import ei.Ei.EggIncFirstContactRequest
@@ -62,7 +67,7 @@ suspend fun fetchContractData(backup: Backup): ContractData {
         try {
             val status = fetchContractStatus(
                 basicRequestInfo,
-                contract.contract.identifier,
+                contract.contractIdentifier,
                 contract.coopIdentifier
             )
             contract to status
@@ -75,16 +80,24 @@ suspend fun fetchContractData(backup: Backup): ContractData {
         }
     }
 
+    val contractsInfo = fetchContractsInfo(
+        basicRequestInfo,
+        backup.contracts.contractsList.mapNotNull { it.contractIdentifier }
+    )
+
     val contracts = validContracts.map { it.first }
     val statuses = validContracts.map { it.second }
 
-    return ContractData(contracts, statuses)
+    return ContractData(contracts, statuses, contractsInfo)
 }
 
 suspend fun fetchPeriodicalsData(eid: String): PeriodicalsData {
     val periodicals = fetchPeriodicals(eid)
+    val contractPlayerInfo = fetchPlayerContractInfo(getBasicRequestInfo(eid))
+
     return PeriodicalsData(
         periodicals.contracts.contractsList,
+        contractPlayerInfo,
         periodicals.contracts.customEggsList,
         periodicals.contracts.currentSeason
     )
@@ -145,6 +158,72 @@ private suspend fun fetchActiveMissions(
                 val activeMissionsResponse =
                     GetActiveMissionsResponse.parseFrom(authMessageResponse)
                 return activeMissionsResponse.activeMissionsList
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+
+        else -> throw Exception("Error retrieving data")
+    }
+}
+
+private suspend fun fetchContractsInfo(
+    basicRequestInfo: BasicRequestInfo,
+    contractIds: List<String>
+): ContractsInfoResponse {
+    val url = CONTRACTS_INFO_ENDPOINT
+
+    val getContractsInfoRequest = ContractsInfoRequest.newBuilder()
+        .setRinfo(basicRequestInfo)
+        .addAllContractIdentifiers(contractIds)
+        .build()
+
+    val authMessage = try {
+        buildSecureAuthMessage(data = getContractsInfoRequest)
+    } catch (e: Exception) {
+        throw e
+    }
+
+    val encodedRequest = encodeRequest(authMessage.toByteArray())
+    val response = makeRequest(url, encodedRequest)
+
+    when (response.status.value) {
+        in 200..299 -> {
+            try {
+                val authMessageResponse = handleAuthMessageResponse(response)
+                val contractsInfoResponse =
+                    ContractsInfoResponse.parseFrom(authMessageResponse)
+                return contractsInfoResponse
+            } catch (e: Exception) {
+                throw e
+            }
+        }
+
+        else -> throw Exception("Error retrieving data")
+    }
+}
+
+private suspend fun fetchPlayerContractInfo(
+    basicRequestInfo: BasicRequestInfo
+): ContractPlayerInfo {
+    val url = CONTRACT_PLAYER_INFO_ENDPOINT
+
+    val authMessage = try {
+        buildSecureAuthMessage(data = basicRequestInfo)
+    } catch (e: Exception) {
+        throw e
+    }
+
+    val encodedRequest = encodeRequest(authMessage.toByteArray())
+    val response = makeRequest(url, encodedRequest)
+
+    when (response.status.value) {
+        in 200..299 -> {
+            try {
+                val authMessageResponse = handleAuthMessageResponse(response)
+                val contractPlayerInfoResponse =
+                    ContractPlayerInfo.parseFrom(authMessageResponse)
+                return contractPlayerInfoResponse
             } catch (e: Exception) {
                 throw e
             }
