@@ -133,7 +133,6 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     val formattedPeriodicalsContracts =
                         formatPeriodicalsContracts(
                             periodicalsResult,
-                            backupResult,
                             contractsArchiveResult,
                             null
                         )
@@ -144,12 +143,10 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                             formattedPeriodicalsContracts,
                             null
                         )
-                    val formattedSeasonInfo = formatSeasonInfo(
-                        periodicalsResult,
-                        backupResult
-                    )
+                    val formattedSeasonInfo = formatSeasonInfo(periodicalsResult)
                     val formattedCustomEggs = formatCustomEggs(periodicalsResult)
-                    val formattedStatsData = formatStatsData(backupResult, formattedCustomEggs)
+                    val formattedStatsData =
+                        formatStatsData(backupResult, formattedCustomEggs, periodicalsResult)
                     saveColleggtibleImagesToCache(periodicalsResult, context)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
