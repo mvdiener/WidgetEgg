@@ -31,14 +31,16 @@ import java.util.UUID
 import kotlin.math.abs
 
 fun formatContractData(
-    contractInfo: ContractData,
+    contractData: ContractData,
     userName: String,
     periodicalsContracts: List<PeriodicalsContractInfoEntry>,
     previousContractInfo: List<ContractInfoEntry>?,
 ): List<ContractInfoEntry> {
-    return contractInfo.contracts.map { contract ->
-        val gradeSpecsList = contract.contract.gradeSpecsList
-        val gradeSpecs = gradeSpecsList.find { gradeSpec -> gradeSpec.grade == contract.grade }
+    return contractData.contracts.map { contract ->
+        val contractInfo =
+            contractData.contractsInfo.contractsList.find { it.identifier == contract.contractIdentifier }
+        val gradeSpecsList = contractInfo?.gradeSpecsList
+        val gradeSpecs = gradeSpecsList?.find { gradeSpec -> gradeSpec.grade == contract.grade }
 
         val formattedGoals = gradeSpecs?.goalsList?.map { goal ->
             GoalInfoEntry(
@@ -50,8 +52,8 @@ fun formatContractData(
         } ?: emptyList()
 
         val status =
-            contractInfo.contractStatuses.find { contractStatus ->
-                contractStatus.contractIdentifier == contract.contract.identifier
+            contractData.contractStatuses.find { contractStatus ->
+                contractStatus.contractIdentifier == contract.contractIdentifier
             }
 
         val formattedContributors = status?.contributorsList?.filterNot { contributor ->
@@ -86,21 +88,21 @@ fun formatContractData(
         } ?: emptyList()
 
         val periodicalContract =
-            periodicalsContracts.find { it.identifier == contract.contract.identifier }
+            periodicalsContracts.find { it.identifier == contract.contractIdentifier }
         val previousContract =
-            previousContractInfo?.find { it.identifier == contract.contract.identifier }
+            previousContractInfo?.find { it.identifier == contract.contractIdentifier }
 
 
         ContractInfoEntry(
             stateId = UUID.randomUUID()
                 .toString(), // Probably not necessary, but used in the off chance server data is not different from the last api call
-            eggId = contract.contract.egg.number,
-            customEggId = contract.contract.customEggId,
-            name = contract.contract.name,
-            identifier = contract.contract.identifier,
+            eggId = contractInfo?.egg?.number ?: 1000,
+            customEggId = contractInfo?.customEggId,
+            name = contractInfo?.name ?: "",
+            identifier = contractInfo?.identifier ?: "",
             coopName = contract.coopIdentifier,
-            seasonName = formatSeasonName(contract.contract.seasonId),
-            isLegacy = contract.contract.leggacy,
+            seasonName = formatSeasonName(contractInfo?.seasonId ?: ""),
+            isLegacy = contractInfo?.leggacy ?: false,
             eggsDelivered = status?.totalAmount ?: 0.0,
             timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
             allGoalsAchieved = status?.allGoalsAchieved == true,
@@ -109,7 +111,7 @@ fun formatContractData(
             maxCoopSize = periodicalContract?.maxCoopSize ?: previousContract?.maxCoopSize ?: 0,
             tokenTimerMinutes = periodicalContract?.tokenTimerMinutes
                 ?: previousContract?.tokenTimerMinutes ?: 0.0,
-            isUltra = contract.contract.ccOnly,
+            isUltra = contractInfo?.ccOnly ?: false,
             goals = formattedGoals,
             contributors = formattedContributors,
             contractArtifacts = contractArtifacts
@@ -119,7 +121,6 @@ fun formatContractData(
 
 fun formatPeriodicalsContracts(
     periodicalsData: PeriodicalsData,
-    backup: Backup,
     contractsArchive: List<LocalContract>?,
     previousPeriodicalsData: List<PeriodicalsContractInfoEntry>?
 ): List<PeriodicalsContractInfoEntry> {
@@ -129,7 +130,7 @@ fun formatPeriodicalsContracts(
 
     return filtered.map { contract ->
         val gradeSpecs =
-            contract.gradeSpecsList.find { gradeSpec -> gradeSpec.grade == backup.contracts.lastCpi.grade }
+            contract.gradeSpecsList.find { gradeSpec -> gradeSpec.grade == periodicalsData.contractPlayerInfo.grade }
 
         val formattedGoals = gradeSpecs?.goalsList?.map { goal ->
             GoalInfoEntry(
@@ -172,11 +173,10 @@ fun formatPeriodicalsContracts(
 
 fun formatSeasonInfo(
     periodicalsData: PeriodicalsData,
-    backup: Backup,
 ): SeasonGradeAndGoals {
     val seasonInfo = periodicalsData.seasonInfo
     val startingGrade =
-        backup.contracts.lastCpi.seasonProgressList.find { it.seasonId == seasonInfo.id }?.startingGrade
+        periodicalsData.contractPlayerInfo.seasonProgressList.find { it.seasonId == seasonInfo.id }?.startingGrade
 
     val goalSet = if (startingGrade != null) {
         seasonInfo.gradeGoalsList.find { it.grade == startingGrade }
@@ -196,7 +196,7 @@ fun formatSeasonInfo(
     return SeasonGradeAndGoals(
         stateId = UUID.randomUUID().toString(),
         seasonName = seasonInfo.name,
-        seasonScore = backup.contracts.lastCpi.seasonCxp,
+        seasonScore = periodicalsData.contractPlayerInfo.seasonCxp,
         startingSeasonGrade = startingGrade,
         goals = formattedGoals
     )
@@ -207,7 +207,7 @@ fun getArchivedContract(
     contractsArchive: List<LocalContract>
 ): ArchivedContractInfoEntry? {
     val archivedContract =
-        contractsArchive.find { it.contract.identifier == contractIdentifier }
+        contractsArchive.find { it.contractIdentifier == contractIdentifier }
 
     return if (archivedContract != null) {
         ArchivedContractInfoEntry(

@@ -31,7 +31,7 @@ fun formatStatsData(backup: Backup, periodicalsData: PeriodicalsData?): StatsInf
     val ticketBalance = (backup.game.shellScriptsEarned - backup.game.shellScriptsSpent).toDouble()
 
     val homeFarm = backup.farmsList.first { it.farmType == FarmType.HOME }
-    val contractInfo = backup.contracts.lastCpi
+    val contractInfo = periodicalsData?.contractPlayerInfo
 
     val totalMissions =
         backup.artifactsDb.missionArchiveCount + backup.artifactsDb.missionInfosCount
@@ -48,9 +48,9 @@ fun formatStatsData(backup: Backup, periodicalsData: PeriodicalsData?): StatsInf
         tickets = numberToString(ticketBalance),
         homeFarmEggId = homeFarm.eggType.number,
         homeFarmPopulation = numberToString(homeFarm.numChickens.toDouble()),
-        contractGrade = contractInfo.grade.number,
-        contractSeasonScore = numberToString(contractInfo.seasonCxp),
-        contractTotalScore = numberToString(contractInfo.totalCxp),
+        contractGrade = contractInfo?.grade?.number ?: 0,
+        contractSeasonScore = numberToString(contractInfo?.seasonCxp ?: 0.0),
+        contractTotalScore = numberToString(contractInfo?.totalCxp ?: 0.0),
         shipsLaunched = numberToString(totalMissions.toDouble()),
         droneTakedowns = numberToString(backup.stats.droneTakedowns.toDouble()),
         craftingLevel = getCraftingLevel(backup.artifacts.craftingXp),

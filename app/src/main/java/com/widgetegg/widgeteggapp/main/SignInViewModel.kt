@@ -149,7 +149,6 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     val formattedPeriodicalsContracts =
                         formatPeriodicalsContracts(
                             periodicalsResult,
-                            backupResult,
                             contractsArchiveResult,
                             null
                         )
@@ -160,10 +159,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                             formattedPeriodicalsContracts,
                             null
                         )
-                    val formattedSeasonInfo = formatSeasonInfo(
-                        periodicalsResult,
-                        backupResult
-                    )
+                    val formattedSeasonInfo = formatSeasonInfo(periodicalsResult)
                     val formattedStatsData = formatStatsData(backupResult, periodicalsResult)
                     val formattedVirtueData =
                         formatVirtueData(backupResult, periodicalsResult, null)
