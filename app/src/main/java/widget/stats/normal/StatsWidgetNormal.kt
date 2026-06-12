@@ -39,7 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
 import tools.utilities.getAsset
-import tools.utilities.getContractGradeName
+import tools.utilities.getGradeName
 import tools.utilities.getEggName
 import tools.utilities.getFarmerRole
 import tools.utilities.getShortenedFarmerRole
@@ -397,7 +397,7 @@ fun Contracts(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val grade = getContractGradeName(statsInfo.contractGrade)
+        val grade = getGradeName(statsInfo.contractGrade)
         val gradeBitmap = bitmapResize(
             BitmapFactory.decodeStream(
                 getAsset(

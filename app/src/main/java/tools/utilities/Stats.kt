@@ -1,7 +1,6 @@
 package tools.utilities
 
 import androidx.compose.ui.graphics.Color
-import data.constants.ALL_GRADES
 import data.constants.ALL_ROLES
 import data.Badges
 import data.constants.CRAFTING_LEVELS
@@ -75,15 +74,6 @@ fun getShortenedFarmerRole(role: String): String {
     } else {
         "${split[0].first()}${split[1]}"
     }
-}
-
-fun getContractGradeName(grade: Int): String {
-    val allGradesSize = ALL_GRADES.size
-    if (grade >= allGradesSize) {
-        return ALL_GRADES[0]
-    }
-
-    return ALL_GRADES[grade]
 }
 
 fun getBadges(backup: Backup, periodicalsData: PeriodicalsData?): Badges {

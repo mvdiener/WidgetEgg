@@ -61,7 +61,7 @@ import tools.utilities.getAsset
 import tools.utilities.getColleggtibleBitmap
 import tools.utilities.getContractDurationRemaining
 import tools.utilities.getGoalPercentComplete
-import tools.utilities.getContractGradeName
+import tools.utilities.getGradeName
 import tools.utilities.getContractTimeTextColor
 import tools.utilities.getContractTotalTimeText
 import tools.utilities.getCoopEggsPerHour
@@ -399,7 +399,7 @@ fun EggAndGrade(
                 modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
             )
         }
-        val grade = getContractGradeName(data.grade)
+        val grade = getGradeName(data.grade)
         val gradeBitmap = bitmapResize(
             BitmapFactory.decodeStream(
                 getAsset(
@@ -897,7 +897,7 @@ fun SeasonContent(
         )
         Box(modifier = GlanceModifier.defaultWeight()) {}
         if ((seasonData.startingSeasonGrade?.number ?: 0) != 0) {
-            val grade = getContractGradeName(seasonData.startingSeasonGrade?.number ?: 0)
+            val grade = getGradeName(seasonData.startingSeasonGrade?.number ?: 0)
             val gradeBitmap = bitmapResize(
                 BitmapFactory.decodeStream(
                     getAsset(

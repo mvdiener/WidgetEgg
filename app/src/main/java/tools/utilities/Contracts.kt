@@ -39,8 +39,14 @@ fun formatContractData(
     return contractData.contracts.map { contract ->
         val contractInfo =
             contractData.contractsInfo.contractsList.find { it.identifier == contract.contractIdentifier }
+
+        val status =
+            contractData.contractStatuses.find { contractStatus ->
+                contractStatus.contractIdentifier == contract.contractIdentifier
+            }
+
         val gradeSpecsList = contractInfo?.gradeSpecsList
-        val gradeSpecs = gradeSpecsList?.find { gradeSpec -> gradeSpec.grade == contract.grade }
+        val gradeSpecs = gradeSpecsList?.find { gradeSpec -> gradeSpec.grade == status?.grade }
 
         val formattedGoals = gradeSpecs?.goalsList?.map { goal ->
             GoalInfoEntry(
@@ -51,14 +57,9 @@ fun formatContractData(
             )
         } ?: emptyList()
 
-        val status =
-            contractData.contractStatuses.find { contractStatus ->
-                contractStatus.contractIdentifier == contract.contractIdentifier
-            }
-
         val formattedContributors = status?.contributorsList?.filterNot { contributor ->
             // Remove any [departed] users stuck from contract creation
-            contributor.userName == "[departed]" && contributor.uuid.isNullOrEmpty()
+            contributor.userName == "[departed]" && contributor.uuid.isNullOrBlank()
         }?.map { contributor ->
             ContributorInfoEntry(
                 eggsDelivered = contributor.contributionAmount,
@@ -107,7 +108,7 @@ fun formatContractData(
             timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
             allGoalsAchieved = status?.allGoalsAchieved == true,
             clearedForExit = status?.clearedForExit == true,
-            grade = contract.grade.number,
+            grade = status?.grade?.number ?: 0,
             maxCoopSize = periodicalContract?.maxCoopSize ?: previousContract?.maxCoopSize ?: 0,
             tokenTimerMinutes = periodicalContract?.tokenTimerMinutes
                 ?: previousContract?.tokenTimerMinutes ?: 0.0,
