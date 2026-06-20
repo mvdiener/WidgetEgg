@@ -16,6 +16,10 @@ fun encodeRequest(input: ByteArray): String {
     return Base64.encodeToString(input, Base64.DEFAULT)
 }
 
+fun decodeRequest(input: String): ByteArray {
+    return Base64.decode(input, Base64.DEFAULT)
+}
+
 suspend fun handleAuthMessageResponse(response: HttpResponse): ByteString {
     val decoded = decodeRequest(response.bodyAsText())
     val authMessage = AuthenticatedMessage.parseFrom(decoded)
@@ -60,10 +64,6 @@ private fun sha256(input: ByteArray): String {
     val md = MessageDigest.getInstance("SHA-256")
     val bytes = md.digest(input)
     return bytes.joinToString("") { "%02x".format(it) }
-}
-
-private fun decodeRequest(input: String): ByteArray {
-    return Base64.decode(input, Base64.DEFAULT)
 }
 
 private fun decompress(authenticatedMessage: AuthenticatedMessage): ByteString {

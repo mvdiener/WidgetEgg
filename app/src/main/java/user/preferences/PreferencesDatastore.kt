@@ -17,6 +17,7 @@ import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
 import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import data.PeriodicalsContractInfoEntry
+import data.PlayerColleggtibleInfoEntry
 import data.SeasonGradeAndGoals
 import data.StatsInfo
 import data.TankInfo
@@ -65,6 +66,7 @@ class PreferencesDatastore(context: Context) {
         private val STATS_INFO = stringPreferencesKey("statsInfo")
         private val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
         private val VIRTUE_INFO = stringPreferencesKey("virtueInfo")
+        private val PLAYER_COLLEGGTIBLE_INFO = stringPreferencesKey("playerColleggtibleInfo")
         private val USE_ABSOLUTE_TIME_VIRTUE_SILOS =
             booleanPreferencesKey("useAbsoluteTimeVirtueSilos")
         private val USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG =
@@ -466,6 +468,24 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveVirtueInfo(virtueInfo: VirtueInfo) {
         dataStore.edit {
             it[VIRTUE_INFO] = Json.encodeToString(virtueInfo)
+        }
+    }
+
+    suspend fun getPlayerColleggtibleInfo(): List<PlayerColleggtibleInfoEntry> {
+        return dataStore.data.map {
+            it[PLAYER_COLLEGGTIBLE_INFO]?.let { colleggtibleJson ->
+                try {
+                    Json.decodeFromString<List<PlayerColleggtibleInfoEntry>>(colleggtibleJson)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            } ?: emptyList()
+        }.first()
+    }
+
+    suspend fun savePlayerColleggtibleInfo(colleggtibleInfo: List<PlayerColleggtibleInfoEntry>) {
+        dataStore.edit {
+            it[PLAYER_COLLEGGTIBLE_INFO] = Json.encodeToString(colleggtibleInfo)
         }
     }
 

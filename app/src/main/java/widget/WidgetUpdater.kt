@@ -22,6 +22,7 @@ import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import tools.utilities.formatVirtueData
+import tools.utilities.getPlayerColleggtibles
 import tools.utilities.removeCalendarEvents
 import tools.utilities.saveColleggtibleImagesToCache
 import tools.utilities.scheduleCalendarEvents
@@ -371,6 +372,7 @@ class WidgetUpdater {
         periodicalsInfo: PeriodicalsData?
     ) {
         var prefVirtueInfo = preferences.getVirtueInfo()
+        var prefPlayerColleggtibleInfo = preferences.getPlayerColleggtibleInfo()
 
         val prefEid = preferences.getEid()
         val prefUseAbsoluteTimeVirtueSilos = preferences.getUseAbsoluteTimeVirtueSilos()
@@ -384,13 +386,22 @@ class WidgetUpdater {
 
         try {
             if (prefEid.isNotBlank()) {
+                prefPlayerColleggtibleInfo =
+                    getPlayerColleggtibles(periodicalsInfo, backup, prefPlayerColleggtibleInfo)
+
                 prefVirtueInfo =
-                    formatVirtueData(backup, periodicalsInfo, prefVirtueInfo.dailyEvents)
+                    formatVirtueData(
+                        backup,
+                        periodicalsInfo,
+                        prefPlayerColleggtibleInfo,
+                        prefVirtueInfo.dailyEvents
+                    )
 
                 prefVirtueInfo =
                     sendEventNotification(context, prefVirtueInfo, prefSelectedEventNotifications)
 
                 preferences.saveVirtueInfo(prefVirtueInfo)
+                preferences.savePlayerColleggtibleInfo(prefPlayerColleggtibleInfo)
 
                 VirtueWidgetDataStore().updateVirtueWidgetDataStore(
                     context,

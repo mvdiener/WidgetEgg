@@ -9,6 +9,7 @@ import android.graphics.Paint
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
+import data.constants.ALL_GRADES
 import data.constants.NUMBER_UNITS
 import data.constants.PROGRESS_BACKGROUND_COLOR
 import ei.Ei.Egg
@@ -303,4 +304,13 @@ fun getVirtueFunctionIconPath(eggId: Int): String {
         54 -> "icon_shipping"
         else -> ""
     }
+}
+
+fun getGradeName(grade: Int): String {
+    val allGradesSize = ALL_GRADES.size
+    if (grade >= allGradesSize) {
+        return ALL_GRADES[0]
+    }
+
+    return ALL_GRADES[grade]
 }

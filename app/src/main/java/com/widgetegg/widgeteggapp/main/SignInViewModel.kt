@@ -20,6 +20,7 @@ import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
 import tools.utilities.formatVirtueData
+import tools.utilities.getPlayerColleggtibles
 import tools.utilities.saveColleggtibleImagesToCache
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
@@ -161,8 +162,15 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         )
                     val formattedSeasonInfo = formatSeasonInfo(periodicalsResult)
                     val formattedStatsData = formatStatsData(backupResult, periodicalsResult)
+                    val formattedPlayerColleggtibleInfo =
+                        getPlayerColleggtibles(periodicalsResult, backupResult, emptyList())
                     val formattedVirtueData =
-                        formatVirtueData(backupResult, periodicalsResult, null)
+                        formatVirtueData(
+                            backupResult,
+                            periodicalsResult,
+                            formattedPlayerColleggtibleInfo,
+                            null
+                        )
                     saveColleggtibleImagesToCache(periodicalsResult, context)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
@@ -173,6 +181,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     preferences.saveSeasonInfo(formattedSeasonInfo)
                     preferences.saveStatsInfo(formattedStatsData)
                     preferences.saveVirtueInfo(formattedVirtueData)
+                    preferences.savePlayerColleggtibleInfo(formattedPlayerColleggtibleInfo)
                     MissionWidgetDataStore().updateMissionWidgetDataStore(
                         context,
                         missionInfo = formattedMissionData,

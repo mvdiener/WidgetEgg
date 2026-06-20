@@ -5,6 +5,7 @@ import data.Event
 import data.PeriodicalsContractInfoEntry
 import data.constants.IHR_RESEARCHES
 import data.PeriodicalsData
+import data.PlayerColleggtibleInfoEntry
 import data.Stone
 import data.constants.VIRTUE_DELIVERY_GOALS
 import data.constants.VIRTUE_EGGS
@@ -41,6 +42,7 @@ import kotlin.math.sqrt
 fun formatVirtueData(
     backup: Backup,
     periodicalsData: PeriodicalsData?,
+    playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>,
     previousEventInfo: List<Event>?
 ): VirtueInfo {
     val homeFarm = backup.farmsList.first { it.farmType == FarmType.HOME }
@@ -65,25 +67,25 @@ fun formatVirtueData(
     val isOnVirtue = homeFarm.eggType.number in VIRTUE_EGGS
 
     val (onlineHatcheryRate, offlineHatcheryRate) = if (isOnVirtue) {
-        getInternalHatcheryRate(backup, periodicalsData, homeFarm, virtueArtifacts)
+        getInternalHatcheryRate(backup, playerColleggtibleInfo, homeFarm, virtueArtifacts)
     } else {
         Pair(0.0, 0.0)
     }
 
     val (activeVirtueFarmEggLayingRate, inactiveVirtueFarmEggLayingRate) = if (isOnVirtue) {
-        getEggLayingRate(backup, periodicalsData, homeFarm, virtueArtifacts)
+        getEggLayingRate(backup, playerColleggtibleInfo, homeFarm, virtueArtifacts)
     } else {
         Pair(0.0, 0.0)
     }
 
     val shippingCapacity = if (isOnVirtue) {
-        getShippingCapacity(backup, periodicalsData, homeFarm, virtueArtifacts)
+        getShippingCapacity(backup, playerColleggtibleInfo, homeFarm, virtueArtifacts)
     } else {
         0.0
     }
 
     val habCapacity = if (isOnVirtue) {
-        getHabCapacity(backup, periodicalsData, homeFarm, virtueArtifacts)
+        getHabCapacity(backup, playerColleggtibleInfo, homeFarm, virtueArtifacts)
     } else {
         0.0
     }
@@ -390,7 +392,7 @@ private fun getNextShiftCost(backup: Backup): Double {
 
 private fun getInternalHatcheryRate(
     backup: Backup,
-    periodicalsData: PeriodicalsData?,
+    playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>,
     homeFarm: Backup.Simulation,
     virtueArtifacts: List<Artifact>
 ): Pair<Double, Double> {
@@ -401,7 +403,7 @@ private fun getInternalHatcheryRate(
     if (onlineMultiplier == 0.0) return Pair(0.0, 0.0)
 
     val colleggtibleMultiplier =
-        getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.INTERNAL_HATCHERY_RATE)
+        getColleggtiblesMultiplier(playerColleggtibleInfo, GameDimension.INTERNAL_HATCHERY_RATE)
     val truthEggBonus = (1.1).pow(backup.virtue.eovEarnedList.sumOf { it })
     val artifactsMultiplier = getArtifactsMultiplier(virtueArtifacts, IHR_ARTIFACTS, IHR_STONES)
 
@@ -447,12 +449,12 @@ private fun getResearchIhrMultiplier(
 
 private fun getEggLayingRate(
     backup: Backup,
-    periodicalsData: PeriodicalsData?,
+    playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>,
     homeFarm: Backup.Simulation,
     virtueArtifacts: List<Artifact>
 ): Pair<Double, Double> {
     val colleggtibleMultiplier =
-        getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.EGG_LAYING_RATE)
+        getColleggtiblesMultiplier(playerColleggtibleInfo, GameDimension.EGG_LAYING_RATE)
     val artifactsMultiplier = getArtifactsMultiplier(
         virtueArtifacts, LAY_RATE_ARTIFACTS,
         LAY_RATE_STONES
@@ -488,12 +490,12 @@ private fun getResearchLayRate(
 
 private fun getShippingCapacity(
     backup: Backup,
-    periodicalsData: PeriodicalsData?,
+    playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>,
     homeFarm: Backup.Simulation,
     virtueArtifacts: List<Artifact>
 ): Double {
     val colleggtibleMultiplier =
-        getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.SHIPPING_CAPACITY)
+        getColleggtiblesMultiplier(playerColleggtibleInfo, GameDimension.SHIPPING_CAPACITY)
     val artifactsMultiplier = getArtifactsMultiplier(
         virtueArtifacts, SHIPPING_CAPACITY_ARTIFACTS,
         SHIPPING_CAPACITY_STONES
@@ -557,12 +559,12 @@ private fun getResearchShippingCapacity(
 
 private fun getHabCapacity(
     backup: Backup,
-    periodicalsData: PeriodicalsData?,
+    playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>,
     homeFarm: Backup.Simulation,
     virtueArtifacts: List<Artifact>
 ): Double {
     val colleggtibleMultiplier =
-        getColleggtiblesMultiplier(backup, periodicalsData, GameDimension.HAB_CAPACITY)
+        getColleggtiblesMultiplier(playerColleggtibleInfo, GameDimension.HAB_CAPACITY)
     val artifactsMultiplier =
         getArtifactsMultiplier(virtueArtifacts, HAB_SPACE_ARTIFACTS, emptyArray())
     val (universalMultiplier, portalOnlyMultiplier) = getResearchHabCapacity(homeFarm)

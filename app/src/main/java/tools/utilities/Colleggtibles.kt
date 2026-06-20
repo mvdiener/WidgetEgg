@@ -2,9 +2,11 @@ package tools.utilities
 
 import android.content.Context
 import api.downloadImageBytes
+import api.fetchColleggtibleContracts
 import data.CustomEggInfoEntry
 import data.constants.FARM_SIZE_TIERS
 import data.PeriodicalsData
+import data.PlayerColleggtibleInfoEntry
 import ei.Ei.Backup
 import ei.Ei.GameModifier.GameDimension
 import java.io.File
@@ -12,13 +14,70 @@ import java.io.FileOutputStream
 
 fun formatCustomEggs(periodicalsData: PeriodicalsData?): List<CustomEggInfoEntry> {
     return periodicalsData?.customEggs?.map { egg ->
-        val buffs = egg.buffsList.map { buff -> buff.value }.sorted()
+        val buffs = egg.buffsList.map { buff -> buff.value }
         CustomEggInfoEntry(
             name = egg.identifier,
             buffType = egg.buffsList.firstOrNull()?.dimension ?: GameDimension.INVALID,
             buffs = buffs
         )
     } ?: emptyList()
+}
+
+suspend fun getPlayerColleggtibles(
+    periodicalsData: PeriodicalsData?,
+    backup: Backup,
+    preferencesPlayerColleggtibles: List<PlayerColleggtibleInfoEntry>
+): List<PlayerColleggtibleInfoEntry> {
+    val customEggs = formatCustomEggs(periodicalsData)
+    if (customEggs.isEmpty()) return preferencesPlayerColleggtibles
+
+    // If missing colleggtible data, attempt to retrieve the latest via contract history
+    // Avoid doing this if we already have all maxed colleggtible buffs
+    // Should automatically find new colleggtibles since base data comes from periodicals
+    if (preferencesPlayerColleggtibles.isEmpty()
+        || customEggs.size != preferencesPlayerColleggtibles.size
+        || preferencesPlayerColleggtibles.any { it.bestPossibleBuff != it.bestAchievedBuff }
+    ) {
+        try {
+            val colleggtibleContracts = fetchColleggtibleContracts()
+            if (colleggtibleContracts.isEmpty()) return preferencesPlayerColleggtibles
+
+            val contractsWithPop =
+                backup.contracts.archiveList.filter { it.maxFarmSizeReached > 0.0 }
+
+            return customEggs.mapNotNull { egg ->
+                if (egg.buffType == GameDimension.INVALID) return@mapNotNull null
+
+                val bestPossibleBuff = if (egg.buffs.any { it < 1.0 }) {
+                    egg.buffs.minOrNull() ?: 1.0
+                } else {
+                    egg.buffs.maxOrNull() ?: 1.0
+                }
+
+                val matchingContracts = colleggtibleContracts.mapNotNull {
+                    if (it.customEggId == egg.name) it.contractName else null
+                }.toSet()
+
+                val maxPop = contractsWithPop
+                    .filter { it.contractIdentifier in matchingContracts }
+                    .maxOfOrNull { it.maxFarmSizeReached } ?: 0.0
+
+                val reachedTierIndex = FARM_SIZE_TIERS.indexOfLast { maxPop >= it }
+                if (reachedTierIndex == -1) return@mapNotNull null
+
+                PlayerColleggtibleInfoEntry(
+                    name = egg.name,
+                    buffType = egg.buffType,
+                    bestPossibleBuff = bestPossibleBuff,
+                    bestAchievedBuff = egg.buffs.getOrElse(reachedTierIndex) { 1.0 }
+                )
+            }
+        } catch (_: Exception) {
+            return preferencesPlayerColleggtibles
+        }
+    }
+
+    return preferencesPlayerColleggtibles
 }
 
 // Gets the total possible habs multiplier, rather than what the user has achieved
@@ -30,28 +89,14 @@ fun getHabsColleggtiblesMultiplier(periodicalsData: PeriodicalsData?): Double {
         }
 }
 
-// Gets the total ihr multiplier that the user has achieved
+// Gets the total colleggtible multiplier that the user has achieved for the given colleggtible type
 fun getColleggtiblesMultiplier(
-    backup: Backup,
-    periodicalsData: PeriodicalsData?,
+    playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>,
     colleggtibleType: GameDimension
 ): Double {
-    if (periodicalsData == null) return 1.0
-
-    val customEggs =
-        formatCustomEggs(periodicalsData).filter { egg -> egg.buffType == colleggtibleType }
-    val contracts = backup.contracts.archiveList + backup.contracts.contractsList
-
+    val customEggs = playerColleggtibleInfo.filter { it.buffType == colleggtibleType }
     return customEggs.fold(1.0) { total, egg ->
-        val maxPop = contracts.filter { it.contract.customEggId == egg.name }
-            .maxOfOrNull { it.maxFarmSizeReached } ?: 0.0
-
-        val reachedTierIndex = FARM_SIZE_TIERS.indexOfLast { maxPop >= it }
-
-        if (reachedTierIndex == -1) return@fold total
-
-        val eggMultiplier = egg.buffs.getOrElse(reachedTierIndex) { 1.0 }
-        total * eggMultiplier
+        total * egg.bestAchievedBuff
     }
 }
 
