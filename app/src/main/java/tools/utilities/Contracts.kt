@@ -176,8 +176,9 @@ fun formatSeasonInfo(
     periodicalsData: PeriodicalsData,
 ): SeasonGradeAndGoals {
     val seasonInfo = periodicalsData.seasonInfo
-    val startingGrade =
-        periodicalsData.contractPlayerInfo.seasonProgressList.find { it.seasonId == seasonInfo.id }?.startingGrade
+    val matchingSeason =
+        periodicalsData.contractPlayerInfo.seasonProgressList.find { it.seasonId == seasonInfo.id }
+    val startingGrade = matchingSeason?.startingGrade ?: periodicalsData.contractPlayerInfo.grade
 
     val goalSet = if (startingGrade != null) {
         seasonInfo.gradeGoalsList.find { it.grade == startingGrade }
@@ -194,10 +195,16 @@ fun formatSeasonInfo(
         )
     } ?: emptyList()
 
+    val seasonScore = if (matchingSeason == null) {
+        0.0
+    } else {
+        periodicalsData.contractPlayerInfo.seasonCxp
+    }
+
     return SeasonGradeAndGoals(
         stateId = UUID.randomUUID().toString(),
         seasonName = seasonInfo.name,
-        seasonScore = periodicalsData.contractPlayerInfo.seasonCxp,
+        seasonScore = seasonScore,
         startingSeasonGrade = startingGrade,
         goals = formattedGoals
     )
