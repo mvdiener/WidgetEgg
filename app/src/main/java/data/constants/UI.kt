@@ -39,6 +39,15 @@ val NUMBER_UNITS = arrayOf(
     "tT"
 )
 
+val ALL_GRADES = arrayOf(
+    "grade_unknown",
+    "grade_c",
+    "grade_b",
+    "grade_a",
+    "grade_aa",
+    "grade_aaa"
+)
+
 val PROBLEMATIC_BROWSERS = arrayOf(
     "org.mozilla.firefox",
     "com.duckduckgo.mobile.android"

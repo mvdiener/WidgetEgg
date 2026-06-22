@@ -91,15 +91,6 @@ val CRAFTING_LEVELS = arrayOf(
     1000000000.0
 )
 
-val ALL_GRADES = arrayOf(
-    "grade_unknown",
-    "grade_c",
-    "grade_b",
-    "grade_a",
-    "grade_aa",
-    "grade_aaa"
-)
-
 val SHIP_MAX_LAUNCH_POINTS = arrayOf(
     0,
     14,
