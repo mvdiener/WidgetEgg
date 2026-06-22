@@ -46,6 +46,7 @@ import tools.utilities.bitmapResize
 import tools.utilities.getAsset
 import tools.utilities.getEggName
 import tools.utilities.getNextTruthEggThreshold
+import tools.utilities.getOfflineTruthEggPercentComplete
 import tools.utilities.getRemainingSiloTime
 import tools.utilities.getTimeRemainingToNextTruthEgg
 import tools.utilities.getVirtueFunctionIconPath
@@ -331,9 +332,20 @@ fun FarmProgress(
             )
             Box(modifier = GlanceModifier.defaultWeight()) {}
             if (virtueInfo.isOnVirtue) {
+                val offlinePercentComplete =
+                    if (virtueInfo.eggId == farm.eggId) {
+                        getOfflineTruthEggPercentComplete(
+                            virtueInfo,
+                            farm.eggsDelivered
+                        )
+                    } else {
+                        0.0f
+                    }
                 val timeRemaining =
                     if (virtueInfo.offlineHatcheryRate == 0.0 && virtueInfo.eggLayingRate == 0.0) {
                         "Infinity"
+                    } else if (offlinePercentComplete >= 1.0f) {
+                        "TE ready"
                     } else {
                         getTimeRemainingToNextTruthEgg(
                             virtueInfo,
