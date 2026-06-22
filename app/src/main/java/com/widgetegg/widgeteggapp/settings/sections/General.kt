@@ -252,7 +252,8 @@ fun ColorPickerDialog(
             )
             TextField(
                 value = "#$hexInput".uppercase(),
-                modifier = Modifier.padding(top = 10.dp),
+                modifier = Modifier.padding(bottom = 10.dp),
+                label = { Text(text = "Format: ARBG") },
                 onValueChange = { newValue ->
                     val sanitized =
                         newValue.removePrefix("#").uppercase().filter { it in "012345678ABCDEF" }
