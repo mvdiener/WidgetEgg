@@ -9,15 +9,15 @@ import android.graphics.Paint
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.scale
 import androidx.core.graphics.toColorInt
-import data.NUMBER_UNITS
-import data.PROGRESS_BACKGROUND_COLOR
+import data.constants.ALL_GRADES
+import data.constants.NUMBER_UNITS
+import data.constants.PROGRESS_BACKGROUND_COLOR
 import ei.Ei.Egg
 import java.io.File
 import java.io.InputStream
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.util.Locale
 
 data class ProgressData(
     val progress: Float,
@@ -85,6 +85,26 @@ fun createCircularProgressBarBitmap(
         )
     }
 
+    return bitmap
+}
+
+fun createLinearGradientBitmap(
+    startColor: Int,
+    endColor: Int,
+    heightPx: Int,
+    widthPx: Int
+): Bitmap {
+    val bitmap = createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val paint = Paint().apply {
+        isAntiAlias = true
+        shader = android.graphics.LinearGradient(
+            0f, 0f, widthPx.toFloat(), 0f, // Left to Right
+            startColor, endColor,
+            android.graphics.Shader.TileMode.CLAMP
+        )
+    }
+    canvas.drawRect(0f, 0f, widthPx.toFloat(), heightPx.toFloat(), paint)
     return bitmap
 }
 
@@ -252,4 +272,45 @@ fun truncateString(text: String, maxLength: Int): String {
     if (text.length <= maxLength) return text
 
     return text.take(maxLength - 3) + "..."
+}
+
+fun getEventImage(eventType: String): String {
+    return when (eventType) {
+        "epic-research-sale", "research-sale" -> "icon_research_sale"
+        "piggy-boost", "piggy-cap-boost" -> "icon_piggy"
+        "prestige-boost" -> "icon_prestige_boost"
+        "earnings-boost" -> "icon_earnings_boost"
+        "gift-boost" -> "icon_gift_boost"
+        "drone-boost" -> "icon_drone_boost"
+        "hab-sale" -> "icon_hab_sale"
+        "vehicle-sale" -> "icon_vehicle_sale"
+        "boost-sale" -> "icon_lightning"
+        "boost-duration" -> "icon_boost_duration"
+        "crafting-sale" -> "icon_afx_craft"
+        "mission-fuel" -> "icon_afx_mission_fuel"
+        "mission-capacity" -> "icon_afx_chest_2"
+        "mission-duration" -> "icon_afx_mission_duration"
+        "shell-sale" -> "icon_shells_v2"
+        else -> ""
+    }
+}
+
+fun getVirtueFunctionIconPath(eggId: Int): String {
+    return when (eggId) {
+        50 -> "icon_research"
+        51 -> "icon_habs"
+        52 -> "icon_missions"
+        53 -> "icon_silos"
+        54 -> "icon_shipping"
+        else -> ""
+    }
+}
+
+fun getGradeName(grade: Int): String {
+    val allGradesSize = ALL_GRADES.size
+    if (grade >= allGradesSize) {
+        return ALL_GRADES[0]
+    }
+
+    return ALL_GRADES[grade]
 }

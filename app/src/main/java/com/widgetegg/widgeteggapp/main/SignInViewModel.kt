@@ -14,17 +14,19 @@ import api.fetchPeriodicalsData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.formatContractData
-import tools.utilities.formatCustomEggs
 import tools.utilities.formatMissionData
 import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
+import tools.utilities.formatVirtueData
+import tools.utilities.getPlayerColleggtibles
 import tools.utilities.saveColleggtibleImagesToCache
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
 import widget.missions.MissionWidgetDataStore
 import widget.stats.StatsWidgetDataStore
+import widget.virtue.VirtueWidgetDataStore
 
 class SignInViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -91,6 +93,20 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
         showWhatNextDialog = input
     }
 
+    var isBackgroundUsageDisabled by mutableStateOf(true)
+        private set
+
+    fun updateIsBackgroundUsageDisabled(input: Boolean) {
+        isBackgroundUsageDisabled = input
+    }
+
+    var showBackgroundUsageDialog by mutableStateOf(false)
+        private set
+
+    fun updateShowBackgroundUsageDialog(input: Boolean) {
+        showBackgroundUsageDialog = input
+    }
+
     fun getBackupData() {
         viewModelScope.launch(Dispatchers.IO) {
             val context = getApplication<Application>().applicationContext
@@ -108,6 +124,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     eid = eid,
                     eiUserName = backupResult.userName
                 )
+                VirtueWidgetDataStore().updateVirtueWidgetDataStore(context, eid = eid)
                 updateHasSubmitted(false)
                 updateEid("")
             } catch (_: Exception) {
@@ -144,9 +161,16 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                             null
                         )
                     val formattedSeasonInfo = formatSeasonInfo(periodicalsResult)
-                    val formattedCustomEggs = formatCustomEggs(periodicalsResult)
-                    val formattedStatsData =
-                        formatStatsData(backupResult, formattedCustomEggs, periodicalsResult)
+                    val formattedStatsData = formatStatsData(backupResult, periodicalsResult)
+                    val formattedPlayerColleggtibleInfo =
+                        getPlayerColleggtibles(periodicalsResult, backupResult, emptyList())
+                    val formattedVirtueData =
+                        formatVirtueData(
+                            backupResult,
+                            periodicalsResult,
+                            formattedPlayerColleggtibleInfo,
+                            null
+                        )
                     saveColleggtibleImagesToCache(periodicalsResult, context)
                     preferences.saveMissionInfo(formattedMissionData)
                     preferences.saveVirtueMissionInfo(formattedVirtueMissionData)
@@ -156,7 +180,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                     preferences.savePeriodicalsContractInfo(formattedPeriodicalsContracts)
                     preferences.saveSeasonInfo(formattedSeasonInfo)
                     preferences.saveStatsInfo(formattedStatsData)
-                    preferences.saveCustomEggs(formattedCustomEggs)
+                    preferences.saveVirtueInfo(formattedVirtueData)
+                    preferences.savePlayerColleggtibleInfo(formattedPlayerColleggtibleInfo)
                     MissionWidgetDataStore().updateMissionWidgetDataStore(
                         context,
                         missionInfo = formattedMissionData,
@@ -174,6 +199,10 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         context,
                         statsInfo = formattedStatsData
                     )
+                    VirtueWidgetDataStore().updateVirtueWidgetDataStore(
+                        context,
+                        virtueInfo = formattedVirtueData
+                    )
                 }
             } catch (_: Exception) {
             }
@@ -188,6 +217,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                 MissionWidgetDataStore().clearAllData(context)
                 ContractWidgetDataStore().clearAllData(context)
                 StatsWidgetDataStore().clearAllData(context)
+                VirtueWidgetDataStore().clearAllData(context)
                 preferences.clearPreferences()
             }
 

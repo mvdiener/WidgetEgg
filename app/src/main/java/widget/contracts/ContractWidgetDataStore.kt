@@ -11,7 +11,6 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import androidx.glance.appwidget.updateAll
 import data.ContractInfoEntry
-import data.CustomEggInfoEntry
 import data.PeriodicalsContractInfoEntry
 import data.SeasonGradeAndGoals
 import kotlinx.serialization.json.Json

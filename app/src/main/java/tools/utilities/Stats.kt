@@ -1,22 +1,19 @@
 package tools.utilities
 
 import androidx.compose.ui.graphics.Color
-import data.ALL_GRADES
-import data.ALL_ROLES
+import data.constants.ALL_ROLES
 import data.Badges
-import data.CRAFTING_LEVELS
-import data.CustomEggInfoEntry
-import data.MAX_ENLIGHTEN_FARM_POP
-import data.MAX_FARM_POP
+import data.constants.CRAFTING_LEVELS
+import data.constants.MAX_ENLIGHTEN_FARM_POP
+import data.constants.MAX_FARM_POP
 import data.PeriodicalsData
-import data.SHIP_MAX_LAUNCH_POINTS
+import data.constants.SHIP_MAX_LAUNCH_POINTS
 import data.StatsInfo
 import ei.Ei.ArtifactInventoryItem
 import ei.Ei.ArtifactSpec
 import ei.Ei.Backup
 import ei.Ei.Egg
 import ei.Ei.FarmType
-import ei.Ei.GameModifier
 import ei.Ei.MissionInfo
 import java.util.UUID
 import kotlin.Boolean
@@ -26,11 +23,7 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.round
 
-fun formatStatsData(
-    backup: Backup,
-    customEggs: List<CustomEggInfoEntry>,
-    periodicalsData: PeriodicalsData?
-): StatsInfo {
+fun formatStatsData(backup: Backup, periodicalsData: PeriodicalsData?): StatsInfo {
     val eb = calculateEB(backup)
     val roleId = getEBRoleId(eb)
     val geBalance = (backup.game.goldenEggsEarned - backup.game.goldenEggsSpent).toDouble()
@@ -61,7 +54,7 @@ fun formatStatsData(
         droneTakedowns = numberToString(backup.stats.droneTakedowns.toDouble()),
         craftingLevel = getCraftingLevel(backup.artifacts.craftingXp),
         craftingXP = numberToString(backup.artifacts.craftingXp),
-        badges = getBadges(backup, customEggs)
+        badges = getBadges(backup, periodicalsData)
     )
 }
 
@@ -83,18 +76,9 @@ fun getShortenedFarmerRole(role: String): String {
     }
 }
 
-fun getContractGradeName(grade: Int): String {
-    val allGradesSize = ALL_GRADES.size
-    if (grade >= allGradesSize) {
-        return ALL_GRADES[0]
-    }
-
-    return ALL_GRADES[grade]
-}
-
-fun getBadges(backup: Backup, customEggs: List<CustomEggInfoEntry>): Badges {
+fun getBadges(backup: Backup, periodicalsData: PeriodicalsData?): Badges {
     val allLegendaries = getAllLegendaries(backup.artifactsDb.inventoryItemsList)
-    val habsMultiplier = getHabsColleggtiblesMultiplier(customEggs)
+    val habsMultiplier = getHabsColleggtiblesMultiplier(periodicalsData)
 
     val (hasFed, hasFedPlus) = hasFed(backup, habsMultiplier)
 
@@ -223,11 +207,4 @@ private fun getCraftingLevel(craftingXp: Double): Int {
     }
 
     return 30
-}
-
-private fun getHabsColleggtiblesMultiplier(customEggs: List<CustomEggInfoEntry>): Double {
-    return customEggs.filter { egg -> egg.buff.type == GameModifier.GameDimension.HAB_CAPACITY && egg.buff.maxValue > 0.0 }
-        .fold(1.0) { total, egg ->
-            total * egg.buff.maxValue
-        }
 }

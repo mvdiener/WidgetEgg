@@ -16,16 +16,18 @@ import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import tools.utilities.formatContractData
-import tools.utilities.formatCustomEggs
 import tools.utilities.formatMissionData
 import tools.utilities.formatPeriodicalsContracts
 import tools.utilities.formatSeasonInfo
 import tools.utilities.formatStatsData
 import tools.utilities.formatTankInfo
+import tools.utilities.formatVirtueData
+import tools.utilities.getPlayerColleggtibles
 import tools.utilities.removeCalendarEvents
 import tools.utilities.saveColleggtibleImagesToCache
 import tools.utilities.scheduleCalendarEvents
 import tools.utilities.sendContractNotification
+import tools.utilities.sendEventNotification
 import tools.utilities.updateFuelingMission
 import user.preferences.PreferencesDatastore
 import widget.contracts.ContractWidgetDataStore
@@ -40,6 +42,9 @@ import widget.missions.normal.MissionWidgetNormal
 import widget.missions.normal.VirtueMissionWidgetNormal
 import widget.stats.StatsWidgetDataStore
 import widget.stats.normal.StatsWidgetNormal
+import widget.virtue.VirtueWidgetDataStore
+import widget.virtue.large.VirtueWidgetLarge
+import widget.virtue.normal.VirtueWidgetNormal
 import java.time.Instant
 
 class WidgetUpdater {
@@ -50,15 +55,24 @@ class WidgetUpdater {
         val hasVirtueMissionWidgets = hasVirtueMissionWidgets(context)
         val hasContractWidgets = hasContractWidgets(context)
         val hasStatsWidgets = hasStatsWidgets(context)
+        val hasVirtueWidgets = hasVirtueWidgets(context)
         val allWidgets =
-            listOf(hasMissionWidgets, hasVirtueMissionWidgets, hasContractWidgets, hasStatsWidgets)
+            listOf(
+                hasMissionWidgets,
+                hasVirtueMissionWidgets,
+                hasContractWidgets,
+                hasStatsWidgets,
+                hasVirtueWidgets
+            )
 
         if (prefEid.isNotBlank() && allWidgets.any { it }) {
             try {
                 val backup = fetchBackupData(prefEid)
 
                 val periodicalsInfo = try {
-                    if (hasContractWidgets || hasStatsWidgets) fetchPeriodicalsData(prefEid) else null
+                    if (hasContractWidgets || hasStatsWidgets || hasVirtueWidgets) fetchPeriodicalsData(
+                        prefEid
+                    ) else null
                 } catch (_: Exception) {
                     null
                 }
@@ -98,6 +112,17 @@ class WidgetUpdater {
                         val job = launch {
                             try {
                                 updateStats(context, preferences, backup, periodicalsInfo)
+                            } catch (e: Exception) {
+                                exceptions.add(e)
+                            }
+                        }
+                        jobs.add(job)
+                    }
+
+                    if (hasVirtueWidgets) {
+                        val job = launch {
+                            try {
+                                updateVirtue(context, preferences, backup, periodicalsInfo)
                             } catch (e: Exception) {
                                 exceptions.add(e)
                             }
@@ -320,19 +345,11 @@ class WidgetUpdater {
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
         val prefShowCommunityBadges = preferences.getShowCommunityBadges()
-        val prefCustomEggs = preferences.getCustomEggs()
 
         try {
             if (prefEid.isNotBlank()) {
-                val formattedCustomEggs = if (periodicalsInfo != null) {
-                    formatCustomEggs(periodicalsInfo)
-                } else {
-                    prefCustomEggs
-                }
-
-                prefStatsInfo = formatStatsData(backup, formattedCustomEggs, periodicalsInfo)
+                prefStatsInfo = formatStatsData(backup, periodicalsInfo)
                 preferences.saveStatsInfo(prefStatsInfo)
-                preferences.saveCustomEggs(formattedCustomEggs)
 
                 StatsWidgetDataStore().updateStatsWidgetDataStore(
                     context,
@@ -342,6 +359,60 @@ class WidgetUpdater {
                     backgroundColor = prefWidgetBackgroundColor,
                     textColor = prefWidgetTextColor,
                     showCommunityBadges = prefShowCommunityBadges
+                )
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    private suspend fun updateVirtue(
+        context: Context,
+        preferences: PreferencesDatastore,
+        backup: Backup,
+        periodicalsInfo: PeriodicalsData?
+    ) {
+        var prefVirtueInfo = preferences.getVirtueInfo()
+        var prefPlayerColleggtibleInfo = preferences.getPlayerColleggtibleInfo()
+
+        val prefEid = preferences.getEid()
+        val prefUseAbsoluteTimeVirtueSilos = preferences.getUseAbsoluteTimeVirtueSilos()
+        val prefUseAbsoluteTimeVirtueNextTruthEgg =
+            preferences.getUseAbsoluteTimeVirtueNextTruthEgg()
+        val prefShowNextTruthEggGoalAmount = preferences.getShowNextTruthEggGoalAmount()
+        val prefOpenVirtueCompanion = preferences.getOpenVirtueCompanion()
+        val prefSelectedEventNotifications = preferences.getSelectedEventNotifications()
+        val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
+        val prefWidgetTextColor = preferences.getWidgetTextColor()
+
+        try {
+            if (prefEid.isNotBlank()) {
+                prefPlayerColleggtibleInfo =
+                    getPlayerColleggtibles(periodicalsInfo, backup, prefPlayerColleggtibleInfo)
+
+                prefVirtueInfo =
+                    formatVirtueData(
+                        backup,
+                        periodicalsInfo,
+                        prefPlayerColleggtibleInfo,
+                        prefVirtueInfo.dailyEvents
+                    )
+
+                prefVirtueInfo =
+                    sendEventNotification(context, prefVirtueInfo, prefSelectedEventNotifications)
+
+                preferences.saveVirtueInfo(prefVirtueInfo)
+                preferences.savePlayerColleggtibleInfo(prefPlayerColleggtibleInfo)
+
+                VirtueWidgetDataStore().updateVirtueWidgetDataStore(
+                    context,
+                    eid = prefEid,
+                    virtueInfo = prefVirtueInfo,
+                    useAbsoluteTimeVirtueSilos = prefUseAbsoluteTimeVirtueSilos,
+                    useAbsoluteTimeVirtueNextTruthEgg = prefUseAbsoluteTimeVirtueNextTruthEgg,
+                    showNextTruthEggGoalAmount = prefShowNextTruthEggGoalAmount,
+                    openVirtueCompanion = prefOpenVirtueCompanion,
+                    backgroundColor = prefWidgetBackgroundColor,
+                    textColor = prefWidgetTextColor
                 )
             }
         } catch (_: Exception) {
@@ -391,6 +462,14 @@ class WidgetUpdater {
     private suspend fun hasStatsWidgets(context: Context): Boolean {
         return GlanceAppWidgetManager(context).getGlanceIds(
             StatsWidgetNormal::class.java
+        ).isNotEmpty()
+    }
+
+    private suspend fun hasVirtueWidgets(context: Context): Boolean {
+        return GlanceAppWidgetManager(context).getGlanceIds(
+            VirtueWidgetNormal::class.java
+        ).isNotEmpty() || GlanceAppWidgetManager(context).getGlanceIds(
+            VirtueWidgetLarge::class.java
         ).isNotEmpty()
     }
 

@@ -8,5 +8,5 @@ object Routes {
     var missionsSettingsScreen = "missions_settings_screen"
     var statsSettingsScreen = "stats_settings_screen"
     var statsLegendScreen = "stats_legend_screen"
-
+    var virtueSettingsScreen = "virtue_settings_screen"
 }

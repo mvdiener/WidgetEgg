@@ -36,8 +36,8 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import data.DEFAULT_WIDGET_BACKGROUND_COLOR
-import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import tools.utilities.getImageNameFromAfxId
 import kotlinx.coroutines.CoroutineScope
@@ -52,6 +52,7 @@ import tools.utilities.getShipName
 import widget.WidgetUpdater
 import widget.missions.MissionWidgetDataStore
 import widget.missions.MissionWidgetDataStorePreferencesKeys
+import widget.shared.NoWidgetContent
 
 abstract class BaseWidgetNormal(val isVirtueWidget: Boolean = false) : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -129,7 +130,7 @@ abstract class BaseWidgetNormal(val isVirtueWidget: Boolean = false) : GlanceApp
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || missionData.isEmpty() || (missionData.size == 1 && missionData.first().identifier.isBlank() && !showFuelingShip)) {
-                    NoMissionsContent(assetManager, textColor)
+                    NoWidgetContent(assetManager, "Waiting for mission data...", 60.dp, textColor)
                 } else {
                     Row(
                         modifier = GlanceModifier.fillMaxWidth(),
@@ -160,34 +161,6 @@ abstract class BaseWidgetNormal(val isVirtueWidget: Boolean = false) : GlanceApp
                 }
             }
         }
-    }
-}
-
-@Composable
-fun LogoContent(assetManager: AssetManager) {
-    val bitmapImage =
-        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
-
-    Image(
-        provider = ImageProvider(bitmapImage),
-        contentDescription = "Empty Widget Logo",
-        modifier = GlanceModifier.size(60.dp)
-    )
-}
-
-@Composable
-fun NoMissionsContent(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContent(assetManager)
-        Text(
-            text = "Waiting for mission data...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
     }
 }
 

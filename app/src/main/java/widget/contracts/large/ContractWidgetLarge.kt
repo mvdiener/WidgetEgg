@@ -41,33 +41,31 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import data.CONTRACT_OFFLINE_PROGRESS_COLOR
-import data.CONTRACT_PROGRESS_COLOR
+import data.constants.OFFLINE_PROGRESS_COLOR
+import data.constants.PROGRESS_COLOR
 import data.ContractInfoEntry
 import data.ContributorInfoEntry
-import data.DEFAULT_BROWSER
-import data.DEFAULT_WIDGET_BACKGROUND_COLOR
-import data.DEFAULT_WIDGET_TEXT_COLOR
-import data.PROBLEMATIC_BROWSERS
-import data.PROGRESS_BACKGROUND_COLOR
+import data.constants.DEFAULT_BROWSER
+import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.PROBLEMATIC_BROWSERS
+import data.constants.PROGRESS_BACKGROUND_COLOR
 import data.PeriodicalsContractInfoEntry
 import data.SeasonGradeAndGoals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
-import tools.utilities.createGlowBitmap
 import tools.utilities.formatTokenTimeText
 import tools.utilities.getAsset
 import tools.utilities.getColleggtibleBitmap
 import tools.utilities.getContractDurationRemaining
 import tools.utilities.getGoalPercentComplete
-import tools.utilities.getContractGradeName
+import tools.utilities.getGradeName
 import tools.utilities.getContractTimeTextColor
 import tools.utilities.getContractTotalTimeText
 import tools.utilities.getCoopEggsPerHour
 import tools.utilities.getEggName
-import tools.utilities.getImageNameFromAfxId
 import tools.utilities.getIndividualEggsPerHour
 import tools.utilities.getOfflineEggsDelivered
 import tools.utilities.getOfflineTimeHoursAndMinutes
@@ -78,7 +76,8 @@ import tools.utilities.truncateString
 import widget.WidgetUpdater
 import widget.contracts.ContractWidgetDataStore
 import widget.contracts.ContractWidgetDataStorePreferencesKeys
-import widget.contracts.active.LogoContentContracts
+import widget.shared.ArtifactsContent
+import widget.shared.NoWidgetContent
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import kotlin.text.isBlank
@@ -144,7 +143,7 @@ class ContractWidgetLarge : GlanceAppWidget() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    NoContractsContentLarge(assetManager, textColor)
+                    NoWidgetContent(assetManager, "Waiting for contract data...", 80.dp, textColor)
                 }
             } else if (contractData.size == 1 && !showAvailableContracts && !showSeasonInfo) {
                 Column(
@@ -247,22 +246,6 @@ class ContractWidgetLarge : GlanceAppWidget() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun NoContractsContentLarge(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContentContracts(assetManager)
-        Text(
-            text = "Waiting for contract data...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
     }
 }
 
@@ -416,7 +399,7 @@ fun EggAndGrade(
                 modifier = GlanceModifier.size(20.dp).padding(end = 5.dp)
             )
         }
-        val grade = getContractGradeName(data.grade)
+        val grade = getGradeName(data.grade)
         val gradeBitmap = bitmapResize(
             BitmapFactory.decodeStream(
                 getAsset(
@@ -632,62 +615,7 @@ fun ArtifactsAndTimeRemaining(
         horizontalAlignment = Alignment.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (contract.contractArtifacts.isNotEmpty()) {
-            contract.contractArtifacts.forEachIndexed { index, artifact ->
-                val artifactName =
-                    getImageNameFromAfxId(artifact.name, artifact.level)
-                val artifactBitmap = bitmapResize(
-                    BitmapFactory.decodeStream(
-                        getAsset(
-                            assetManager,
-                            "artifacts/$artifactName.png"
-                        )
-                    )
-                )
-                Box(
-                    modifier = GlanceModifier.size(30.dp).padding(start = 2.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (artifact.rarity > 0) {
-                        Image(
-                            provider = ImageProvider(createGlowBitmap(artifact.rarity)),
-                            contentDescription = null,
-                            modifier = GlanceModifier.fillMaxSize()
-                        )
-                    }
-                    Image(
-                        provider = ImageProvider(artifactBitmap),
-                        contentDescription = "Contract Artifact $index",
-                        modifier = GlanceModifier.size(25.dp)
-                    )
-                    if (artifact.stones.isNotEmpty()) {
-                        Box(
-                            modifier = GlanceModifier.fillMaxSize().padding(end = 2.dp),
-                            contentAlignment = Alignment.BottomEnd
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                artifact.stones.forEachIndexed { index, stone ->
-                                    val stoneName =
-                                        getImageNameFromAfxId(stone.name, stone.level + 1)
-                                    val stoneBitmap = bitmapResize(
-                                        BitmapFactory.decodeStream(
-                                            getAsset(assetManager, "artifacts/$stoneName.png")
-                                        )
-                                    )
-                                    Image(
-                                        provider = ImageProvider(stoneBitmap),
-                                        contentDescription = "Stone Icon $index",
-                                        modifier = GlanceModifier.size(8.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        ArtifactsContent(assetManager, contract.contractArtifacts)
         Box(modifier = GlanceModifier.defaultWeight()) {}
         TimeTextAndScrollLarge(
             assetManager,
@@ -838,7 +766,7 @@ fun Goals(
                             LinearProgressIndicator(
                                 modifier = GlanceModifier.fillMaxSize(),
                                 progress = offlinePercentComplete,
-                                color = ColorProvider(Color(CONTRACT_OFFLINE_PROGRESS_COLOR.toColorInt())),
+                                color = ColorProvider(Color(OFFLINE_PROGRESS_COLOR.toColorInt())),
                                 backgroundColor = ColorProvider(Color(PROGRESS_BACKGROUND_COLOR.toColorInt()))
                             )
                         }
@@ -848,7 +776,7 @@ fun Goals(
                         LinearProgressIndicator(
                             modifier = GlanceModifier.fillMaxSize(),
                             progress = percentComplete,
-                            color = ColorProvider(Color(CONTRACT_PROGRESS_COLOR.toColorInt())),
+                            color = ColorProvider(Color(PROGRESS_COLOR.toColorInt())),
                             backgroundColor = ColorProvider(progressBackground)
                         )
                     }
@@ -969,7 +897,7 @@ fun SeasonContent(
         )
         Box(modifier = GlanceModifier.defaultWeight()) {}
         if ((seasonData.startingSeasonGrade?.number ?: 0) != 0) {
-            val grade = getContractGradeName(seasonData.startingSeasonGrade?.number ?: 0)
+            val grade = getGradeName(seasonData.startingSeasonGrade?.number ?: 0)
             val gradeBitmap = bitmapResize(
                 BitmapFactory.decodeStream(
                     getAsset(
@@ -1073,7 +1001,7 @@ fun SeasonContent(
                         LinearProgressIndicator(
                             modifier = GlanceModifier.fillMaxSize(),
                             progress = percentComplete,
-                            color = ColorProvider(Color(CONTRACT_PROGRESS_COLOR.toColorInt())),
+                            color = ColorProvider(Color(PROGRESS_COLOR.toColorInt())),
                             backgroundColor = ColorProvider(Color(PROGRESS_BACKGROUND_COLOR.toColorInt()))
                         )
                     }

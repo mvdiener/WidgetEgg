@@ -9,17 +9,17 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.toColorInt
 import data.ArchivedContractInfoEntry
-import data.CONTRACT_OFFLINE_PROGRESS_COLOR
-import data.CONTRACT_PROGRESS_COLOR
-import data.ContractArtifact
+import data.Artifact
+import data.constants.OFFLINE_PROGRESS_COLOR
+import data.constants.PROGRESS_COLOR
 import data.ContractData
 import data.ContractInfoEntry
-import data.ContractStone
 import data.ContributorInfoEntry
 import data.GoalInfoEntry
 import data.PeriodicalsContractInfoEntry
 import data.PeriodicalsData
 import data.SeasonGradeAndGoals
+import data.Stone
 import ei.Ei.Backup
 import ei.Ei.ContractCoopStatusResponse.ContributionInfo
 import ei.Ei.LocalContract
@@ -39,8 +39,14 @@ fun formatContractData(
     return contractData.contracts.map { contract ->
         val contractInfo =
             contractData.contractsInfo.contractsList.find { it.identifier == contract.contractIdentifier }
+
+        val status =
+            contractData.contractStatuses.find { contractStatus ->
+                contractStatus.contractIdentifier == contract.contractIdentifier
+            }
+
         val gradeSpecsList = contractInfo?.gradeSpecsList
-        val gradeSpecs = gradeSpecsList?.find { gradeSpec -> gradeSpec.grade == contract.grade }
+        val gradeSpecs = gradeSpecsList?.find { gradeSpec -> gradeSpec.grade == status?.grade }
 
         val formattedGoals = gradeSpecs?.goalsList?.map { goal ->
             GoalInfoEntry(
@@ -51,14 +57,9 @@ fun formatContractData(
             )
         } ?: emptyList()
 
-        val status =
-            contractData.contractStatuses.find { contractStatus ->
-                contractStatus.contractIdentifier == contract.contractIdentifier
-            }
-
         val formattedContributors = status?.contributorsList?.filterNot { contributor ->
             // Remove any [departed] users stuck from contract creation
-            contributor.userName == "[departed]" && contributor.uuid.isNullOrEmpty()
+            contributor.userName == "[departed]" && contributor.uuid.isNullOrBlank()
         }?.map { contributor ->
             ContributorInfoEntry(
                 eggsDelivered = contributor.contributionAmount,
@@ -73,13 +74,13 @@ fun formatContractData(
             contributor.userName == userName
         }?.farmInfo?.equippedArtifactsList?.map { artifact ->
             val stones = artifact.stonesList.map { stone ->
-                ContractStone(
+                Stone(
                     name = stone.name.number,
                     level = stone.level.number
                 )
             }
 
-            ContractArtifact(
+            Artifact(
                 name = artifact.spec.name.number,
                 rarity = artifact.spec.rarity.number,
                 level = artifact.spec.level.number,
@@ -107,7 +108,7 @@ fun formatContractData(
             timeRemainingSeconds = status?.secondsRemaining ?: 0.0,
             allGoalsAchieved = status?.allGoalsAchieved == true,
             clearedForExit = status?.clearedForExit == true,
-            grade = contract.grade.number,
+            grade = status?.grade?.number ?: 0,
             maxCoopSize = periodicalContract?.maxCoopSize ?: previousContract?.maxCoopSize ?: 0,
             tokenTimerMinutes = periodicalContract?.tokenTimerMinutes
                 ?: previousContract?.tokenTimerMinutes ?: 0.0,
@@ -175,8 +176,9 @@ fun formatSeasonInfo(
     periodicalsData: PeriodicalsData,
 ): SeasonGradeAndGoals {
     val seasonInfo = periodicalsData.seasonInfo
-    val startingGrade =
-        periodicalsData.contractPlayerInfo.seasonProgressList.find { it.seasonId == seasonInfo.id }?.startingGrade
+    val matchingSeason =
+        periodicalsData.contractPlayerInfo.seasonProgressList.find { it.seasonId == seasonInfo.id }
+    val startingGrade = matchingSeason?.startingGrade ?: periodicalsData.contractPlayerInfo.grade
 
     val goalSet = if (startingGrade != null) {
         seasonInfo.gradeGoalsList.find { it.grade == startingGrade }
@@ -193,10 +195,16 @@ fun formatSeasonInfo(
         )
     } ?: emptyList()
 
+    val seasonScore = if (matchingSeason == null) {
+        0.0
+    } else {
+        periodicalsData.contractPlayerInfo.seasonCxp
+    }
+
     return SeasonGradeAndGoals(
         stateId = UUID.randomUUID().toString(),
         seasonName = seasonInfo.name,
-        seasonScore = periodicalsData.contractPlayerInfo.seasonCxp,
+        seasonScore = seasonScore,
         startingSeasonGrade = startingGrade,
         goals = formattedGoals
     )
@@ -242,8 +250,8 @@ fun createContractCircularProgressBarBitmap(
     offlineProgress: Float?,
     size: Int
 ): Bitmap {
-    val totalProgressColor = CONTRACT_PROGRESS_COLOR.toColorInt()
-    val offlineProgressColor = CONTRACT_OFFLINE_PROGRESS_COLOR.toColorInt()
+    val totalProgressColor = PROGRESS_COLOR.toColorInt()
+    val offlineProgressColor = OFFLINE_PROGRESS_COLOR.toColorInt()
     val progressData = mutableListOf(ProgressData(totalProgress, totalProgressColor))
     if (offlineProgress != null) {
         progressData.add(ProgressData(offlineProgress, offlineProgressColor))

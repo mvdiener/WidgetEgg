@@ -28,10 +28,7 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.state.PreferencesGlanceStateDefinition
-import androidx.glance.text.Text
-import androidx.glance.text.TextStyle
-import androidx.glance.unit.ColorProvider
-import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +40,7 @@ import tools.utilities.getShipName
 import widget.WidgetUpdater
 import widget.missions.MissionWidgetDataStore
 import widget.missions.MissionWidgetDataStorePreferencesKeys
+import widget.shared.NoWidgetContent
 
 abstract class BaseWidgetMinimal(val isVirtueWidget: Boolean = false) : GlanceAppWidget() {
     override val stateDefinition = PreferencesGlanceStateDefinition
@@ -107,7 +105,7 @@ abstract class BaseWidgetMinimal(val isVirtueWidget: Boolean = false) : GlanceAp
             ) {
                 val assetManager = context.assets
                 if (eid.isBlank() || missionData.isEmpty()) {
-                    NoMissionsContentMinimal(assetManager, textColor)
+                    NoWidgetContent(assetManager, "Waiting for mission data...", 40.dp, textColor)
                 } else {
                     val missionsChunked = missionData.chunked(2)
                     missionsChunked.forEach { missionGroup ->
@@ -127,34 +125,6 @@ abstract class BaseWidgetMinimal(val isVirtueWidget: Boolean = false) : GlanceAp
                 }
             }
         }
-    }
-}
-
-@Composable
-fun LogoContentMinimal(assetManager: AssetManager) {
-    val bitmapImage =
-        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
-
-    Image(
-        provider = ImageProvider(bitmapImage),
-        contentDescription = "Empty Widget Logo",
-        modifier = GlanceModifier.size(40.dp)
-    )
-}
-
-@Composable
-fun NoMissionsContentMinimal(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContentMinimal(assetManager)
-        Text(
-            text = "Waiting for mission data...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
     }
 }
 

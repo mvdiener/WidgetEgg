@@ -1,8 +1,18 @@
 package data
 
 import ei.Ei.Contract.PlayerGrade
+import ei.Ei.ContractCoopStatusResponse
+import ei.Ei.ContractsInfoResponse
+import ei.Ei.LocalContract
 import ei.Ei.RewardType
 import kotlinx.serialization.Serializable
+
+// Data class used as return object from api.fetchContractData
+data class ContractData(
+    val contracts: List<LocalContract>,
+    val contractStatuses: List<ContractCoopStatusResponse>,
+    val contractsInfo: ContractsInfoResponse
+)
 
 // Data class used to save contract information to preferences
 @Serializable
@@ -25,7 +35,7 @@ data class ContractInfoEntry(
     var isUltra: Boolean,
     var goals: List<GoalInfoEntry>,
     var contributors: List<ContributorInfoEntry>,
-    var contractArtifacts: List<ContractArtifact>
+    var contractArtifacts: List<Artifact>
 )
 
 @Serializable
@@ -43,20 +53,6 @@ data class ContributorInfoEntry(
     var offlineTimeSeconds: Double,
     var offlineTimeSecondsIgnoringSilos: Double,
     var isSelf: Boolean
-)
-
-@Serializable
-data class ContractArtifact(
-    var name: Int,
-    var rarity: Int,
-    var level: Int,
-    var stones: List<ContractStone>
-)
-
-@Serializable
-data class ContractStone(
-    var name: Int,
-    var level: Int
 )
 
 // Data class used to save periodicals contract information to preferences

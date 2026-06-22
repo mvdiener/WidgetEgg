@@ -268,7 +268,7 @@ fun SendNotificationsForNewContractsRow(
         ) {
             SettingsHeaderAndDescription(
                 "Notify on new contracts",
-                "Timeliness of notification not guaranteed. Previously denied notification permissions need to be manually re-enabled within app settings.",
+                "Timeliness of notifications not guaranteed. Previously denied notification permissions need to be manually re-enabled within app settings.",
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 10.dp)
@@ -312,7 +312,7 @@ fun SendNotificationsForIncompleteContractsRow(
         ) {
             SettingsHeaderAndDescription(
                 "Notify on incomplete contracts",
-                "Timeliness of notification not guaranteed. Previously denied notification permissions need to be manually re-enabled within app settings.",
+                "Timeliness of notifications not guaranteed. Previously denied notification permissions need to be manually re-enabled within app settings.",
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 10.dp)

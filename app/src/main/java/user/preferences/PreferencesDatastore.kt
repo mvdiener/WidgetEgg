@@ -9,17 +9,19 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import data.CalendarEntry
 import data.ContractInfoEntry
-import data.CustomEggInfoEntry
-import data.DEFAULT_WIDGET_BACKGROUND_COLOR
-import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.MissionInfoEntry
 import data.PeriodicalsContractInfoEntry
+import data.PlayerColleggtibleInfoEntry
 import data.SeasonGradeAndGoals
 import data.StatsInfo
 import data.TankInfo
+import data.VirtueInfo
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
@@ -63,7 +65,17 @@ class PreferencesDatastore(context: Context) {
         private val WIDGET_TEXT_COLOR = intPreferencesKey("widgetTextColor")
         private val STATS_INFO = stringPreferencesKey("statsInfo")
         private val SHOW_COMMUNITY_BADGES = booleanPreferencesKey("showCommunityBadges")
-        private val CUSTOM_EGGS = stringPreferencesKey("customEggs")
+        private val VIRTUE_INFO = stringPreferencesKey("virtueInfo")
+        private val PLAYER_COLLEGGTIBLE_INFO = stringPreferencesKey("playerColleggtibleInfo")
+        private val USE_ABSOLUTE_TIME_VIRTUE_SILOS =
+            booleanPreferencesKey("useAbsoluteTimeVirtueSilos")
+        private val USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG =
+            booleanPreferencesKey("useAbsoluteTimeVirtueNextTruthEgg")
+        private val SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT =
+            booleanPreferencesKey("showNextTruthEggGoalAmount")
+        private val OPEN_VIRTUE_COMPANION = booleanPreferencesKey("openVirtueCompanion")
+        private val SELECTED_EVENT_NOTIFICATIONS =
+            stringSetPreferencesKey("selectedEventNotifications")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -441,11 +453,29 @@ class PreferencesDatastore(context: Context) {
         }
     }
 
-    suspend fun getCustomEggs(): List<CustomEggInfoEntry> {
+    suspend fun getVirtueInfo(): VirtueInfo {
         return dataStore.data.map {
-            it[CUSTOM_EGGS]?.let { customEggsJson ->
+            it[VIRTUE_INFO]?.let { virtueJson ->
                 try {
-                    Json.decodeFromString<List<CustomEggInfoEntry>>(customEggsJson)
+                    Json.decodeFromString<VirtueInfo>(virtueJson)
+                } catch (e: Exception) {
+                    VirtueInfo()
+                }
+            } ?: VirtueInfo()
+        }.first()
+    }
+
+    suspend fun saveVirtueInfo(virtueInfo: VirtueInfo) {
+        dataStore.edit {
+            it[VIRTUE_INFO] = Json.encodeToString(virtueInfo)
+        }
+    }
+
+    suspend fun getPlayerColleggtibleInfo(): List<PlayerColleggtibleInfoEntry> {
+        return dataStore.data.map {
+            it[PLAYER_COLLEGGTIBLE_INFO]?.let { colleggtibleJson ->
+                try {
+                    Json.decodeFromString<List<PlayerColleggtibleInfoEntry>>(colleggtibleJson)
                 } catch (e: Exception) {
                     emptyList()
                 }
@@ -453,9 +483,59 @@ class PreferencesDatastore(context: Context) {
         }.first()
     }
 
-    suspend fun saveCustomEggs(customEggs: List<CustomEggInfoEntry>) {
+    suspend fun savePlayerColleggtibleInfo(colleggtibleInfo: List<PlayerColleggtibleInfoEntry>) {
         dataStore.edit {
-            it[CUSTOM_EGGS] = Json.encodeToString(customEggs)
+            it[PLAYER_COLLEGGTIBLE_INFO] = Json.encodeToString(colleggtibleInfo)
+        }
+    }
+
+    suspend fun getUseAbsoluteTimeVirtueSilos() = dataStore.data.map {
+        it[USE_ABSOLUTE_TIME_VIRTUE_SILOS] == true
+    }.first()
+
+    suspend fun saveUseAbsoluteTimeVirtueSilos(useAbsoluteTimeVirtueSilos: Boolean) {
+        dataStore.edit {
+            it[USE_ABSOLUTE_TIME_VIRTUE_SILOS] = useAbsoluteTimeVirtueSilos
+        }
+    }
+
+    suspend fun getUseAbsoluteTimeVirtueNextTruthEgg() = dataStore.data.map {
+        it[USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG] == true
+    }.first()
+
+    suspend fun saveUseAbsoluteTimeVirtueNextTruthEgg(useAbsoluteTimeVirtueNextTruthEgg: Boolean) {
+        dataStore.edit {
+            it[USE_ABSOLUTE_TIME_VIRTUE_NEXT_TRUTH_EGG] = useAbsoluteTimeVirtueNextTruthEgg
+        }
+    }
+
+    suspend fun getShowNextTruthEggGoalAmount() = dataStore.data.map {
+        it[SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] == true
+    }.first()
+
+    suspend fun saveShowNextTruthEggGoalAmount(showNextTruthEggGoalAmount: Boolean) {
+        dataStore.edit {
+            it[SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] = showNextTruthEggGoalAmount
+        }
+    }
+
+    suspend fun getOpenVirtueCompanion() = dataStore.data.map {
+        it[OPEN_VIRTUE_COMPANION] == true
+    }.first()
+
+    suspend fun saveOpenVirtueCompanion(openVirtueCompanion: Boolean) {
+        dataStore.edit {
+            it[OPEN_VIRTUE_COMPANION] = openVirtueCompanion
+        }
+    }
+
+    suspend fun getSelectedEventNotifications() = dataStore.data.map {
+        it[SELECTED_EVENT_NOTIFICATIONS] ?: emptySet()
+    }.first()
+
+    suspend fun saveSelectedEventNotifications(selectedEventNotifications: Set<String>) {
+        dataStore.edit {
+            it[SELECTED_EVENT_NOTIFICATIONS] = selectedEventNotifications
         }
     }
 

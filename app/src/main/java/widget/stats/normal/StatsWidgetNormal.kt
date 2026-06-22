@@ -31,20 +31,21 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import data.DEFAULT_WIDGET_BACKGROUND_COLOR
-import data.DEFAULT_WIDGET_TEXT_COLOR
+import data.constants.DEFAULT_WIDGET_BACKGROUND_COLOR
+import data.constants.DEFAULT_WIDGET_TEXT_COLOR
 import data.StatsInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import tools.utilities.bitmapResize
 import tools.utilities.getAsset
-import tools.utilities.getContractGradeName
+import tools.utilities.getGradeName
 import tools.utilities.getEggName
 import tools.utilities.getFarmerRole
 import tools.utilities.getShortenedFarmerRole
 import tools.utilities.truncateString
 import widget.WidgetUpdater
+import widget.shared.NoWidgetContent
 import widget.stats.StatsWidgetDataStore
 import widget.stats.StatsWidgetDataStorePreferencesKeys
 
@@ -99,10 +100,10 @@ class StatsWidgetNormal : GlanceAppWidget() {
                         }
                     }
             ) {
+                val assetManager = context.assets
                 if (eid.isBlank() || statsInfo.stateId.isBlank()) {
-                    NoStatsContent(context.assets, textColor)
+                    NoWidgetContent(assetManager, "Waiting for stats data...", 80.dp, textColor)
                 } else {
-                    val assetManager = context.assets
                     NameAndRole(statsInfo, eiUserName, assetManager, textColor)
                     MysticalEggs(statsInfo, assetManager, textColor)
                     Earnings(statsInfo, assetManager, textColor)
@@ -117,34 +118,6 @@ class StatsWidgetNormal : GlanceAppWidget() {
                 }
             }
         }
-    }
-}
-
-@Composable
-fun LogoContentStats(assetManager: AssetManager) {
-    val bitmapImage =
-        BitmapFactory.decodeStream(getAsset(assetManager, "icons/logo-dark-mode.png"))
-
-    Image(
-        provider = ImageProvider(bitmapImage),
-        contentDescription = "Empty Widget Logo",
-        modifier = GlanceModifier.size(80.dp)
-    )
-}
-
-@Composable
-fun NoStatsContent(assetManager: AssetManager, textColor: Color) {
-    Column(
-        modifier = GlanceModifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LogoContentStats(assetManager)
-        Text(
-            text = "Waiting for stats data...",
-            style = TextStyle(color = ColorProvider(textColor)),
-            modifier = GlanceModifier.padding(top = 5.dp)
-        )
     }
 }
 
@@ -424,7 +397,7 @@ fun Contracts(
         modifier = GlanceModifier.statsRowModifier(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val grade = getContractGradeName(statsInfo.contractGrade)
+        val grade = getGradeName(statsInfo.contractGrade)
         val gradeBitmap = bitmapResize(
             BitmapFactory.decodeStream(
                 getAsset(
