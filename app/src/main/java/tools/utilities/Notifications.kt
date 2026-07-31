@@ -86,16 +86,23 @@ fun sendContractNotification(
 fun sendEventNotification(
     context: Context,
     virtueInfo: VirtueInfo,
-    selectedEventNotifications: Set<String>
-): VirtueInfo {
-    if (!hasNotificationPermissions(context) || selectedEventNotifications.isEmpty()) return virtueInfo
+    selectedEventNotifications: Set<String>,
+    sentEventNotificationMap: Map<String, Long>
+): Map<String, Long> {
+    if (!hasNotificationPermissions(context) || selectedEventNotifications.isEmpty()) return sentEventNotificationMap
+
+    // Prune entries older than 2 weeks to keep the datastore small
+    val currentTime = System.currentTimeMillis()
+    val twoWeeksAgo = currentTime - (14L * 24 * 60 * 60 * 1000)
+    val updatedNotificationMap =
+        sentEventNotificationMap.filter { it.value > twoWeeksAgo }.toMutableMap()
 
     // Find intersection of today's events and the events where the user wants a notification
     val matchingEvents = virtueInfo.dailyEvents.filter { event ->
-        event.type in selectedEventNotifications && !event.notificationSent
+        event.type in selectedEventNotifications && event.identifier !in updatedNotificationMap
     }
 
-    if (matchingEvents.isEmpty()) return virtueInfo
+    if (matchingEvents.isEmpty()) return updatedNotificationMap
 
     val titleText = if (matchingEvents.size == 1) "New event available" else "New events available"
     val messageText = matchingEvents.joinToString(separator = ", ") {
@@ -123,15 +130,12 @@ fun sendEventNotification(
         notify("event_notifications".hashCode(), builder.build())
     }
 
-    val updatedEvents = virtueInfo.dailyEvents.map { event ->
-        if (event.type in selectedEventNotifications) {
-            event.copy(notificationSent = true)
-        } else {
-            event
-        }
+    // Add new events to history
+    matchingEvents.forEach { event ->
+        updatedNotificationMap[event.identifier] = currentTime
     }
 
-    return virtueInfo.copy(dailyEvents = updatedEvents)
+    return updatedNotificationMap
 }
 
 private fun createNotificationBuilder(

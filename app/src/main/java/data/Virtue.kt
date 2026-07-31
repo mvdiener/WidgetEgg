@@ -38,11 +38,11 @@ data class VirtueFarmInfo(
 
 @Serializable
 data class Event(
+    var identifier: String,
     var type: String,
     var multiplier: Double,
     var isUltra: Boolean,
-    var name: String,
-    var notificationSent: Boolean
+    var name: String
 )
 
 data class Research(
