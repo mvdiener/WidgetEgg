@@ -76,6 +76,8 @@ class PreferencesDatastore(context: Context) {
         private val OPEN_VIRTUE_COMPANION = booleanPreferencesKey("openVirtueCompanion")
         private val SELECTED_EVENT_NOTIFICATIONS =
             stringSetPreferencesKey("selectedEventNotifications")
+        private val SENT_EVENT_NOTIFICATION_MAP =
+            stringPreferencesKey("sentEventNotificationMap")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -536,6 +538,24 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveSelectedEventNotifications(selectedEventNotifications: Set<String>) {
         dataStore.edit {
             it[SELECTED_EVENT_NOTIFICATIONS] = selectedEventNotifications
+        }
+    }
+
+    suspend fun getSentEventNotificationMap(): Map<String, Long> {
+        return dataStore.data.map {
+            it[SENT_EVENT_NOTIFICATION_MAP]?.let { json ->
+                try {
+                    Json.decodeFromString<Map<String, Long>>(json)
+                } catch (e: Exception) {
+                    emptyMap()
+                }
+            } ?: emptyMap()
+        }.first()
+    }
+
+    suspend fun saveSentEventNotificationMap(sentEventNotificationMap: Map<String, Long>) {
+        dataStore.edit {
+            it[SENT_EVENT_NOTIFICATION_MAP] = Json.encodeToString(sentEventNotificationMap)
         }
     }
 

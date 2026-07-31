@@ -373,6 +373,7 @@ class WidgetUpdater {
     ) {
         var prefVirtueInfo = preferences.getVirtueInfo()
         var prefPlayerColleggtibleInfo = preferences.getPlayerColleggtibleInfo()
+        var prefSentEventNotificationMap = preferences.getSentEventNotificationMap()
 
         val prefEid = preferences.getEid()
         val prefUseAbsoluteTimeVirtueSilos = preferences.getUseAbsoluteTimeVirtueSilos()
@@ -393,14 +394,19 @@ class WidgetUpdater {
                     formatVirtueData(
                         backup,
                         periodicalsInfo,
-                        prefPlayerColleggtibleInfo,
-                        prefVirtueInfo.dailyEvents
+                        prefPlayerColleggtibleInfo
                     )
 
-                prefVirtueInfo =
-                    sendEventNotification(context, prefVirtueInfo, prefSelectedEventNotifications)
+                prefSentEventNotificationMap =
+                    sendEventNotification(
+                        context,
+                        prefVirtueInfo,
+                        prefSelectedEventNotifications,
+                        prefSentEventNotificationMap
+                    )
 
                 preferences.saveVirtueInfo(prefVirtueInfo)
+                preferences.saveSentEventNotificationMap(prefSentEventNotificationMap)
                 preferences.savePlayerColleggtibleInfo(prefPlayerColleggtibleInfo)
 
                 VirtueWidgetDataStore().updateVirtueWidgetDataStore(

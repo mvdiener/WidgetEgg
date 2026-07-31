@@ -42,8 +42,7 @@ import kotlin.math.sqrt
 fun formatVirtueData(
     backup: Backup,
     periodicalsData: PeriodicalsData?,
-    playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>,
-    previousEventInfo: List<Event>?
+    playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>
 ): VirtueInfo {
     val homeFarm = backup.farmsList.first { it.farmType == FarmType.HOME }
     val homeFarmIndex = backup.farmsList.indexOf(homeFarm)
@@ -111,7 +110,7 @@ fun formatVirtueData(
         isOnVirtue = isOnVirtue,
         virtueEquippedArtifacts = virtueArtifacts,
         homeEquippedArtifacts = homeArtifacts,
-        dailyEvents = formatDailyEvents(periodicalsData, previousEventInfo),
+        dailyEvents = formatDailyEvents(periodicalsData),
         farms = virtueFarms
     )
 }
@@ -267,17 +266,15 @@ private fun getArtifacts(
 }
 
 private fun formatDailyEvents(
-    periodicalsData: PeriodicalsData?,
-    previousEventInfo: List<Event>?
+    periodicalsData: PeriodicalsData?
 ): List<Event> {
     return periodicalsData?.dailyEvents?.map { event ->
-        val previousEvent = previousEventInfo?.find { it.type == event.type }
         Event(
+            identifier = event.identifier,
             type = event.type,
             multiplier = event.multiplier,
             isUltra = event.ccOnly,
-            name = getEventName(event.type),
-            notificationSent = previousEvent?.notificationSent ?: false
+            name = getEventName(event.type)
         )
     } ?: emptyList()
 }

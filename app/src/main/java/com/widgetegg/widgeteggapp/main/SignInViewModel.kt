@@ -168,8 +168,7 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                         formatVirtueData(
                             backupResult,
                             periodicalsResult,
-                            formattedPlayerColleggtibleInfo,
-                            null
+                            formattedPlayerColleggtibleInfo
                         )
                     saveColleggtibleImagesToCache(periodicalsResult, context)
                     preferences.saveMissionInfo(formattedMissionData)
