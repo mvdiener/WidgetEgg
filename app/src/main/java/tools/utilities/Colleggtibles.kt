@@ -2,7 +2,6 @@ package tools.utilities
 
 import android.content.Context
 import api.downloadImageBytes
-import api.fetchColleggtibleContracts
 import data.CustomEggInfoEntry
 import data.constants.FARM_SIZE_TIERS
 import data.PeriodicalsData
@@ -23,7 +22,7 @@ fun formatCustomEggs(periodicalsData: PeriodicalsData?): List<CustomEggInfoEntry
     } ?: emptyList()
 }
 
-suspend fun getPlayerColleggtibles(
+fun getPlayerColleggtibles(
     periodicalsData: PeriodicalsData?,
     backup: Backup,
     preferencesPlayerColleggtibles: List<PlayerColleggtibleInfoEntry>
@@ -31,19 +30,14 @@ suspend fun getPlayerColleggtibles(
     val customEggs = formatCustomEggs(periodicalsData)
     if (customEggs.isEmpty()) return preferencesPlayerColleggtibles
 
-    // If missing colleggtible data, attempt to retrieve the latest via contract history
-    // Avoid doing this if we already have all maxed colleggtible buffs
-    // Should automatically find new colleggtibles since base data comes from periodicals
     if (preferencesPlayerColleggtibles.isEmpty()
         || customEggs.size != preferencesPlayerColleggtibles.size
         || preferencesPlayerColleggtibles.any { it.bestPossibleBuff != it.bestAchievedBuff }
     ) {
         try {
-            val colleggtibleContracts = fetchColleggtibleContracts()
-            if (colleggtibleContracts.isEmpty()) return preferencesPlayerColleggtibles
 
-            val contractsWithPop =
-                backup.contracts.archiveList.filter { it.maxFarmSizeReached > 0.0 }
+            val colleggtiblesPopList =
+                backup.contracts.colleggtibleMaxFarmSizeReachedList
 
             return customEggs.mapNotNull { egg ->
                 if (egg.buffType == GameDimension.INVALID) return@mapNotNull null
@@ -54,13 +48,8 @@ suspend fun getPlayerColleggtibles(
                     egg.buffs.maxOrNull() ?: 1.0
                 }
 
-                val matchingContracts = colleggtibleContracts.mapNotNull {
-                    if (it.customEggId == egg.name) it.contractName else null
-                }.toSet()
-
-                val maxPop = contractsWithPop
-                    .filter { it.contractIdentifier in matchingContracts }
-                    .maxOfOrNull { it.maxFarmSizeReached } ?: 0.0
+                val maxPop =
+                    colleggtiblesPopList.find { it.eggId == egg.name }?.maxFarmSizeReached ?: 0.0
 
                 val reachedTierIndex = FARM_SIZE_TIERS.indexOfLast { maxPop >= it }
                 if (reachedTierIndex == -1) return@mapNotNull null
