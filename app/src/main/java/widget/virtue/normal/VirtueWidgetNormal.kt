@@ -74,6 +74,8 @@ class VirtueWidgetNormal : GlanceAppWidget() {
                     ?: false
             val openVirtueCompanion =
                 state[VirtueWidgetDataStorePreferencesKeys.OPEN_VIRTUE_COMPANION] ?: false
+            val showNextFiveGoals =
+                state[VirtueWidgetDataStorePreferencesKeys.SHOW_NEXT_FIVE_GOALS] ?: false
             val backgroundColor =
                 state[VirtueWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR]?.let { colorInt ->
                     Color(colorInt)
@@ -151,6 +153,7 @@ class VirtueWidgetNormal : GlanceAppWidget() {
                         virtueInfo,
                         useAbsoluteTimeVirtueNextTruthEgg,
                         use24HrFormat,
+                        showNextFiveGoals,
                         textColor
                     )
                 }
@@ -297,15 +300,20 @@ fun FarmProgress(
     virtueInfo: VirtueInfo,
     useAbsoluteTimeVirtueNextTruthEgg: Boolean,
     use24HrFormat: Boolean,
+    showNextFiveGoals: Boolean,
     textColor: Color
 ) {
     val farms = if (virtueInfo.isOnVirtue) {
         val (activeFarm, otherFarms) = virtueInfo.farms.partition { it.eggId == virtueInfo.eggId }
-        activeFarm + otherFarms
+        if (showNextFiveGoals && activeFarm.isNotEmpty()) {
+            List(5) { activeFarm.first() }
+        } else {
+            activeFarm + otherFarms
+        }
     } else {
         virtueInfo.farms
     }
-    farms.forEach { farm ->
+    farms.forEachIndexed { index, farm ->
         Row(
             modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 5.dp),
             horizontalAlignment = Alignment.Start,
@@ -325,9 +333,14 @@ fun FarmProgress(
                 contentDescription = eggName,
                 modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
             )
+            val pendingText = if (!virtueInfo.isOnVirtue || !showNextFiveGoals || index == 0) {
+                "${farm.truthEggs}(${farm.pendingTruthEggs})"
+            } else {
+                "+${index + 1}"
+            }
             Text(
                 modifier = GlanceModifier.padding(end = 2.dp),
-                text = "${farm.truthEggs}(${farm.pendingTruthEggs})",
+                text = pendingText,
                 style = TextStyle(color = ColorProvider(textColor))
             )
             Box(modifier = GlanceModifier.defaultWeight()) {}
@@ -336,7 +349,8 @@ fun FarmProgress(
                     if (virtueInfo.eggId == farm.eggId) {
                         getOfflineTruthEggPercentComplete(
                             virtueInfo,
-                            farm.eggsDelivered
+                            farm.eggsDelivered,
+                            if (showNextFiveGoals) index else 0
                         )
                     } else {
                         0.0f
@@ -351,7 +365,8 @@ fun FarmProgress(
                             virtueInfo,
                             farm,
                             useAbsoluteTimeVirtueNextTruthEgg,
-                            use24HrFormat
+                            use24HrFormat,
+                            if (showNextFiveGoals) index else 0
                         )
                     }
                 Text(

@@ -382,6 +382,7 @@ class WidgetUpdater {
         val prefShowNextTruthEggGoalAmount = preferences.getShowNextTruthEggGoalAmount()
         val prefOpenVirtueCompanion = preferences.getOpenVirtueCompanion()
         val prefSelectedEventNotifications = preferences.getSelectedEventNotifications()
+        val prefShowNextFiveGoals = preferences.getShowNextFiveGoals()
         val prefWidgetBackgroundColor = preferences.getWidgetBackgroundColor()
         val prefWidgetTextColor = preferences.getWidgetTextColor()
 
@@ -417,6 +418,7 @@ class WidgetUpdater {
                     useAbsoluteTimeVirtueNextTruthEgg = prefUseAbsoluteTimeVirtueNextTruthEgg,
                     showNextTruthEggGoalAmount = prefShowNextTruthEggGoalAmount,
                     openVirtueCompanion = prefOpenVirtueCompanion,
+                    showNextFiveGoals = prefShowNextFiveGoals,
                     backgroundColor = prefWidgetBackgroundColor,
                     textColor = prefWidgetTextColor
                 )

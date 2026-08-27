@@ -66,6 +66,7 @@ fun Virtue(navController: NavController, activity: MainActivity) {
         settingsViewModel.updateOpenVirtueCompanion(preferences.getOpenVirtueCompanion())
         settingsViewModel.updateShowNextTruthEggGoalAmount(preferences.getShowNextTruthEggGoalAmount())
         settingsViewModel.updateSelectedEvents(preferences.getSelectedEventNotifications())
+        settingsViewModel.updateShowNextFiveGoals(preferences.getShowNextFiveGoals())
     }
 
     if (!hasNotificationPermissions(context)) {
@@ -119,6 +120,7 @@ fun VirtueGeneralGroup(
         AbsoluteTimeVirtueSilosRow(settingsViewModel)
         AbsoluteTimeVirtueTruthEggRow(settingsViewModel)
         OpenVirtueCompanionRow(settingsViewModel)
+        ShowNextFiveGoalsRow(settingsViewModel)
         EventNotificationRow(settingsViewModel, context, activity)
     }
 }
@@ -206,6 +208,36 @@ fun OpenVirtueCompanionRow(settingsViewModel: SettingsViewModel) {
                 onCheckedChange = {
                     scope.launch {
                         settingsViewModel.updateOpenVirtueCompanion(!settingsViewModel.openVirtueCompanion)
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ShowNextFiveGoalsRow(settingsViewModel: SettingsViewModel) {
+    Row(
+        modifier = Modifier.settingsRowModifier(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SettingsHeaderAndDescription(
+                "Show next five TE goals",
+                "Show the next five TE goals for the current egg, instead of the next TE goal for all five virtue eggs. Only applies when on virtue.",
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 10.dp)
+            )
+            val scope = rememberCoroutineScope()
+            Switch(
+                checked = settingsViewModel.showNextFiveGoals,
+                onCheckedChange = {
+                    scope.launch {
+                        settingsViewModel.updateShowNextFiveGoals(!settingsViewModel.showNextFiveGoals)
                     }
                 }
             )

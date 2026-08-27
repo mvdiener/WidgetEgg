@@ -88,6 +88,8 @@ class VirtueWidgetLarge : GlanceAppWidget() {
                 state[VirtueWidgetDataStorePreferencesKeys.SHOW_NEXT_TRUTH_EGG_GOAL_AMOUNT] ?: false
             val openVirtueCompanion =
                 state[VirtueWidgetDataStorePreferencesKeys.OPEN_VIRTUE_COMPANION] ?: false
+            val showNextFiveGoals =
+                state[VirtueWidgetDataStorePreferencesKeys.SHOW_NEXT_FIVE_GOALS] ?: false
             val backgroundColor =
                 state[VirtueWidgetDataStorePreferencesKeys.WIDGET_BACKGROUND_COLOR]?.let { colorInt ->
                     Color(colorInt)
@@ -167,6 +169,7 @@ class VirtueWidgetLarge : GlanceAppWidget() {
                         useAbsoluteTimeVirtueNextTruthEgg,
                         use24HrFormat,
                         showNextTruthEggGoalAmount,
+                        showNextFiveGoals,
                         textColor
                     )
                 }
@@ -253,6 +256,15 @@ fun HomeFarmInfo(
                 provider = ImageProvider(virtueFunctionBitmap),
                 contentDescription = "Virtue Egg Function",
                 modifier = GlanceModifier.size(25.dp).padding(start = 2.dp)
+            )
+
+            val eggLayRatePerSecond =
+                virtueInfo.eggLayingRate.coerceAtMost(virtueInfo.shippingCapacity)
+            val eggLayRatePerHour = numberToString(eggLayRatePerSecond * 60 * 60)
+            Text(
+                text = "$eggLayRatePerHour/hr",
+                style = TextStyle(color = ColorProvider(textColor)),
+                modifier = GlanceModifier.padding(start = 2.dp)
             )
         }
 
@@ -378,15 +390,20 @@ fun FarmProgress(
     useAbsoluteTimeVirtueNextTruthEgg: Boolean,
     use24HrFormat: Boolean,
     showNextTruthEggGoalAmount: Boolean,
+    showNextFiveGoals: Boolean,
     textColor: Color
 ) {
     val farms = if (virtueInfo.isOnVirtue) {
         val (activeFarm, otherFarms) = virtueInfo.farms.partition { it.eggId == virtueInfo.eggId }
-        activeFarm + otherFarms
+        if (showNextFiveGoals && activeFarm.isNotEmpty()) {
+            List(5) { activeFarm.first() }
+        } else {
+            activeFarm + otherFarms
+        }
     } else {
         virtueInfo.farms
     }
-    farms.forEach { farm ->
+    farms.forEachIndexed { index, farm ->
         Row(
             modifier = GlanceModifier.fillMaxWidth().padding(start = 5.dp, end = 8.dp),
             horizontalAlignment = Alignment.Start,
@@ -413,8 +430,14 @@ fun FarmProgress(
                         contentDescription = eggName,
                         modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
                     )
+                    val pendingText =
+                        if (!virtueInfo.isOnVirtue || !showNextFiveGoals || index == 0) {
+                            "${farm.truthEggs} (${farm.pendingTruthEggs})"
+                        } else {
+                            "+${index + 1}"
+                        }
                     Text(
-                        text = "${farm.truthEggs} (${farm.pendingTruthEggs})",
+                        text = pendingText,
                         style = TextStyle(color = ColorProvider(textColor))
                     )
                 }
@@ -424,7 +447,8 @@ fun FarmProgress(
                     if (virtueInfo.eggId == farm.eggId) {
                         getOfflineTruthEggPercentComplete(
                             virtueInfo,
-                            farm.eggsDelivered
+                            farm.eggsDelivered,
+                            if (showNextFiveGoals) index else 0
                         )
                     } else {
                         0.0f
@@ -449,7 +473,10 @@ fun FarmProgress(
                     } else {
                         Color(PROGRESS_BACKGROUND_COLOR.toColorInt())
                     }
-                    val percentComplete = getTruthEggPercentComplete(farm.eggsDelivered)
+                    val percentComplete = getTruthEggPercentComplete(
+                        farm.eggsDelivered,
+                        if (showNextFiveGoals) index else 0
+                    )
                     LinearProgressIndicator(
                         modifier = GlanceModifier.fillMaxSize(),
                         progress = percentComplete,
@@ -468,7 +495,10 @@ fun FarmProgress(
                     modifier = GlanceModifier.width(width),
                     contentAlignment = Alignment.CenterEnd
                 ) {
-                    val nextTEThreshold = getNextTruthEggThreshold(farm.eggsDelivered)
+                    val nextTEThreshold = getNextTruthEggThreshold(
+                        farm.eggsDelivered,
+                        if (showNextFiveGoals) index else 0
+                    )
                     var goalText = if (showNextTruthEggGoalAmount && nextTEThreshold != 0.0) {
                         "${numberToString(nextTEThreshold)} - "
                     } else {
@@ -485,7 +515,8 @@ fun FarmProgress(
                                 virtueInfo,
                                 farm,
                                 useAbsoluteTimeVirtueNextTruthEgg,
-                                use24HrFormat
+                                use24HrFormat,
+                                if (showNextFiveGoals) index else 0
                             )
                         }
                     Text(

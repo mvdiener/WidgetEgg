@@ -440,4 +440,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             preferences.saveSelectedEventNotifications(input)
         }
     }
+
+    var showNextFiveGoals by mutableStateOf(false)
+        private set
+
+    suspend fun updateShowNextFiveGoals(input: Boolean) {
+        showNextFiveGoals = input
+        preferences.saveShowNextFiveGoals(input)
+        val context = getApplication<Application>().applicationContext
+        VirtueWidgetDataStore().updateVirtueWidgetDataStore(
+            context,
+            showNextFiveGoals = input
+        )
+    }
 }

@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.widgetegg.widgeteggapp"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.widgetegg.widgeteggapp"

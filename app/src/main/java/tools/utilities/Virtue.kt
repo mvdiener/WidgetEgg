@@ -2,7 +2,6 @@ package tools.utilities
 
 import data.Artifact
 import data.Event
-import data.PeriodicalsContractInfoEntry
 import data.constants.IHR_RESEARCHES
 import data.PeriodicalsData
 import data.PlayerColleggtibleInfoEntry
@@ -84,7 +83,7 @@ fun formatVirtueData(
     }
 
     val habCapacity = if (isOnVirtue) {
-        getHabCapacity(backup, playerColleggtibleInfo, homeFarm, virtueArtifacts)
+        getHabCapacity(playerColleggtibleInfo, homeFarm, virtueArtifacts)
     } else {
         0.0
     }
@@ -149,7 +148,8 @@ fun getTimeRemainingToNextTruthEgg(
     virtueInfo: VirtueInfo,
     farm: VirtueFarmInfo,
     useAbsoluteTime: Boolean,
-    use24HrFormat: Boolean
+    use24HrFormat: Boolean,
+    additionalThresholds: Int = 0
 ): String {
     val isOnActiveFarm = virtueInfo.eggId == farm.eggId
     val offlineHatcheryRate = virtueInfo.offlineHatcheryRate
@@ -188,7 +188,7 @@ fun getTimeRemainingToNextTruthEgg(
         eggsDelivered
     }
     val targetEggAmount =
-        getNextTruthEggThreshold(offlineEggsDelivered)
+        getNextTruthEggThreshold(offlineEggsDelivered, additionalThresholds)
     if (targetEggAmount == 0.0) return "Winner!"
 
     val targetEggsRemaining = targetEggAmount - eggsDelivered
@@ -214,8 +214,8 @@ fun getTimeRemainingToNextTruthEgg(
     return formatTimeText(remainingSeconds, useAbsoluteTime, use24HrFormat)
 }
 
-fun getTruthEggPercentComplete(delivered: Double): Float {
-    val nextTEThreshold = getNextTruthEggThreshold(delivered)
+fun getTruthEggPercentComplete(delivered: Double, additionalThresholds: Int = 0): Float {
+    val nextTEThreshold = getNextTruthEggThreshold(delivered, additionalThresholds)
     if (nextTEThreshold == 0.0) return 1.0f
     val previousTEThreshold = getPreviousTruthEggThreshold(delivered)
 
@@ -223,9 +223,13 @@ fun getTruthEggPercentComplete(delivered: Double): Float {
     return ((delivered - previousTEThreshold) / totalNeeded).toFloat()
 }
 
-fun getOfflineTruthEggPercentComplete(virtueInfo: VirtueInfo, delivered: Double): Float {
+fun getOfflineTruthEggPercentComplete(
+    virtueInfo: VirtueInfo,
+    delivered: Double,
+    additionalThresholds: Int = 0
+): Float {
     val offlineDelivered = getVirtueOfflineEggsDelivered(virtueInfo, delivered)
-    val nextTEThreshold = getNextTruthEggThreshold(delivered)
+    val nextTEThreshold = getNextTruthEggThreshold(delivered, additionalThresholds)
     if (nextTEThreshold == 0.0 || offlineDelivered >= nextTEThreshold) return 1.0f
     val previousTEThreshold = getPreviousTruthEggThreshold(delivered)
 
@@ -233,10 +237,10 @@ fun getOfflineTruthEggPercentComplete(virtueInfo: VirtueInfo, delivered: Double)
     return ((offlineDelivered - previousTEThreshold) / totalNeeded).toFloat()
 }
 
-fun getNextTruthEggThreshold(delivered: Double): Double {
+fun getNextTruthEggThreshold(delivered: Double, additionalThresholds: Int = 0): Double {
     val basePassed = countTruthEggThresholdsPassed(delivered)
 
-    return VIRTUE_DELIVERY_GOALS.getOrElse(basePassed) { 0.0 }
+    return VIRTUE_DELIVERY_GOALS.getOrElse(basePassed + additionalThresholds) { 0.0 }
 }
 
 private fun getArtifacts(
@@ -247,7 +251,7 @@ private fun getArtifacts(
 
     val inventoryMap = inventory.associateBy { it.itemId }
 
-    return activeArtifactList.slotsList.mapNotNull { slot ->
+    return activeArtifactList.slotsList.filter { it.occupied }.mapNotNull { slot ->
         val foundArtifact = inventoryMap[slot.itemId] ?: return@mapNotNull null
         val stones = foundArtifact.artifact.stonesList.map { stone ->
             Stone(
@@ -555,7 +559,6 @@ private fun getResearchShippingCapacity(
 }
 
 private fun getHabCapacity(
-    backup: Backup,
     playerColleggtibleInfo: List<PlayerColleggtibleInfoEntry>,
     homeFarm: Backup.Simulation,
     virtueArtifacts: List<Artifact>
