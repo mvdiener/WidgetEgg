@@ -258,8 +258,7 @@ fun HomeFarmInfo(
                 modifier = GlanceModifier.size(25.dp).padding(start = 2.dp)
             )
 
-            val eggLayRatePerSecond =
-                virtueInfo.eggLayingRate.coerceAtMost(virtueInfo.shippingCapacity)
+            val eggLayRatePerSecond = minOf(virtueInfo.eggLayingRate, virtueInfo.shippingCapacity)
             val eggLayRatePerHour = numberToString(eggLayRatePerSecond * 60 * 60)
             Text(
                 text = "$eggLayRatePerHour/hr",
