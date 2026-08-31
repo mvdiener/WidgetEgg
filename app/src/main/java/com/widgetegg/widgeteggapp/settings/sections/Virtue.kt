@@ -397,7 +397,7 @@ fun EventNotificationDialog(settingsViewModel: SettingsViewModel) {
                     }
                 }
                 LazyColumn {
-                    items(ALL_EVENT_TYPES) { event ->
+                    items(ALL_EVENT_TYPES.sortedBy { it.displayName }, key = { it.id }) { event ->
                         val isChecked = tempSelection.contains(event.id)
                         Row(
                             modifier = Modifier.fillMaxWidth(),

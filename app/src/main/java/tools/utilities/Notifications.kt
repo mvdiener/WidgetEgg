@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import com.widgetegg.widgeteggapp.R
 import data.constants.CONTRACT_NOTIFICATION_CHANNEL_ID
 import data.ContractInfoEntry
+import data.Event
 import data.PeriodicalsContractInfoEntry
 import data.VirtueInfo
 
@@ -99,7 +100,10 @@ fun sendEventNotification(
 
     // Find intersection of today's events and the events where the user wants a notification
     val matchingEvents = virtueInfo.dailyEvents.filter { event ->
-        event.type in selectedEventNotifications && event.identifier !in updatedNotificationMap
+        valueSpecificEventMatches(
+            event,
+            selectedEventNotifications
+        ) && event.identifier !in updatedNotificationMap
     }
 
     if (matchingEvents.isEmpty()) return updatedNotificationMap
@@ -136,6 +140,15 @@ fun sendEventNotification(
     }
 
     return updatedNotificationMap
+}
+
+private fun valueSpecificEventMatches(event: Event, selected: Set<String>): Boolean {
+    if (selected.contains(event.type)) return true
+
+    return when (event.type) {
+        "prestige-boost" -> selected.contains("prestige-boost-3x") && event.multiplier >= 3.0
+        else -> false
+    }
 }
 
 private fun createNotificationBuilder(
