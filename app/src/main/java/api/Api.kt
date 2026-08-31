@@ -1,8 +1,6 @@
 package api
 
 import com.widgetegg.widgeteggapp.BuildConfig
-import data.CarpetColleggtibleContractInfoEntry
-import data.ColleggtibleInfoEntry
 import data.constants.BACKUP_ENDPOINT
 import data.constants.CONTRACTS_ARCHIVE_ENDPOINT
 import data.constants.CONTRACTS_INFO_ENDPOINT
@@ -14,10 +12,8 @@ import data.constants.MISSION_ENDPOINT
 import data.MissionData
 import data.constants.PERIODICALS_ENDPOINT
 import data.PeriodicalsData
-import data.constants.COLLEGGTIBLE_CONTRACTS_JSON
 import ei.Ei.Backup
 import ei.Ei.BasicRequestInfo
-import ei.Ei.Contract
 import ei.Ei.ContractsArchive
 import ei.Ei.ContractsInfoRequest
 import ei.Ei.ContractsInfoResponse
@@ -26,7 +22,6 @@ import ei.Ei.ContractCoopStatusRequest
 import ei.Ei.ContractCoopStatusResponse
 import ei.Ei.EggIncFirstContactRequest
 import ei.Ei.EggIncFirstContactResponse
-import ei.Ei.GameModifier
 import ei.Ei.GetActiveMissionsRequest
 import ei.Ei.GetActiveMissionsResponse
 import ei.Ei.GetPeriodicalsRequest
@@ -44,9 +39,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.readRawBytes
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import kotlinx.serialization.json.Json
 import tools.buildSecureAuthMessage
-import tools.decodeRequest
 import tools.encodeRequest
 import tools.handleAuthMessageResponse
 import tools.handleBackupResponse
@@ -97,14 +90,6 @@ suspend fun fetchContractData(backup: Backup): ContractData {
     val statuses = validContracts.map { it.second }
 
     return ContractData(contracts, statuses, contractsInfo)
-}
-
-suspend fun fetchColleggtibleContracts(): List<ColleggtibleInfoEntry> {
-    return try {
-        fetchCarpetColleggtibleContracts()
-    } catch (e: Exception) {
-        throw e
-    }
 }
 
 suspend fun fetchPeriodicalsData(eid: String): PeriodicalsData {
@@ -323,30 +308,6 @@ private suspend fun fetchPeriodicals(eid: String): PeriodicalsResponse {
     }
 }
 
-private suspend fun fetchCarpetColleggtibleContracts(): List<ColleggtibleInfoEntry> {
-    val url = COLLEGGTIBLE_CONTRACTS_JSON
-    val response = makeRequest(url)
-
-    when (response.status.value) {
-        in 200..299 -> {
-            try {
-                val jsonText = response.bodyAsText()
-                val decoded =
-                    Json.decodeFromString<List<CarpetColleggtibleContractInfoEntry>>(jsonText)
-                return decoded.map { contract ->
-                    val customEggId =
-                        Contract.parseFrom(decodeRequest(contract.proto)).customEggId
-                    ColleggtibleInfoEntry(customEggId, contract.id)
-                }
-            } catch (e: Exception) {
-                throw e
-            }
-        }
-
-        else -> throw Exception("Error retrieving data")
-    }
-}
-
 private suspend fun fetchContractsArchive(basicRequestInfo: BasicRequestInfo): ContractsArchive {
     val url = CONTRACTS_ARCHIVE_ENDPOINT
 
@@ -414,12 +375,5 @@ private suspend fun makeRequest(
     return sharedClient.post(urlString = url) {
         parameter("data", encodedRequest)
         contentType(ContentType.Application.FormUrlEncoded)
-    }
-}
-
-private suspend fun makeRequest(url: String): HttpResponse {
-    return sharedClient.get(urlString = url) {
-        contentType(ContentType.Application.Json)
-        header("User-Agent", "WidgetEgg-Android")
     }
 }

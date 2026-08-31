@@ -30,7 +30,7 @@ fun scheduleCalendarEvents(
     isVirtueMission: Boolean = false
 ) {
     if (hasCalendarPermissions(context)) {
-        missions.map { mission ->
+        missions.forEach { mission ->
             val missionEndTime = getMissionEndTimeMilliseconds(mission)
             if (missionEndTime > 0 && mission.identifier.isNotBlank() && selectedCalendar.id.toInt() != -1 && !hasEvent(
                     context,

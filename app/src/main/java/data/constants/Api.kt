@@ -8,7 +8,5 @@ const val CONTRACTS_INFO_ENDPOINT = "${API_ROOT}/ei_ctx/get_contracts_info"
 const val CONTRACT_PLAYER_INFO_ENDPOINT = "${API_ROOT}/ei_ctx/get_contract_player_info"
 const val PERIODICALS_ENDPOINT = "${API_ROOT}/ei/get_periodicals"
 const val CONTRACTS_ARCHIVE_ENDPOINT = "${API_ROOT}/ei_ctx/get_contracts_archive"
-const val COLLEGGTIBLE_CONTRACTS_JSON =
-    "https://raw.githubusercontent.com/carpetsage/egg/main/periodicals/data/colleggtible-contracts.json"
 
 const val CURRENT_CLIENT_VERSION = 99

@@ -744,6 +744,7 @@ val ALL_EVENT_TYPES = listOf(
     EventType("piggy-boost", "Piggy Growth"),
     EventType("piggy-cap-boost", "Unlimited Piggy"),
     EventType("prestige-boost", "Prestige Boost"),
+    EventType("prestige-boost-3x", "Prestige Boost (3x +)"),
     EventType("earnings-boost", "Cash Boost"),
     EventType("gift-boost", "Generous Gifts"),
     EventType("drone-boost", "Generous Drones"),

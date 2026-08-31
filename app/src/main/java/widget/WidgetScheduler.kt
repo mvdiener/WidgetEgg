@@ -9,7 +9,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 
-class WidgetScheduler() {
+class WidgetScheduler {
     fun scheduleUpdate(context: Context) {
         cancelOldWorkers(context)
         // Update widget every 15 minutes

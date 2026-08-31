@@ -20,7 +20,6 @@ import data.PeriodicalsContractInfoEntry
 import data.PeriodicalsData
 import data.SeasonGradeAndGoals
 import data.Stone
-import ei.Ei.Backup
 import ei.Ei.ContractCoopStatusResponse.ContributionInfo
 import ei.Ei.LocalContract
 import ei.Ei.RewardType
@@ -288,7 +287,7 @@ fun getContractDurationRemaining(
 ): Pair<String, Boolean> {
     var isOnTrack = true
     if (contract.allGoalsAchieved) {
-        return Pair("Finished!", isOnTrack)
+        return Pair("Finished!", true)
     }
 
     val totalEggsNeeded = contract.goals.maxOfOrNull { goal -> goal.amount } ?: 0.0
@@ -309,7 +308,7 @@ fun getContractDurationRemaining(
         isOnTrack = false
 
         if (contract.timeRemainingSeconds <= 0.0 && remainingEggsNeeded > 0.0) {
-            return Pair("Out of time!", isOnTrack)
+            return Pair("Out of time!", false)
         }
     }
 

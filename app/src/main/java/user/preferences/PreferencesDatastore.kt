@@ -78,6 +78,7 @@ class PreferencesDatastore(context: Context) {
             stringSetPreferencesKey("selectedEventNotifications")
         private val SENT_EVENT_NOTIFICATION_MAP =
             stringPreferencesKey("sentEventNotificationMap")
+        private val SHOW_NEXT_FIVE_GOALS = booleanPreferencesKey("showNextFiveGoals")
     }
 
     suspend fun getEid() = dataStore.data.map {
@@ -556,6 +557,16 @@ class PreferencesDatastore(context: Context) {
     suspend fun saveSentEventNotificationMap(sentEventNotificationMap: Map<String, Long>) {
         dataStore.edit {
             it[SENT_EVENT_NOTIFICATION_MAP] = Json.encodeToString(sentEventNotificationMap)
+        }
+    }
+
+    suspend fun getShowNextFiveGoals() = dataStore.data.map {
+        it[SHOW_NEXT_FIVE_GOALS] == true
+    }.first()
+
+    suspend fun saveShowNextFiveGoals(showNextFiveGoals: Boolean) {
+        dataStore.edit {
+            it[SHOW_NEXT_FIVE_GOALS] = showNextFiveGoals
         }
     }
 

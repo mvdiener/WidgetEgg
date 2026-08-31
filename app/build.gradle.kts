@@ -11,14 +11,14 @@ plugins {
 
 android {
     namespace = "com.widgetegg.widgeteggapp"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 33
-        versionName = "5.0.1"
+        versionCode = 34
+        versionName = "5.1.0"
 
         ndk {
             debugSymbolLevel = "SYMBOL_TABLE"
