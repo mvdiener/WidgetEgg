@@ -16,7 +16,7 @@ android {
     defaultConfig {
         applicationId = "com.widgetegg.widgeteggapp"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 34
         versionName = "5.1.0"
 
