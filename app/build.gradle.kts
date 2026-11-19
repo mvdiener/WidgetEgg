@@ -3,10 +3,15 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("com.google.protobuf")
-    kotlin("plugin.serialization") version "2.0.20"
+    kotlin("plugin.serialization") version "2.4.21"
+}
+
+kotlin {
+    compilerOptions {
+        languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0
+    }
 }
 
 android {
@@ -57,9 +62,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
-    }
-    kotlinOptions {
-        jvmTarget = "21"
     }
     buildFeatures {
         compose = true
@@ -122,7 +124,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
 
     // Color picker
-    implementation("com.github.skydoves:colorpicker-compose:1.1.3")
+    implementation("com.github.skydoves:colorpicker-compose:1.3.0")
 
 }
 
