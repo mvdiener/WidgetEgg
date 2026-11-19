@@ -87,6 +87,7 @@ data class SeasonGradeAndGoals(
     var stateId: String = "",
     var seasonName: String = "",
     var seasonScore: Double = 0.0,
+    var seasonContractsPlayed: Int = 0,
     var startingSeasonGrade: PlayerGrade? = null,
     var goals: List<GoalInfoEntry> = emptyList()
 )
