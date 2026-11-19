@@ -252,7 +252,7 @@ fun ContractDouble(
         modifier = GlanceModifier.padding(start = 5.dp),
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 45, 6)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 45, 6, true)
     }
 
     Column(
@@ -293,7 +293,7 @@ fun ContractAll(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 30, 4)
+        EggAndProgressBars(assetManager, context, contract, useOfflineTime, 30, 4, true)
     }
 
     Text(
@@ -324,7 +324,8 @@ fun EggAndProgressBars(
     contract: ContractInfoEntry,
     useOfflineTime: Boolean,
     eggSize: Int,
-    progressSize: Int
+    progressSize: Int,
+    shouldResizeColleggtible: Boolean = false
 ) {
     val eggName = if (contract.customEggId.isNullOrBlank()) {
         getEggName(contract.eggId)
@@ -359,7 +360,7 @@ fun EggAndProgressBars(
     val eggBitmap = if (contract.customEggId.isNullOrBlank()) {
         BitmapFactory.decodeStream(getAsset(assetManager, "eggs/$eggName.png"))
     } else {
-        getColleggtibleBitmap(assetManager, eggName, context, false)
+        getColleggtibleBitmap(assetManager, eggName, context, shouldResizeColleggtible)
     }
 
     Image(
