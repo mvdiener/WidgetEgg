@@ -160,7 +160,8 @@ class SignInViewModel(application: Application) : AndroidViewModel(application) 
                             formattedPeriodicalsContracts,
                             null
                         )
-                    val formattedSeasonInfo = formatSeasonInfo(periodicalsResult)
+                    val formattedSeasonInfo =
+                        formatSeasonInfo(periodicalsResult, contractsArchiveResult, null)
                     val formattedStatsData = formatStatsData(backupResult, periodicalsResult)
                     val formattedPlayerColleggtibleInfo =
                         getPlayerColleggtibles(periodicalsResult, backupResult, emptyList())

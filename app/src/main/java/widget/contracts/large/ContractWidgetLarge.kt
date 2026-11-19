@@ -929,6 +929,11 @@ fun SeasonContent(
             text = "Current score: $scoreText",
             style = TextStyle(color = ColorProvider(textColor))
         )
+        Box(modifier = GlanceModifier.defaultWeight()) {}
+        Text(
+            text = "${seasonData.seasonContractsPlayed}/13 played",
+            style = TextStyle(color = ColorProvider(textColor))
+        )
     }
 
     Column(

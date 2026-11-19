@@ -150,7 +150,6 @@ fun formatPeriodicalsContracts(
             previousPeriodicalContract?.archivedContractInfo
         }
 
-
         PeriodicalsContractInfoEntry(
             stateId = UUID.randomUUID().toString(),
             eggId = contract.egg.number,
@@ -173,6 +172,8 @@ fun formatPeriodicalsContracts(
 
 fun formatSeasonInfo(
     periodicalsData: PeriodicalsData,
+    contractsArchive: List<LocalContract>?,
+    previousSeasonInfo: SeasonGradeAndGoals?
 ): SeasonGradeAndGoals {
     val seasonInfo = periodicalsData.seasonInfo
     val matchingSeason =
@@ -200,10 +201,16 @@ fun formatSeasonInfo(
         periodicalsData.contractPlayerInfo.seasonCxp
     }
 
+    val seasonContractsPlayed =
+        contractsArchive?.filter { it.evaluation.seasonId == seasonInfo.id && it.evaluation.cxp > 0.0 }
+            ?.distinctBy { it.evaluation.contractIdentifier }?.size
+            ?: previousSeasonInfo?.seasonContractsPlayed ?: 0
+
     return SeasonGradeAndGoals(
         stateId = UUID.randomUUID().toString(),
         seasonName = seasonInfo.name,
         seasonScore = seasonScore,
+        seasonContractsPlayed = seasonContractsPlayed,
         startingSeasonGrade = startingGrade,
         goals = formattedGoals
     )

@@ -52,21 +52,13 @@ fun SettingsScreen(navController: NavController) {
 
     val am: ActivityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     settingsViewModel.updateIsBackgroundUsageDisabled(
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            am.isBackgroundRestricted
-        } else {
-            false
-        }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && am.isBackgroundRestricted
     )
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         settingsViewModel.updateIsOptimizationDisabled(pm.isIgnoringBatteryOptimizations(packageName))
         settingsViewModel.updateIsBackgroundUsageDisabled(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                am.isBackgroundRestricted
-            } else {
-                false
-            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && am.isBackgroundRestricted
         )
     }
 
@@ -92,7 +84,7 @@ fun SettingsScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 15.dp),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             item {
                 if (settingsViewModel.isBackgroundUsageDisabled) {

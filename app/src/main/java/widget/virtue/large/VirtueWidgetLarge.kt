@@ -281,8 +281,12 @@ fun HomeFarmInfo(
             contentDescription = "Truth Egg",
             modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
         )
+        var teText = virtueInfo.totalTruthEggs
+        if (virtueInfo.isOnVirtue) {
+            teText += " (${virtueInfo.totalPendingTruthEggs}) "
+        }
         Text(
-            text = "${virtueInfo.totalTruthEggs} (${virtueInfo.totalPendingTruthEggs}) ",
+            text = teText,
             style = TextStyle(color = ColorProvider(textColor))
         )
 
@@ -429,12 +433,13 @@ fun FarmProgress(
                         contentDescription = eggName,
                         modifier = GlanceModifier.size(20.dp).padding(end = 2.dp)
                     )
-                    val pendingText =
-                        if (!virtueInfo.isOnVirtue || !showNextFiveGoals || index == 0) {
-                            "${farm.truthEggs} (${farm.pendingTruthEggs})"
-                        } else {
-                            "+${index + 1}"
-                        }
+                    val pendingText = if (!virtueInfo.isOnVirtue) {
+                        "${farm.truthEggs}"
+                    } else if (!showNextFiveGoals || index == 0) {
+                        "${farm.truthEggs}(${farm.pendingTruthEggs})"
+                    } else {
+                        "+${index + 1}"
+                    }
                     Text(
                         text = pendingText,
                         style = TextStyle(color = ColorProvider(textColor))

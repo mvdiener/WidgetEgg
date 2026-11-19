@@ -286,7 +286,8 @@ class WidgetUpdater {
                             contractsArchiveInfo,
                             prefPeriodicalsContractInfo
                         )
-                    prefSeasonInfo = formatSeasonInfo(periodicalsInfo)
+                    prefSeasonInfo =
+                        formatSeasonInfo(periodicalsInfo, contractsArchiveInfo, prefSeasonInfo)
                     saveColleggtibleImagesToCache(periodicalsInfo, context)
                 }
 
